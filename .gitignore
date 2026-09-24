@@ -1,0 +1,19 @@
+# Layer 4 working memory: per-agent dossiers and claim boards. Never committed.
+.agents/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Secrets and local config
+.env
+.env.*
+
+# Run artifacts (provenance lives in docs/study/, not in git blobs)
+runs/
+*.sqlite
+*.db
