@@ -138,3 +138,28 @@ working-style preferences and do not shift. The TLS truststore requirement
 (`src/aprime/net.py`) cost minutes rather than an hour precisely because it was
 already known. Facts of that kind remain worth recording outside the repo;
 preferences do not.
+
+---
+
+## §7 — Amendment to §6: a machine-facts file above the repo (2026-09-24)
+
+§6 recorded that no `CLAUDE.md` may exist above the repo, for any purpose. The
+owner has since granted a narrow exception, on the distinction §6 itself raised:
+machine and environment facts are not working-style preferences and do not shift
+with topic, effort or mood.
+
+`~/.claude/CLAUDE.md` now exists, inherited by every project on this machine. It
+is restricted by its own stated contract to facts about the computer — TLS
+interception requiring the OS certificate store, system-level
+`core.autocrlf=true`, display size, Python location, GUI launch behaviour. It
+explicitly forbids project facts and working-style preferences, and states the
+test for inclusion: would this be true regardless of who is working, on what, in
+what mood.
+
+Every entry in it carries a verification date and the command that produced it.
+Four of the five were verified on the day of writing rather than carried from
+memory; the fifth (GUI launch redirection) is marked as unverified and must be
+re-confirmed before being relied on.
+
+The rejection in §6 stands for preferences. Isolation rule 3 in `CLAUDE.md` is
+amended to match.

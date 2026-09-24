@@ -39,8 +39,13 @@ Each family also keeps `STATE.md` (what is live or frozen now) and
    holds a project fact — no architecture, decision, finding, state, date,
    number or file path. If asked to remember a project fact, write it to the
    correct repo layer and say which one.
-3. `CLAUDE.md` lives at this repo root ONLY. Never create or edit one above
-   the repo. Ancestors were checked clean on 2026-09-24.
+3. This project's `CLAUDE.md` lives at this repo root ONLY. One file exists
+   above the repo — `~/.claude/CLAUDE.md`, inherited by every project — and it
+   is restricted to **machine and environment facts** (TLS interception, git
+   line-ending conversion, display size, Python location). It carries no
+   project facts and no working-style preferences, by its own stated contract.
+   Never add a project fact to it, and never create a `CLAUDE.md` at any other
+   level. Ancestors were otherwise checked clean on 2026-09-24. See HANDOFF §7.
 4. Spawned agents receive memory through their briefs. Agents never write to
    auto-memory and never read another project's files.
 5. Open every session with this repo root as the working directory. The
@@ -70,6 +75,10 @@ guard against developing against the answers, not bookkeeping. See HANDOFF §2.
 - **Reports to the owner** — one self-contained page, full quality, numbers
   always with denominators, every finding graded by how many independent
   derivations support it, and a step-back closing paragraph.
+- **Close every reply with a standing position block** — a short paragraph
+  saying where the project stands, followed by a light list of decisions the
+  owner needs to take or ratify. Carrying open decisions forward is the point:
+  a decision that is never restated is a decision that gets made by default.
 - **Staging** — each seat stages only its own files by explicit path. The Lead
   stages a shared file only after the author hands it off. Read the diff
   before committing.
