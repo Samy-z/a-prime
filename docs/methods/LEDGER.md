@@ -295,3 +295,39 @@ itself, and a reopen trigger that fires on the wrong evidence is a defect in the
 ledger. **Sharpened: MTH-001 reopens only on a feature that distinguishes a
 degraded output from an improved one — not one that distinguishes a shorter
 output from a longer one.** Directional entailment does not reopen it.
+
+## MTH-018 — Decoy FDR control validated on ground truth; power envelope measured
+**Date:** 2026-09-24
+**Finding:** On a synthetic system where the truly-changed set is known, the
+target-decoy selection held realised FDR at or below **0.101** against a target
+of 0.10, across nine (k, severity) cells. The calibration delivers what it
+claims, and this is the only setting in which that can be checked at all.
+
+Power, measured separately (400 inputs, 40 changed, q=0.10, mean of 5 seeds,
+`mode_share` perturbation):
+
+| k | sev 0.3 | sev 0.6 | sev 0.9 | decoy p95 |
+|---|---|---|---|---|
+| 10 | 0.00 | 0.08 | 0.83 | 0.480 |
+| 20 | 0.00 | 0.73 | 0.99 | 0.310 |
+| 40 | 0.21 | 0.98 | 1.00 | 0.215 |
+
+**Consequence — k=20, not k=10.** MTH-006 derived k=10 as a floor from
+combinatorics; measured on the actual statistic, k=10 detects 8% of moderate
+shifts, which is indistinguishable from nothing. The operating point is k=20,
+i.e. **60 model calls per input rather than 30**. This doubles the projected
+study cost and is a budget decision, not an implementation detail.
+
+**Second consequence — a severity floor.** A 0.3 mode-share shift is
+undetectable at every k tested, reaching 0.21 only at k=40. Below roughly a 0.5
+shift this statistic has nothing to say. That belongs in the blind-spot map
+beside the 10%-retrieval-noise floor (BCH-004).
+
+**Third — failure is all-or-nothing per run.** Power at k=10 / severity 0.6 over
+five seeds was [0.0, 0.0, 0.55, 0.0, 0.325]: either a qualifying threshold
+exists or none does. A single deployment's result is a draw from that
+distribution, not a point estimate, and should be reported as such.
+**Evidence:** `tests/test_pipeline.py`, sweep run 2026-09-24. Reproducible.
+**Reopen if:** a different statistic (energy distance on embeddings, semantic
+mode clustering) changes the envelope — it must be re-measured, not assumed to
+inherit these numbers.
