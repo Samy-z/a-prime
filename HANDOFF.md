@@ -16,12 +16,15 @@ above this repo, nor at user level. Scanned: the parent projects folder,
 Desktop, the user home, and their `.claude/` subdirectories.
 
 **One pre-existing leak recorded, outside this repo.** The owner's auto-memory
-under the key for the parent projects folder currently holds roughly thirteen
-project facts belonging to a different, private project, alongside about eight
-genuinely owner-scoped entries. Those project facts are visible to any session
-opened at that parent folder, including sessions for this project. Remediation
-belongs to that other project and is not actioned here. This repo's discipline
-prevents a-prime from adding to the pile.
+under the key for the parent projects folder holds 24 entries, of which 16
+carry a different private project's name. Roughly ten of those are hard project
+facts — live state, dated commitments, tuning parameters, repo-specific file
+conventions — and the rest are portable working-style feedback that merely
+references that project. All 16 are visible to any session opened at that
+parent folder, including sessions for this one; they were loaded into the
+session that wrote this entry. Remediation belongs to that other project and is
+not actioned here. This repo's discipline prevents a-prime from adding to the
+pile.
 
 ---
 
