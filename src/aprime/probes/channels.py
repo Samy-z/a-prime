@@ -39,6 +39,11 @@ EMBEDDING_MODELS: list[ModelSpec] = [
 
 NLI_MODELS: list[ModelSpec] = [
     ModelSpec("deberta_mnli", "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli", "nli"),
+    # Second checkpoint, different family (RoBERTa, not DeBERTa). The embedding
+    # finding replicates across three families and is therefore a statement
+    # about embeddings; the NLI finding rested on one checkpoint and was
+    # therefore only a statement about that checkpoint. This closes the gap.
+    ModelSpec("roberta_mnli", "FacebookAI/roberta-large-mnli", "nli"),
 ]
 
 
@@ -118,14 +123,20 @@ class NLIChannel:
         # disagree on it, and a silent off-by-one here would look exactly like
         # the channel being uninformative.
         id2label = {int(k): v.lower() for k, v in self.model.config.id2label.items()}
-        matches = [i for i, lab in id2label.items() if "contradiction" in lab]
+        self.contra_idx = self._one(id2label, "contradiction", spec.hub_id)
+        self.entail_idx = self._one(id2label, "entail", spec.hub_id)
+
+    @staticmethod
+    def _one(id2label: dict[int, str], needle: str, hub_id: str) -> int:
+        matches = [i for i, lab in id2label.items() if needle in lab]
         if len(matches) != 1:
             raise RuntimeError(
-                f"cannot identify contradiction label in {id2label} for {spec.hub_id}"
+                f"cannot identify '{needle}' label in {id2label} for {hub_id}"
             )
-        self.contra_idx = matches[0]
+        return matches[0]
 
     def _probs(self, prem: Sequence[str], hyp: Sequence[str]) -> np.ndarray:
+        """Full 3-class probabilities, shape (n, 3)."""
         out = []
         bs = 16
         for i in range(0, len(prem), bs):
@@ -139,11 +150,37 @@ class NLIChannel:
             ).to(self.device)
             with self.torch.no_grad():
                 logits = self.model(**enc).logits
-            probs = self.torch.softmax(logits, dim=-1)[:, self.contra_idx]
+            probs = self.torch.softmax(logits, dim=-1)
             out.append(probs.cpu().numpy())
         return np.concatenate(out)
 
-    def score(self, texts_a: Sequence[str], texts_b: Sequence[str]) -> np.ndarray:
+    def score_both(
+        self, texts_a: Sequence[str], texts_b: Sequence[str]
+    ) -> dict[str, np.ndarray]:
+        """Both channels from a single pair of forward passes.
+
+        `contradiction` — max over directions. Symmetric by construction, which
+        is why it cannot speak to direction of change (MTH-001).
+
+        `directional` — how much more A entails B than B entails A. This is
+        **asymmetric**, and it is the signal for information *loss*: a text with
+        a condition removed is entailed by the original while the original is
+        not entailed by it. That is precisely the omission case that
+        contradiction is blind to by definition (MTH-014).
+
+        Note what it does and does not give. It detects that information moved
+        in a direction, not whether that is better or worse — dropping a caveat
+        and dropping waffle look identical here. But it is the first
+        meaning-sensitive asymmetric feature the design has had, so it is a
+        candidate against MTH-001's reopen clause rather than a resolution of it.
+        """
         fwd = self._probs(texts_a, texts_b)
         rev = self._probs(texts_b, texts_a)
-        return np.maximum(fwd, rev)
+        return {
+            "contradiction": np.maximum(fwd[:, self.contra_idx], rev[:, self.contra_idx]),
+            "directional": fwd[:, self.entail_idx] - rev[:, self.entail_idx],
+            "directional_abs": np.abs(fwd[:, self.entail_idx] - rev[:, self.entail_idx]),
+        }
+
+    def score(self, texts_a: Sequence[str], texts_b: Sequence[str]) -> np.ndarray:
+        return self.score_both(texts_a, texts_b)["contradiction"]

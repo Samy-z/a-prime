@@ -31,14 +31,23 @@ decoy arm plus the middle band cut that from both sides.
 
 The design originally treated embedding displacement as the primary triage
 signal with NLI as a supporting flank. The week-0 probe suite inverted that.
-See `docs/knowledge/probes.md` and MTH-011 through MTH-014.
+See `docs/knowledge/probes.md` and MTH-011 through MTH-017.
 
 | Channel | Role | Status |
 |---|---|---|
-| NLI contradiction | **Primary.** Shape-stratified thresholds, mandatory. | Validated on one checkpoint (MTH-013) |
-| Structural conformance | **Primary for omission-class**, which no semantic channel covers (MTH-014) | Not built |
+| NLI contradiction | **Primary.** Carries 7 of 8 breaking categories. Shape-stratified thresholds, mandatory. | MTH-013, checkpoint-dependent (MTH-017) |
+| NLI directional entailment | **Primary for omission**, 95.3% at AUC 0.995, and specific — near-zero on everything else. Signed, not absolute. | MTH-016 |
+| Structural conformance | Schema, cardinality, enum domain, language drift, parse failure, F7 charset signature | Not built. No longer solely load-bearing for omission (MTH-014 correction) |
 | Embedding displacement | **Conditional.** Gated on measured surface stability | Gate not built (MTH-012) |
 | Dispersion / mode-share | Collapse and explosion detection | Not built |
+
+Both NLI channels come from a **single pair of forward passes** — contradiction
+is the max over directions, directional is the difference in entailment. Running
+them as separate models would double the dominant cost for nothing.
+
+The two are complementary, not redundant: contradiction misses omission
+entirely, directional catches almost nothing *but* omission. Their union covers
+all eight breaking categories in the probe suite.
 
 **The embedding gate is a hard requirement, not a refinement.** Ungated, the
 channel is anti-correlated with meaning change — it scores a reworded output as
@@ -56,12 +65,18 @@ chance is worse than absent, because it will be trusted.
 - Thresholds must be stratified by output shape. The measured 5%-FPR threshold
   for the NLI channel spanned 0.011 to 0.888 across four shapes, a factor of
   eighty. A single global threshold is wrong for at least two of them.
-- Never ship a semantic-only verdict. Omission is invisible to contradiction by
-  definition, not by weakness of the model, and structural conformance is the
-  only channel that covers it.
+- Never ship a single-channel verdict. Contradiction alone misses omission
+  entirely; directional entailment alone misses the other seven categories.
+  Coverage is a property of the union, not of any one channel.
 - Reformatting is a false-alarm source, not a safe no-op: prose rendered as
   bullets tripped the NLI channel on 18.8% of preserving pairs, and format
-  changes are among the most common consequences of a model swap.
+  changes are among the most common consequences of a model swap. It is the
+  shared weak point of **both** NLI channels (19% each) and the obvious target
+  for normalisation before scoring.
+- The pinned NLI checkpoint is a first-order variable, not an implementation
+  detail. A second checkpoint reproduced every direction and no magnitude, with
+  per-category gaps up to 48 points (MTH-017). Do not treat a number measured on
+  one checkpoint as a property of the channel.
 - Templated, low-variety outputs degenerate the embedding channel and the noise
   floor simultaneously. Detect and flag that regime rather than reporting it as
   clean.

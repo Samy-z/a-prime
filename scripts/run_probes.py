@@ -114,43 +114,47 @@ def main() -> int:
     for spec in specs:
         print(f"\n=== {spec.key} ({spec.hub_id}) ===")
         try:
-            ch = (
-                channels.EmbeddingChannel(spec)
-                if spec.kind == "embedding"
-                else channels.NLIChannel(spec)
-            )
-            scores = ch.score(texts_a, texts_b)
+            if spec.kind == "embedding":
+                ch = channels.EmbeddingChannel(spec)
+                emitted = {spec.key: ch.score(texts_a, texts_b)}
+            else:
+                ch = channels.NLIChannel(spec)
+                # One pair of forward passes, several logical channels.
+                emitted = {
+                    f"{spec.key}:{name}": vals
+                    for name, vals in ch.score_both(texts_a, texts_b).items()
+                }
         except Exception as exc:  # noqa: BLE001
             print(f"  FAILED: {type(exc).__name__}: {exc}")
             record["channels"][spec.key] = {"error": f"{type(exc).__name__}: {exc}"}
             continue
 
-        sep = analysis.separability(scores, relations)
         print(f"  revision {ch.revision}")
-        print(f"  separability (breaking vs preserving, pooled AUC) = {sep:.3f}")
 
-        glob, thr_g = analysis.evaluate(
-            scores, relations, cats, shapes, args.fpr, per_shape_threshold=False
-        )
-        per, thr_s = analysis.evaluate(
-            scores, relations, cats, shapes, args.fpr, per_shape_threshold=True
-        )
-        print("  --- global threshold ---")
-        print(fmt_table(glob, thr_g))
-        print("\n  --- per-shape thresholds ---")
-        print(fmt_table(per, thr_s))
+        for key, scores in emitted.items():
+            sep = analysis.separability(scores, relations)
+            print(f"\n  -- channel {key} --")
+            print(f"  separability (breaking vs preserving, pooled AUC) = {sep:.3f}")
 
-        record["channels"][spec.key] = {
-            "hub_id": spec.hub_id,
-            "revision": ch.revision,
-            "prefix": spec.prefix,
-            "separability_auc": float(sep),
-            "thresholds_global": {k: float(v) for k, v in thr_g.items()},
-            "thresholds_per_shape": {k: float(v) for k, v in thr_s.items()},
-            "scores": [float(x) for x in scores],
-            "results_global": [vars(r) for r in glob],
-            "results_per_shape": [vars(r) for r in per],
-        }
+            glob, thr_g = analysis.evaluate(
+                scores, relations, cats, shapes, args.fpr, per_shape_threshold=False
+            )
+            per, thr_s = analysis.evaluate(
+                scores, relations, cats, shapes, args.fpr, per_shape_threshold=True
+            )
+            print(fmt_table(glob, thr_g))
+
+            record["channels"][key] = {
+                "hub_id": spec.hub_id,
+                "revision": ch.revision,
+                "prefix": spec.prefix,
+                "separability_auc": float(sep),
+                "thresholds_global": {k: float(v) for k, v in thr_g.items()},
+                "thresholds_per_shape": {k: float(v) for k, v in thr_s.items()},
+                "scores": [float(x) for x in scores],
+                "results_global": [vars(r) for r in glob],
+                "results_per_shape": [vars(r) for r in per],
+            }
 
     record["pairs"] = [
         {

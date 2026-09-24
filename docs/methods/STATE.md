@@ -4,15 +4,18 @@ What is live or frozen right now. Updated in the same commit as the change.
 
 ## Frozen
 
-> Nothing yet. The fault taxonomy and severity ladder freeze in week 0 and are
-> recorded in `docs/knowledge/fault-taxonomy.md` with an append-only amendment
-> log. Nothing may be tuned against them before the freeze is committed.
+- **Fault taxonomy and severity ladders — frozen 2026-09-24**, in
+  `docs/knowledge/fault-taxonomy.md`. Nothing may be tuned against them.
+  Amendments are dated appends to the log at the foot of that file; two have
+  landed already (F8 split, exclusions ratified).
 
 ## Live
 
 - Probe suite (`src/aprime/probes`, `scripts/run_probes.py`). Current reference
-  run: `20260924T022150Z`, config `eb95f0b802c4660a`. Findings in
-  `docs/knowledge/probes.md`, rulings in MTH-011 through MTH-014.
+  run: `20260924T031004Z`, config `592763f4f2a8c4d7` (six logical channels over
+  two NLI checkpoints, plus directional entailment). Embedding findings from the
+  earlier run `20260924T022150Z`, config `eb95f0b802c4660a`. Findings in
+  `docs/knowledge/probes.md`, rulings in MTH-011 through MTH-017.
 
 ## Pinned instruments
 
@@ -25,15 +28,18 @@ model card.
 | Embedding (base) | `BAAI/bge-base-en-v1.5` | `a5beb1e3e68b9ab74eb54cfd186867f64f240e1a` | 2026-09-24 |
 | Embedding (base, prefixed) | `intfloat/e5-base-v2` | `f52bf8ec8c7124536f0efb74aca902b2995e5bcd` | 2026-09-24 |
 | NLI (primary channel) | `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` | `6f5cf0a2b59cabb106aca4c287eed12e357e90eb` | 2026-09-24 |
+| NLI (replication check) | `FacebookAI/roberta-large-mnli` | `2a8f12d27941090092df78e4ba6f0928eb5eac98` | 2026-09-24 |
 
 Bumping any of these invalidates prior results. Record the bump as a dated
 append in the LEDGER and re-run the probe suite; do not silently carry numbers
 across a version change.
 
-**Second NLI checkpoint outstanding.** MTH-013 rests on one model, unlike
-MTH-011 which replicates across three embedding families. Until a second
-checkpoint is probed, the NLI result is a property of this checkpoint and not
-of NLI.
+**Second NLI checkpoint done, and it only partly replicated (MTH-017).** The
+direction of every finding held; none of the magnitudes did. Per category the
+gap runs to 48 points (unit: 84% DeBERTa vs 36% RoBERTa). MTH-013 and MTH-016
+are therefore properties of the DeBERTa checkpoint, not of NLI, and the pinned
+checkpoint is a first-order design variable rather than an implementation
+detail. Report it as prominently as any other choice.
 
 ## Sealed holdout
 

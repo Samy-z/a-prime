@@ -50,7 +50,10 @@ in length, too narrow to separate "blind to meaning" from "diluted by length".
 Widened to ~5x (32 to 148 median words) by giving summaries realistic framing
 prose that is identical in both arms.
 
-## Findings (run 20260924T022150Z, config eb95f0b802c4660a)
+## Findings
+
+Embedding channels: run `20260924T022150Z`, config `eb95f0b802c4660a`.
+NLI channels: run `20260924T031004Z`, config `592763f4f2a8c4d7`.
 
 Detection rate is measured at the threshold where the channel false-alarms on
 5% of meaning-preserving pairs. AUC is against the pooled preserving
@@ -108,21 +111,65 @@ one system type and four domains, and carries no weight for STD-005 on its own.
 0.011 (summary) to 0.888 (reasoning) — a factor of eighty. A single global
 threshold would be badly wrong for at least two shapes.
 
-### Omission is invisible to contradiction, structurally
+### Directional entailment closes the omission gap
 
-NLI detects **0%** of dropped caveats at the 5% budget (AUC 0.535, i.e. chance);
-only the summary shape reaches 25%. This is not a weak model. It is what
-entailment means: a text with a condition removed is *entailed* by the original,
-not contradicted by it. No NLI model will fix this.
+Run 20260924T031004Z added a second NLI direction and a second checkpoint.
 
-Embeddings catch 33% of omissions, and only via length.
+Entailment asymmetry — P(A entails B) minus P(B entails A) — detects dropped
+material conditions at **95.3%** [0.87, 0.98], **AUC 0.995**, and is highly
+*specific*: 0-3% on every other breaking category. Contradiction and directional
+entailment are complementary rather than overlapping. Contradiction carries
+seven of eight categories and misses omission completely; directional carries
+omission and almost nothing else. **The union covers all eight.**
 
-**Dropped conditions are a realistic and dangerous regression class, and
-neither semantic channel covers them.** This is independent motivation for
-induced structural conformance (STD-003) — a field present in 99% of baseline
-outputs and suddenly absent is exactly the signal that works here. The one
-mechanism the landscape survey found unoccupied is the one the blind-spot map
-says we need.
+Both come from one pair of forward passes, so the second channel is
+computationally free.
+
+**Signed, not absolute.** The unsigned variant drops omission to 78.1% and picks
+up a 25% false-alarm rate on `verbosity` — adding a hedge is also an information
+change, in the benign direction. We care about loss, so the sign carries meaning.
+
+### The NLI result is a property of the checkpoint, not of NLI
+
+RoBERTa-large-MNLI reproduced the *direction* of every finding and **none of the
+magnitudes**:
+
+| | DeBERTa-v3-base | RoBERTa-large |
+|---|---|---|
+| contradiction, pooled AUC | 0.938 | 0.897 |
+| unit | 84% | **36%** |
+| quantifier | 92% | **55%** |
+| polarity | 98% | 77% |
+| number / temporal | 100% | 84% |
+| paraphrase false alarms | 0% | **12%** |
+| directional, omission | 95.3% | 65.6% |
+
+Per-category gaps run to 48 points. **The pinned checkpoint is a first-order
+design variable**, and this opens a sibling question the study is not built to
+answer: the headline claim is that detection transfers across *domains*, and we
+now have evidence that it degrades measurably across *instrument checkpoints*.
+Say so rather than letting a reader assume otherwise.
+
+### Omission and contradiction — the original finding, now corrected
+
+DeBERTa's contradiction channel detects **0%** of dropped caveats (AUC 0.535,
+chance). The structural reason holds: a text with a condition removed is
+*entailed* by the original, not contradicted by it.
+
+**But "no NLI model will fix this" was too strong and is now falsified in part.**
+RoBERTa detects 28.1% [0.19, 0.40], AUC 0.687 — weak, but above chance. The
+original claim generalised a single-checkpoint result into a property of
+entailment. Embeddings catch 33%, and only via length.
+
+**The consequence runs against an argument we liked.** This section previously
+concluded that structural conformance must carry the omission class alone, and
+noted with some satisfaction that the one unoccupied mechanism in the landscape
+was also the one the blind-spot map said was load-bearing. Directional
+entailment removes that justification. Structural conformance keeps its other
+coverage — schema violations, field cardinality, enum domain, language drift,
+parse failure, the F7 charset signature — and remains unoccupied per STD-003.
+It is no longer the only thing standing between us and a whole fault class, and
+the contribution narrative should stop saying it is.
 
 ### False alarms worth knowing
 
@@ -136,8 +183,14 @@ trips MiniLM on 20.3%, reorder trips BGE on 17.2%.
    conditional add-on, not the primary triage. Recorded in HANDOFF §5.
 2. The embedding channel needs a style-stability gate before it may contribute.
 3. Shape-stratified thresholds are mandatory, not an optimisation.
-4. Structural conformance has to carry omission-class regressions alone.
-5. Cost rises: a bidirectional cross-encoder is far more expensive per
+4. Two NLI channels, one pair of forward passes. Their union covers all eight
+   breaking categories; neither does alone.
+5. Structural conformance is no longer the sole cover for omission, and the
+   contribution narrative must stop claiming it is.
+6. The pinned checkpoint is a reportable design variable, not a detail.
+7. Format normalisation before scoring is the obvious next engineering step —
+   it is the shared 19% false-alarm source across both NLI channels.
+8. Cost rises: a bidirectional cross-encoder is far more expensive per
    comparison than a bi-encoder, which strengthens the case for distilling the
    NLI-based mode clustering once it is the demonstrated bottleneck.
 
@@ -145,9 +198,9 @@ trips MiniLM on 20.3%, reorder trips BGE on 17.2%.
 
 - Perturbations are synthetic and single-fact. Real regressions are messier and
   often combine several.
-- One NLI model. The NLI result should not be assumed to hold for other
-  checkpoints; the embedding result is stronger because it replicates across
-  three families.
+- Two NLI checkpoints, and they disagree by up to 48 points per category. The
+  embedding result is the more robust of the two, replicating across three
+  families.
 - The 5% budget is a convention, not a derived operating point.
 - Seeds are English and template-generated. Nothing here speaks to other
   languages or to free-form generation.

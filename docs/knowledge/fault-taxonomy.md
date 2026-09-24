@@ -357,3 +357,38 @@ Append-only. Never edit a class above; amend here with a date and a reason.
   for lack of any documented instance. Four classes added that were not in the
   original list of eight: F6 cache contamination, F7 numerical/serving-stack
   corruption, F8 sticky routing heterogeneity, F9 persona drift.
+
+- **2026-09-24 (amendment 1) — F8 split into F8a and F8b.** Owner decision.
+  F8 as frozen conflated two orthogonal properties that both produce per-user
+  clustering:
+
+  - **F8a — sticky fault assignment, identity-blind system.** The *infrastructure*
+    pins a user or session to a backend (session affinity, provider pinning,
+    canary cohorts). The application does not know or care who is asking. This
+    is the Anthropic case: 0.8-16% of requests, ~30% of users.
+  - **F8b — identity-aware system.** The *application* varies its behaviour by
+    who is asking (personalization, tenant config, entitlement-shaped
+    retrieval). Per-user clustering exists here **with no fault present at all**.
+
+  Both are built. The reason is stronger than coverage: **F8b with no fault
+  injected is the control arm for F8a.** Without it there is no way to tell
+  whether per-user clustering that the detector picks up is a sticky fault or
+  ordinary personalization — and MTH-009's cluster-splitting cannot be validated
+  against its hardest case without that discrimination. An F8a cell alone would
+  let us claim a result we could not distinguish from a confound.
+
+  Harness consequence: at least one domain cell carries a user/session
+  dimension, run in three conditions — identity-blind + sticky fault (F8a),
+  identity-aware + no fault (control), identity-aware + sticky fault (F8b).
+
+- **2026-09-24 (amendment 2) — exclusions ratified, one reclassified as
+  deferred.** Owner ratified the exclusion of retrieval ACL drift and
+  destructive agent action. Both need the tool to know something about the data
+  or the requester that a self-serving, domain-agnostic detector does not have;
+  they are the kind of check an AI engineer adds deliberately for an internal
+  tool, which is a different product.
+
+  Recorded as **deferred, not rejected**: revisit at the project's late stage or
+  for a later version, particularly if an enterprise cell is ever added to the
+  transfer matrix. The exclusion is about current scope, not about the ideas
+  being wrong.

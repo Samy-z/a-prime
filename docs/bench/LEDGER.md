@@ -96,3 +96,21 @@ bench's remit; what to build from it is engine's call, not bench's.
 (grade B).
 **Reopen if:** a fourth cause with a different signature appears, which would
 weaken the convergence argument.
+
+## BCH-006 — F8 split; the identity-aware no-fault cell is a control, not coverage
+**Date:** 2026-09-24
+**Finding:** Sticky *fault assignment* (infrastructure pins a session to a
+backend) and *identity-aware behaviour* (the application varies by who is
+asking) are orthogonal, and both produce per-user clustering in a per-input
+detector. The second produces it **with no fault present**.
+**Consequence:** Both are built, and the identity-aware-no-fault run is the
+control arm. Without it, per-user clustering the detector picks up cannot be
+attributed to a sticky fault rather than to ordinary personalization, and
+MTH-009's cluster-splitting is never validated against the case it exists for.
+At least one domain cell gains a user/session dimension, run in three
+conditions.
+**Evidence:** owner decision 2026-09-24, on the F8 class frozen the same day;
+Anthropic routing figures (request 0.8-16% vs user ~30%) motivate F8a.
+**Reopen if:** the control arm shows no per-user clustering at all in an
+identity-aware system with no fault, which would mean the confound is not real
+and F8b can collapse back into F8a.

@@ -223,3 +223,75 @@ in MTH-007 from a preference to a correctness condition.
 **Evidence:** bench taxonomy research, 2026-09-24, `.agents/bench-taxonomy-research.md`.
 **Reopen if:** never for batched hosted inference. May relax for a dedicated
 single-request deployment, which must be demonstrated rather than assumed.
+
+## MTH-016 — Directional entailment closes the omission gap; signed, not absolute
+**Date:** 2026-09-24
+**Finding:** Entailment asymmetry — P(A entails B) minus P(B entails A) —
+detects dropped material conditions at **95.3%** [0.87, 0.98], AUC **0.995**,
+at the 5% false-alarm budget (DeBERTa, n=64). It is also highly *specific*:
+0-3% on every other breaking category. Contradiction and directional entailment
+are therefore complementary rather than redundant — contradiction carries seven
+of eight categories and misses omission entirely; directional carries omission
+and almost nothing else. Their union covers all eight.
+**Signed beats absolute.** The unsigned variant drops omission to 78.1% and
+picks up a 25% false-alarm rate on `verbosity`, because adding a hedge is also
+an information change, in the benign direction. We care about loss, not change
+in volume, so the sign is load-bearing.
+**Consequence:** The detector runs both directions of NLI off one pair of
+forward passes and emits two channels. Format remains the shared weak point —
+19% false alarms on both.
+**Evidence:** Probe run 20260924T031004Z, config 592763f4f2a8c4d7.
+**Reopen if:** a fault class other than omission turns out to produce entailment
+asymmetry, which would cost the channel its specificity.
+
+## MTH-017 — NLI findings are checkpoint-dependent; the second model only partly replicates
+**Date:** 2026-09-24
+**Finding:** RoBERTa-large-MNLI reproduces the *direction* of every MTH-013 and
+MTH-016 result and none of the magnitudes. Contradiction pooled AUC 0.897 vs
+0.938, but per category: unit 36% vs 84%, quantifier 55% vs 92%, polarity 77%
+vs 98%, number 84% vs 100%, temporal 84% vs 100%, and paraphrase false alarms
+12% vs 0%. Directional omission detection 65.6% vs 95.3%.
+**Consequence:** MTH-013 and MTH-016 are properties of the DeBERTa checkpoint,
+not of NLI. The pinned checkpoint is a first-order variable and must be reported
+as prominently as any other design choice. It also opens a sibling question to
+STD-005 that this study is not designed to answer: detection transfers across
+*domains* is the headline claim, but transfer across *instrument checkpoints*
+degrades measurably, and we should say so rather than let a reader assume it.
+**Evidence:** Probe run 20260924T031004Z. Two checkpoints, two families.
+**Reopen if:** a third checkpoint lands closer to DeBERTa than to RoBERTa, which
+would suggest RoBERTa is the outlier rather than the spread being real.
+
+## MTH-014 — CORRECTION (dated append, 2026-09-24)
+MTH-014 stated that omission is invisible to contradiction-based detection and
+that "no NLI checkpoint will resolve it". **Too strong, and now falsified in
+part.** RoBERTa-large-MNLI detects 28.1% of omissions [0.19, 0.40] on the
+contradiction channel, AUC 0.687 — weak, but above chance, where DeBERTa scored
+0.0% and AUC 0.535. The structural argument still explains why contradiction is
+*poor* at this (a text with a condition removed is entailed by the original, not
+contradicted by it), but "no checkpoint will resolve it" overstated a
+single-checkpoint result as a property of entailment.
+
+**The larger consequence goes the other way and weakens an argument we liked.**
+MTH-014 concluded that induced structural conformance must carry the omission
+class alone, and noted with satisfaction that the one unoccupied mechanism in
+the landscape was also the one the blind-spot map said was load-bearing.
+MTH-016 removes that justification: directional entailment carries omission at
+95.3%. Structural conformance retains its other coverage — schema violations,
+field cardinality, enum domain, language drift, parse failure, and the F7
+charset signature — and remains the unoccupied mechanism per STD-003. But it is
+no longer the *only* thing standing between us and a whole fault class, and the
+contribution narrative should not keep claiming it is.
+
+## MTH-001 — CORRECTION to the reopen clause (dated append, 2026-09-24)
+The reopen clause asked for "an asymmetric primary feature with demonstrated
+validity — meaning-sensitive, not a length or entropy proxy." Directional
+entailment (MTH-016) satisfies that clause **literally** and does not answer the
+question MTH-001 was about. It is asymmetric, meaning-sensitive, and validated
+at AUC 0.995. It measures **more versus less information**, not **better versus
+worse**: dropping a material caveat and dropping waffle are the same signal.
+
+The clause was written as a proxy for what was wanted rather than as the thing
+itself, and a reopen trigger that fires on the wrong evidence is a defect in the
+ledger. **Sharpened: MTH-001 reopens only on a feature that distinguishes a
+degraded output from an improved one — not one that distinguishes a shorter
+output from a longer one.** Directional entailment does not reopen it.
