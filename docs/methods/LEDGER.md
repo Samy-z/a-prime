@@ -140,3 +140,86 @@ number. Any figure from it is published with its interval.
 **Evidence:** Statistical methodology review, 2026-09-24.
 **Reopen if:** the set exceeds about 200 cases drawn from more than three
 systems.
+
+## MTH-011 — Embedding displacement is anti-correlated with meaning change
+**Date:** 2026-09-24
+**Finding:** Across three embedding models from three families, pooled
+separability AUC between meaning-breaking and meaning-preserving pairs was
+0.391 (MiniLM-L6), 0.440 (BGE-base) and 0.532 (E5-base) — at or below chance.
+Worst categories are the dangerous ones: temporal AUC 0.069, quantifier 0.104,
+number 0.157, negation 0.228. Median displacement under MiniLM: paraphrase
+0.0303, changed number/date/negation 0.0018. Rewording moves the vector about
+twenty times further than changing the fact.
+**Consequence:** Embedding displacement cannot serve as the primary triage
+signal. Channel ordering inverts; see MTH-013 and HANDOFF §5.
+**Evidence:** Probe run 20260924T022150Z, config eb95f0b802c4660a, 832 pairs,
+64 per category. `docs/knowledge/probes.md`.
+**Reopen if:** an embedding family is shown to score minimal factual edits above
+heavy paraphrase on this suite. Note the suite is the instrument — rerun it
+rather than arguing from a model card.
+
+## MTH-012 — The embedding channel is conditionally usable, gated on surface stability
+**Date:** 2026-09-24
+**Finding:** Scored against a minimal preserving baseline (one phrase changed)
+instead of the pooled preserving distribution, the same channels recover to AUC
+0.540 / 0.614 / 0.818 (MiniLM / BGE / E5). The failure in MTH-011 is therefore
+not blindness to meaning as such; it is that surface variation dominates the
+metric when the candidate system rewrites.
+**Consequence:** The engine must measure style drift between baseline and
+candidate and refuse to let the embedding channel contribute when it exceeds
+the level at which the channel was shown to work. This is a precondition the
+tool can check, not a judgement call.
+**Evidence:** Probe run 20260924T022150Z, synonym-only threshold analysis.
+**Reopen if:** the gate proves unmeasurable in practice, in which case the
+channel should be cut rather than run ungated.
+
+## MTH-013 — NLI contradiction is the primary channel, with shape-stratified thresholds
+**Date:** 2026-09-24
+**Finding:** DeBERTa-v3-base-MNLI reached pooled separability AUC 0.938 and,
+at a 5% false-alarm budget, detected seven of eight breaking categories at
+84.4-100% (n=64 each). Stable across output length (95.5-100% over four shapes)
+and across subject domain (96.4-98.2% over four domains, n=112 each). The
+5%-FPR threshold ranged from 0.011 to 0.888 across shapes — a factor of eighty.
+**Consequence:** NLI is the workhorse. Thresholds are stratified by output
+shape; a global threshold is wrong for at least two shapes. Cost rises
+accordingly, since a bidirectional cross-encoder is far more expensive per
+comparison than a bi-encoder.
+**Evidence:** Probe run 20260924T022150Z.
+**Caveat:** One checkpoint only. Unlike MTH-011 this does not replicate across
+families yet, and must not be treated as a property of NLI in general.
+**Reopen if:** a second NLI checkpoint disagrees materially, or the cost proves
+prohibitive at study scale.
+
+## MTH-014 — Omission is structurally invisible to contradiction-based detection
+**Date:** 2026-09-24
+**Finding:** NLI detected 0% of dropped material caveats at the 5% budget (AUC
+0.535, chance), rising only to 25% on the longest shape. This is not a model
+weakness: a text with a condition removed is *entailed* by the original, not
+contradicted by it, so no NLI checkpoint will resolve it. Embeddings catch 33%,
+and only because deletion changes length.
+**Consequence:** Dropped conditions are a realistic and dangerous regression
+class that neither semantic channel covers. Induced structural conformance
+(STD-003) must carry this class alone — a field present in 99% of baseline
+outputs and suddenly absent is the signal that works. The blind spot and the
+one unoccupied mechanism in the landscape coincide.
+**Evidence:** Probe run 20260924T022150Z.
+**Reopen if:** never for NLI — this follows from the definition of entailment.
+Reopen for a directional-entailment formulation (testing whether A entails B but
+B does not entail A), which was not tested here and is the obvious next probe.
+
+## MTH-015 — The decoy arm must be collected in the same load regime as A and B
+**Date:** 2026-09-24
+**Finding:** Temperature-0 decoding is not deterministic on batched serving
+infrastructure. A published measurement (Thinking Machines, Qwen3-235B) found
+1000 completions of a single prompt at temperature 0 produced 80 unique
+outputs, the modal one appearing 78 times, with first divergence at token 103.
+The divergence rate moves with server batch size.
+**Consequence:** A-prime is not merely "a second run of A" — it must be
+collected under the same concurrency and batching conditions as A and B, not
+batched separately or run at a quiet hour. A decoy arm collected in a different
+load regime measures a different noise floor and mis-calibrates every FDR
+estimate downstream. This tightens the interleaving requirement already stated
+in MTH-007 from a preference to a correctness condition.
+**Evidence:** bench taxonomy research, 2026-09-24, `.agents/bench-taxonomy-research.md`.
+**Reopen if:** never for batched hosted inference. May relax for a dedicated
+single-request deployment, which must be demonstrated rather than assumed.

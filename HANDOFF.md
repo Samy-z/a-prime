@@ -81,3 +81,60 @@ before that bottleneck exists, which is week 3 at the earliest.
 
 Recorded so it is not relitigated: fine-tuning returns as a separate project
 with a scope where it is the point, not a prop.
+
+---
+
+## §5 — Channel ordering inverted by the week-0 probe suite (2026-09-24)
+
+The design entered week 0 assuming embedding displacement would be the primary
+triage signal, with an NLI channel added to cover its expected weakness on
+negation and numbers. The probe suite reversed that, and the reversal is large
+enough to be worth recording as a decision rather than a tuning note.
+
+Embedding displacement is not weak on the dangerous categories. It is
+**anti-correlated** with meaning change: across three model families the pooled
+separability AUC was 0.391, 0.440 and 0.532, and rewording moved the vector
+roughly twenty times further than changing a number, a date or a negation.
+A channel below chance is worse than an absent one, because it will be trusted.
+
+It is not, however, useless. Against a minimal-surface-change baseline the same
+channels recover to AUC 0.540 / 0.614 / 0.818. The failure is conditional on
+surface instability, which is measurable, so the channel survives behind a gate
+rather than being cut. MTH-011, MTH-012.
+
+NLI contradiction carried seven of eight breaking categories at 84-100% under a
+5% false-alarm budget, stable across output length and across four subject
+domains. It becomes the primary channel. MTH-013.
+
+The eighth category is the one that matters most for the project's shape.
+Omission — a dropped material condition — is invisible to contradiction by
+definition rather than by model weakness, since a text with a condition removed
+is entailed by the original. Neither semantic channel covers it. Induced
+structural conformance must carry that class alone, which means the one
+mechanism the landscape survey found unoccupied (STD-003) is also the one the
+blind-spot map says is load-bearing. MTH-014.
+
+Two consequences beyond the channel ordering. Thresholds must be stratified by
+output shape — the measured spread was a factor of eighty. And cost rises: a
+bidirectional cross-encoder is far more expensive per comparison than a
+bi-encoder, which strengthens rather than weakens the later case for distilling
+the NLI-based mode clustering once it is the demonstrated bottleneck (see §4).
+
+---
+
+## §6 — Owner-scoped memory deliberately not persisted (2026-09-24)
+
+A user-level `CLAUDE.md` holding owner working-style preferences was proposed
+and rejected by the owner. Reasoning: preferences shift with topic, effort and
+mood, and pre-instantiating them means methodology gets reapplied without being
+thought about. The owner prefers to restate method per project.
+
+Isolation rule 3 therefore stands as written — no `CLAUDE.md` above the repo,
+for any purpose. Owner-scoped memory fragments across per-repo session keys by
+design, and that is the accepted cost.
+
+Narrow exception worth preserving: machine and environment facts are not
+working-style preferences and do not shift. The TLS truststore requirement
+(`src/aprime/net.py`) cost minutes rather than an hour precisely because it was
+already known. Facts of that kind remain worth recording outside the repo;
+preferences do not.
