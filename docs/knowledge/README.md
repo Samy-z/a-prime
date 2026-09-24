@@ -13,9 +13,9 @@ These are not design documents and not history. Design rationale lives in
 |---|---|---|
 | `probes.md` — the instrument probe suite, what each channel can and cannot resolve, minimum detectable effect per channel | methods | **done** 2026-09-24 |
 | `fault-taxonomy.md` — the frozen fault catalogue and severity ladder, with its amendment log | bench | **FROZEN** 2026-09-24 |
-| `recorder.md` — trace capture format, the three-arm protocol, dedup | engine | GAP — week 1 |
-| `adapters.md` — the system-under-test interface and how each system is wired | engine | GAP — week 1 |
-| `decoy-fdr.md` — the calibration procedure and how flags are produced | engine | GAP — week 1 |
+| `recorder.md` — trace capture format, the three-arm protocol, dedup | engine | **done** 2026-09-24 |
+| `adapters.md` — the system-under-test interface and how each system is wired | engine | **done** 2026-09-24 |
+| `decoy-fdr.md` — the calibration procedure and how flags are produced | engine | **done** 2026-09-24 |
 | `conformance.md` — rule induction from baseline output distribution, A-prime pruning, the three-tier band | engine | GAP — week 2 |
 | `mode-clustering.md` — semantic equivalence classes, dispersion test, NLI channel | engine | GAP — week 2 |
 | `cells.md` — the domain x format factorial, knowledge packs, base-rate control | bench | GAP — week 3 |
