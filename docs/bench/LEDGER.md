@@ -50,3 +50,49 @@ the paper. A taxonomy that claims to be drawn from reality cannot carry a class
 with no documented instance.
 **Evidence:** bench taxonomy research, 2026-09-24.
 **Reopen if:** a documented instance appears.
+
+## BCH-003 — Fault taxonomy frozen
+**Date:** 2026-09-24
+**Finding:** 14 classes promoted to `docs/knowledge/fault-taxonomy.md` and
+frozen. F1-F9 are incident-evidenced from grade A/B operator sources; F10-F14
+are mechanism-evidenced with no post-mortem carrying a blast radius, and that
+grading is carried into the paper rather than smoothed over. Four classes were
+added that were not in the original list of eight — cache contamination,
+numerical/serving-stack corruption at fixed model identity, sticky routing
+heterogeneity, and persona drift — and one was dropped (BCH-002).
+**Consequence:** The freeze commit is the pre-registration reference point.
+Nothing may be tuned against the taxonomy from this commit forward. Amendments
+are dated appends to the log at the foot of that file.
+**Evidence:** `.agents/bench-taxonomy-research.md`; freeze commit on this date.
+**Reopen if:** never as a whole. Individual classes change only by amendment.
+
+## BCH-004 — Two severity floors are set by published evidence, not by us
+**Date:** 2026-09-24
+**Finding:** (a) Retrieval corruption at 10% produced *identical* Hit@k, EM and
+F1 to 0% corruption on n=500 (arXiv 2606.28337). (b) Real production prompt
+edits at a flagship deployment are 1-3 lines, measured across 14 commits of
+`xai-org/grok-prompts`; the largest observed change (+9/-23) is a post-incident
+remediation, not a regression.
+**Consequence:** If the harness injects 10% retrieval noise and the detector
+misses it, that is not a detector failure and must not be scored as one. And a
+harness that injects prompt regressions by rewriting whole prompts is injecting
+something that does not occur in the wild — the ladder tops out at ~20 lines and
+that rung is already remediation-shaped.
+**Evidence:** as cited, both reproducible.
+**Reopen if:** a larger controlled study moves the retrieval floor, or a second
+production prompt corpus shows materially larger routine edits.
+
+## BCH-005 — Three unrelated serving-stack faults share one output signature
+**Date:** 2026-09-24
+**Finding:** Anthropic's TPU misconfiguration (Thai/Chinese characters in
+English replies), Anthropic's XLA:TPU approximate-top-k miscompilation, and
+OpenRouter FP4/Int4 quantization (raw `\uXXXX` escapes instead of CJK glyphs)
+have three entirely unrelated causes and converge on the same observable:
+character- and script-level corruption.
+**Consequence:** one cheap, wholly domain-agnostic check covers the family.
+Passed to the engine seat as a *fault signature* in the taxonomy, which is
+bench's remit; what to build from it is engine's call, not bench's.
+**Evidence:** Anthropic post-mortem 2025-09-17 (grade A); Roo-Code #11325
+(grade B).
+**Reopen if:** a fourth cause with a different signature appears, which would
+weaken the convergence argument.

@@ -11,8 +11,8 @@ These are not design documents and not history. Design rationale lives in
 
 | Doc | Owner family | Status |
 |---|---|---|
-| `probes.md` — the instrument probe suite, what each channel can and cannot resolve, minimum detectable effect per channel | methods | GAP — week 0 |
-| `fault-taxonomy.md` — the frozen fault catalogue and severity ladder, with its amendment log | bench | GAP — week 0, freeze before any tuning |
+| `probes.md` — the instrument probe suite, what each channel can and cannot resolve, minimum detectable effect per channel | methods | **done** 2026-09-24 |
+| `fault-taxonomy.md` — the frozen fault catalogue and severity ladder, with its amendment log | bench | **FROZEN** 2026-09-24 |
 | `recorder.md` — trace capture format, the three-arm protocol, dedup | engine | GAP — week 1 |
 | `adapters.md` — the system-under-test interface and how each system is wired | engine | GAP — week 1 |
 | `decoy-fdr.md` — the calibration procedure and how flags are produced | engine | GAP — week 1 |
