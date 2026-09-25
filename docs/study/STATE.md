@@ -4,7 +4,12 @@
 
 1. The transfer study — does label-free regression detection survive a change
    of domain? Open question (STD-005).
-2. Induced structural conformance, pruned by the decoy arm (STD-003).
+2. Induced structural conformance, pruned by the decoy arm (STD-003). Still
+   built and still the unoccupied mechanism, but its original justification —
+   that it alone covered the omission class — was removed by MTH-016. Owner
+   decision 2026-09-25: implement it regardless, and let the README ordering
+   follow what the finished work turns out to support rather than what was
+   promised in advance.
 3. Black-box decoy calibration — known concept, unclaimed construction, works
    where the nearest competitor cannot (STD-001, STD-006).
 4. The published blind-spot map, with minimum detectable effect per channel.

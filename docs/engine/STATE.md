@@ -31,6 +31,14 @@ moderate shift, against 73% at k=20 (MTH-018). Cheap models for systems under
 test — the object of measurement is the detector, not the systems. Subsample
 corpora rather than reducing k: k is load-bearing, corpus size is not.
 
+## Hard requirement: runs must be resumable
+
+Study runs are free in money (local models) and expensive in wall-clock, and
+they occupy the owner's only machine. A multi-hour run that cannot be paused and
+resumed is not a long job, it is a machine lockout. The recorder must checkpoint
+per (input, arm, sample) and restart from where it stopped, and it must be
+safe to kill. Owner constraint, 2026-09-25.
+
 ## Not built
 
 Embedding style-stability gate (MTH-012); structural conformance; shape
