@@ -163,3 +163,53 @@ re-confirmed before being relied on.
 
 The rejection in §6 stands for preferences. Isolation rule 3 in `CLAUDE.md` is
 amended to match.
+
+---
+
+## §8 — Overnight block, 2026-09-25 (week 1 completed, week 2 substantially built)
+
+Worked unattended on the owner's instruction to push as far as possible. Six
+decisions were taken without consultation; each is recorded with its reasoning
+so any of them can be reversed cheaply.
+
+**Register became a third probe class (MTH-021).** Owner decision, but the
+consequence was not anticipated: the false alarms the design had attributed to
+`verbosity` were never false alarms. The channel was correctly detecting a
+change we had mislabelled as a non-change. Relabelling recovered a signal rather
+than merely tidying the labels, and it fixed the clustering fit as a side effect
+— the argmax moved from 0.05 to 0.65, converging on the threshold MTH-020 had
+chosen by argument alone.
+
+**Replay is grouped by input (ENG-001).** Mine, and the largest single
+scheduling decision available: roughly twenty days of prefill on the measured
+hardware. It does not weaken MTH-015, because that guarantee is about the
+triple and grouping puts the three arms closer together, not further apart. What
+it costs is that an input's noise floor now spans a short window while the run
+spans a long one, so every sample carries a wall-clock timestamp and the span is
+reported rather than assumed away.
+
+**A machine-facts file above the repo (§7 amendment).** Already recorded.
+
+**The fault harness grades on activation, never the cell label (BCH-011).** A
+fault labelled at the cell level is wrong for every input it never touched, and
+that is label noise in the direction that looks like success.
+
+**Seat separation was preserved by commit order, not by process.** Building the
+detector and the harness in one session is a contamination risk. The guarantee
+is that every detector threshold was fitted and committed before the harness
+existed, against the probe suite and the stub, neither of which contains an
+injected fault. That is checkable in the git history rather than promised — and
+it is a weaker guarantee than two people would give. Say so in the paper.
+
+**The first titration was a saturated instrument, not a result (ENG-002).** 100%
+recall in all 24 cells including the lowest severity. Under exact-match
+clustering any text change produces a novel mode, so the ladder measured whether
+the string changed rather than how much. Reported as a defect in the
+measurement, because the alternative — reporting 100% detection — would have
+been true and completely misleading.
+
+**What is still not built:** the Palworld adapter and the domain-cell factorial,
+both blocked on the owner ratifying the model pool; prompt-regression and
+retrieval fault injection, which need a system with a prompt and a retriever;
+and the fix for ENG-003, where clustering is recomputed three times per
+comparison.
