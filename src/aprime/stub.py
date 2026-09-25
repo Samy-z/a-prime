@@ -68,6 +68,41 @@ def default_table(input_ids: list[str], n_modes: int = 3) -> dict[str, Behaviour
     return table
 
 
+def realistic_table(
+    input_ids: list[str], n_modes: int = 3, shape: str = "summary"
+) -> dict[str, Behaviour]:
+    """A behaviour table whose modes are realistic multi-sentence outputs.
+
+    `default_table` emits short opaque tokens, which is fine for testing the
+    statistics and useless for testing fault injection: omission needs sentences
+    to drop and truncation needs words to cut, so on terse outputs those faults
+    never fire and a titration curve would measure nothing.
+
+    Reuses the probe suite's renderers and seeds, so the text carries real
+    domain content across four subject areas rather than lorem ipsum.
+    """
+    from .probes.pairs import render
+    from .probes.seeds import SEEDS
+
+    table: dict[str, Behaviour] = {}
+    for i, iid in enumerate(input_ids):
+        rng = random.Random(_stable_hash("realistic", iid))
+        seed = SEEDS[i % len(SEEDS)]
+        modes = []
+        for j in range(n_modes):
+            f = dict(seed.fields)
+            # Each mode is a materially different answer for the same input.
+            if j == 1:
+                f["verdict"] = f["verdict_alt"]
+            elif j == 2:
+                f["number"] = f["number_alt"]
+            modes.append(render(shape, f, variant=j % 2))
+        weights = [rng.random() ** rng.choice([0.3, 1.0, 3.0]) for _ in range(n_modes)]
+        total = sum(weights)
+        table[iid] = Behaviour(tuple(modes), tuple(w / total for w in weights))
+    return table
+
+
 # --------------------------------------------------------------------------
 # perturbations — what "B is different" can mean
 # --------------------------------------------------------------------------

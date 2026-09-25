@@ -1,0 +1,471 @@
+{
+  "provenance": {
+    "run_id": "20260925T043826Z",
+    "config_hash": "ac37a9c464904ea5",
+    "created_utc": "2026-09-25T04:38:26.872355+00:00",
+    "instruments": {
+      "predicate": "exact-match@builtin"
+    },
+    "params": {
+      "k": 12,
+      "q": 0.1,
+      "n_inputs": 120,
+      "severities": [
+        0.1,
+        0.25,
+        0.5,
+        0.9
+      ]
+    },
+    "corpus": "a6789702577b0df5",
+    "git_commit": "89094fffa162615e9b27b42accbcbe4a73318792",
+    "git_branch": "main",
+    "git_dirty": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.3",
+    "packages": {
+      "torch": "2.14.0+cu126",
+      "transformers": "5.17.0",
+      "sentence-transformers": "6.1.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1"
+    },
+    "notes": {
+      "purpose": "severity titration on the stub"
+    }
+  },
+  "rows": [
+    {
+      "fault": "omission",
+      "class": "F5",
+      "severity": 0.1,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "omission",
+      "class": "F5",
+      "severity": 0.25,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "omission",
+      "class": "F5",
+      "severity": 0.5,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "omission",
+      "class": "F5",
+      "severity": 0.9,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "output_truncation",
+      "class": "F12",
+      "severity": 0.1,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "output_truncation",
+      "class": "F12",
+      "severity": 0.25,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "output_truncation",
+      "class": "F12",
+      "severity": 0.5,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]",
+        "ends_with_terminator [F12]"
+      ]
+    },
+    {
+      "fault": "output_truncation",
+      "class": "F12",
+      "severity": 0.9,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "script_corruption",
+      "class": "F7",
+      "severity": 0.1,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "script_subset(('LATIN',)) [F7]",
+        "word_count_range(133, 152) [F10/F12]",
+        "ends_with_terminator [F12]"
+      ]
+    },
+    {
+      "fault": "script_corruption",
+      "class": "F7",
+      "severity": 0.25,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]",
+        "script_subset(('LATIN',)) [F7]",
+        "ends_with_terminator [F12]"
+      ]
+    },
+    {
+      "fault": "script_corruption",
+      "class": "F7",
+      "severity": 0.5,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]",
+        "script_subset(('LATIN',)) [F7]",
+        "ends_with_terminator [F12]"
+      ]
+    },
+    {
+      "fault": "script_corruption",
+      "class": "F7",
+      "severity": 0.9,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]",
+        "script_subset(('LATIN',)) [F7]",
+        "ends_with_terminator [F12]"
+      ]
+    },
+    {
+      "fault": "unicode_escape",
+      "class": "F7",
+      "severity": 0.1,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_unicode_escape [F7]",
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "unicode_escape",
+      "class": "F7",
+      "severity": 0.25,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_unicode_escape [F7]",
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "unicode_escape",
+      "class": "F7",
+      "severity": 0.5,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_unicode_escape [F7]",
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "unicode_escape",
+      "class": "F7",
+      "severity": 0.9,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_unicode_escape [F7]",
+        "ends_with_terminator [F12]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "refusal",
+      "class": "F13",
+      "severity": 0.1,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 111,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_refusal_marker [F13]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "refusal",
+      "class": "F13",
+      "severity": 0.25,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 111,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_refusal_marker [F13]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "refusal",
+      "class": "F13",
+      "severity": 0.5,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 111,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_refusal_marker [F13]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "refusal",
+      "class": "F13",
+      "severity": 0.9,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 111,
+        "novel_mode": 120
+      },
+      "violations": [
+        "no_refusal_marker [F13]",
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "verbosity",
+      "class": "F9",
+      "severity": 0.1,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "verbosity",
+      "class": "F9",
+      "severity": 0.25,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "verbosity",
+      "class": "F9",
+      "severity": 0.5,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    },
+    {
+      "fault": "verbosity",
+      "class": "F9",
+      "severity": 0.9,
+      "activated": 120,
+      "recall": 1.0,
+      "false_on_untouched": 0.0,
+      "n_flagged": 120,
+      "channels": {
+        "mode_share": 120,
+        "dispersion": 0,
+        "novel_mode": 120
+      },
+      "violations": [
+        "word_count_range(133, 152) [F10/F12]"
+      ]
+    }
+  ]
+}
