@@ -63,3 +63,25 @@ figures, so they must come from the semantic path.
 `scripts/titration.py`.
 **Reopen if:** never for exact match. The semantic run is the measurement that
 matters and is pending.
+
+## ENG-003 — Clustering is recomputed three times per comparison; counted once
+**Date:** 2026-09-25
+**Finding:** `detect()` calls `cluster_jointly` once per statistic, so the same
+partition is derived three times per comparison. With exact-match clustering
+that is free. With the NLI predicate it triples the dominant cost of the entire
+detector.
+
+The reported cost counts only the first pass, because the three produce
+identical partitions and counting all three would treble a figure the caller
+incurs once conceptually. That makes the reported number honest about the work
+that *needs* doing and silent about waste, which is the wrong way round.
+**Consequence:** cluster once per (input, arm-pair) and pass the partition to
+all three statistics. Recorded as pressure rather than fixed, because the fix
+touches the detector's inner loop and the semantic titration currently running
+would have to be re-run against the change.
+**Measured meanwhile:** on the exact-match path over 300 inputs at k=12,
+normalisation collapsed **14,400 samples to 1,580 distinct strings (11%)**.
+That 9x reduction is what makes a cross-encoder predicate affordable at all,
+and it is measured rather than hoped for.
+**Evidence:** `scripts/demo_detect.py` cost line.
+**Reopen if:** fixed — then this entry gets a dated append saying so.

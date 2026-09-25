@@ -81,6 +81,7 @@ class Report:
     n_inputs: int
     q: float
     notes: list[str] = field(default_factory=list)
+    cost: dict = field(default_factory=dict)
 
     @property
     def n_flagged(self) -> int:
@@ -116,6 +117,20 @@ class Report:
                     f"  {len(self.contract.band)} rules surfaced for review "
                     "(held often but not always; see contract.band)"
                 )
+        if self.cost and self.cost.get("clusterings"):
+            c = self.cost
+            per = c["predicate_calls"] / max(c["clusterings"], 1)
+            collapse = (
+                c["distinct_after_normalisation"] / c["samples_clustered"]
+                if c["samples_clustered"] else 1.0
+            )
+            lines += [
+                "",
+                f"cost: {c['predicate_calls']} predicate calls over "
+                f"{c['clusterings']} clusterings ({per:.1f} each); "
+                f"normalisation collapsed {c['samples_clustered']} samples to "
+                f"{c['distinct_after_normalisation']} distinct ({collapse:.0%})",
+            ]
         if self.notes:
             lines += ["", "notes:"] + [f"  {n}" for n in self.notes]
         if self.findings:
@@ -132,11 +147,17 @@ def _pairwise(
     ids: Sequence[str],
     predicate: EquivalencePredicate | None,
     stat: str,
+    cost: dict | None = None,
 ) -> np.ndarray:
     out = []
     for iid in ids:
         a, b = clouds_a[iid], clouds_other[iid]
-        ma, mb, _ = cluster_jointly(a, b, predicate)
+        ma, mb, joint = cluster_jointly(a, b, predicate)
+        if cost is not None:
+            cost["predicate_calls"] += joint.predicate_calls
+            cost["clusterings"] += 1
+            cost["samples_clustered"] += joint.n_samples
+            cost["distinct_after_normalisation"] += joint.distinct_after_normalisation
         if stat == "mode_share":
             out.append(stats.tv_distance(ma, mb))
         elif stat == "dispersion":
@@ -177,9 +198,23 @@ def detect(
 
     channels: dict[str, ChannelResult] = {}
 
+    # The equivalence predicate is the dominant cost of the whole detector, so
+    # it is counted rather than estimated. This number is the evidence for or
+    # against distilling it later.
+    cost = {
+        "predicate_calls": 0,
+        "clusterings": 0,
+        "samples_clustered": 0,
+        "distinct_after_normalisation": 0,
+    }
+    # Only the first statistic's clusterings are counted: all three re-derive
+    # the same partition, so counting each would treble the reported cost for
+    # work the caller did once conceptually. The real fix is to cluster once and
+    # reuse -- logged as pressure rather than done, see ENG-003.
     for stat in ("mode_share", "dispersion", "novel_mode"):
-        t = _pairwise(ca, cb, ids, predicate, stat)
-        d = _pairwise(ca, cp, ids, predicate, stat)
+        first = stat == "mode_share"
+        t = _pairwise(ca, cb, ids, predicate, stat, cost if first else None)
+        d = _pairwise(ca, cp, ids, predicate, stat, cost if first else None)
         channels[stat] = ChannelResult(stat, t, d)
 
     # Embedding displacement, gated. Ungated it is anti-correlated with meaning
@@ -277,6 +312,7 @@ def detect(
         n_inputs=len(ids),
         q=q,
         notes=notes,
+        cost=cost,
     )
 
 
