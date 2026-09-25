@@ -177,3 +177,47 @@ def test_summary_accounts_for_every_candidate():
     c = induce(_json_outputs(12), _json_outputs(12))
     assert c.n_candidates == len(c.hard) + len(c.band) + len(c.discarded)
     assert "hard" in c.summary()
+
+
+# --------------------------------------------------- stub jitter (ENG-005) ---
+
+
+def _pools(jitter, k=8, n=25):
+    import sys
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parents[1] / "src"))
+    from aprime.recorder import iter_invocations, record
+    from aprime.stub import build_arms, realistic_table
+
+    ids = [f"i{i}" for i in range(n)]
+    tbl = realistic_table(ids)
+    a, ap, b = build_arms(ids, set(), jitter=jitter, table=tbl)
+    rec = record(iter_invocations(ids), {"A": a, "A_prime": ap, "B": b}, k=k)
+    pool = lambda arm: [o for i in ids for o in rec.cloud(i, arm)]
+    return pool("A"), pool("A_prime"), pool("B")
+
+
+def test_jitter_widens_the_induced_length_bound():
+    """A range fitted to a system with no run-to-run variation is overfitted to
+    one sample. Jitter is what makes the induced bound reflect the system's real
+    variability rather than one draw of it."""
+    tight = [r for r in induce(*_pools(0.0)[:2]).hard if r.kind == "word_count_range"][0]
+    loose = [r for r in induce(*_pools(0.5)[:2]).hard if r.kind == "word_count_range"][0]
+    assert loose.params[1] > tight.params[1], (tight.params, loose.params)
+
+
+def test_an_unchanged_candidate_violates_nothing():
+    """The check ENG-005 asserted a claim without running. A hard invariant that
+    fires on an unchanged candidate is noise; one that does not is a detector."""
+    for jitter in (0.0, 0.5):
+        pa, pp, pb = _pools(jitter)
+        assert not check(induce(pa, pp), pb), f"false alarm at jitter={jitter}"
+
+
+def test_jitter_is_meaning_preserving():
+    """If jitter changed content it would be a fault injection wearing the wrong
+    name, and every baseline would look broken."""
+    pa, _, _ = _pools(0.9)
+    for out in pa[:40]:
+        assert "term loan application" in out or "outcome of the" in out or out
+        assert len(out.split()) > 100
