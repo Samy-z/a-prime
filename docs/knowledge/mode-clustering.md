@@ -90,9 +90,16 @@ blindness that applies to targets and decoys alike, and nothing absorbs it.
 Validity outranks power, so the threshold leans high. At the argmax, 40.6% of
 omission pairs merge.
 
-**This is an argument, not a measurement.** The proper resolution is end-to-end
-detection power across thresholds on a free-text system under test. Replace it
-when that exists.
+**Update 2026-09-25 — argument and measurement now agree.** Re-fitting after
+`verbosity` moved out of the preserving set (MTH-021) moved the argmax from 0.05
+to **0.65**, and lifted peak balanced accuracy from 0.909 to **0.956**. Verbosity
+was distorting the fit: it was the one preserving category the predicate refused
+to merge, and it dragged the optimum two orders of magnitude away from where the
+error asymmetry said it belonged.
+
+The default stays 0.7 — inside the flat region (0.45-0.85 all score 0.952-0.956)
+and on the validity-safe side of the optimum. End-to-end power across thresholds
+on a free-text system is still the measurement that would settle it outright.
 
 ## Known limits
 

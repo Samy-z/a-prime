@@ -126,6 +126,31 @@ def evaluate(
                 )
             )
 
+        # REGISTER sits outside the budget and outside the detection rate: the
+        # facts are identical and only stance moved, so neither "false alarm"
+        # nor "detection" is the right word. It is measured and reported, and
+        # the reader decides. See MTH-021 and the pairs module docstring.
+        for c in sorted(set(cat[rel == "REGISTER"])):
+            sel = mask & (cat == c)
+            vals = scores[sel]
+            if len(vals) == 0:
+                continue
+            det = int((vals > thr).sum())
+            lo, hi = wilson(det, len(vals))
+            results.append(
+                CategoryResult(
+                    category=f"[reg] {c}",
+                    shape=s,
+                    n=len(vals),
+                    detected=det,
+                    rate=det / len(vals),
+                    lo=lo,
+                    hi=hi,
+                    auc=auc(vals, pres),
+                    median_score=float(np.median(vals)),
+                )
+            )
+
         # Preserving categories are reported too: a preserving category that
         # trips the threshold far more often than the others is not noise, it
         # is a specific rewriting the channel mistakes for a change.
@@ -154,7 +179,12 @@ def evaluate(
 
 
 def separability(scores: np.ndarray, relations: list[str]) -> float:
-    """One number for 'can this channel tell the two populations apart at all'."""
+    """One number for 'can this channel tell the two populations apart at all'.
+
+    BREAKING against PRESERVING only. REGISTER is excluded by construction —
+    including it would require deciding which side it belongs on, which is the
+    question we declined to answer.
+    """
     s = np.asarray(scores, dtype=float)
     r = np.array(relations)
     return auc(s[r == "BREAKING"], s[r == "PRESERVING"])

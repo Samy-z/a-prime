@@ -36,18 +36,29 @@ See `docs/knowledge/probes.md` and MTH-011 through MTH-017.
 | Channel | Role | Status |
 |---|---|---|
 | NLI contradiction | **Primary.** Carries 7 of 8 breaking categories. Shape-stratified thresholds, mandatory. | MTH-013, checkpoint-dependent (MTH-017) |
-| NLI directional entailment | **Primary for omission**, 95.3% at AUC 0.995, and specific — near-zero on everything else. Signed, not absolute. | MTH-016 |
+| NLI directional entailment, **upper tail** | **Primary for omission** — 98.4% at 2.5% per-tail budget. Positive means information removed. | MTH-016, MTH-022 |
+| NLI directional entailment, **lower tail** | **Information added** — catches both register directions at 100%. Free: same forward passes. | MTH-022 |
 | Structural conformance | Schema, cardinality, enum domain, language drift, parse failure, F7 charset signature | Not built. No longer solely load-bearing for omission (MTH-014 correction) |
 | Embedding displacement | **Conditional.** Gated on measured surface stability | Gate not built (MTH-012) |
 | Dispersion / mode-share | Collapse and explosion detection | Not built |
 
-Both NLI channels come from a **single pair of forward passes** — contradiction
-is the max over directions, directional is the difference in entailment. Running
-them as separate models would double the dominant cost for nothing.
+All of these come from a **single pair of forward passes** — contradiction is
+the max over directions, directional is the difference. Running them as separate
+models would multiply the dominant cost for nothing.
 
-The two are complementary, not redundant: contradiction misses omission
-entirely, directional catches almost nothing *but* omission. Their union covers
-all eight breaking categories in the probe suite.
+They are complementary, not redundant. Contradiction misses omission entirely;
+the directional upper tail catches omission and almost nothing else; the lower
+tail catches added content, which no other channel sees. Their union covers all
+eight breaking categories plus both register directions.
+
+**Use the signed value with two thresholds, never the absolute value.** Taking
+the absolute conflates the tails: it fires on both omission and addition and
+can distinguish neither, throwing away the one piece of information that names
+the fault (MTH-022).
+
+**Do not call the lower tail a stance detector.** Both register directions go
+negative because both *add* a clause, so the channel measures directional
+information volume, not register as such. Untested against factual additions.
 
 **The embedding gate is a hard requirement, not a refinement.** Ungated, the
 channel is anti-correlated with meaning change — it scores a reworded output as

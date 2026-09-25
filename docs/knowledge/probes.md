@@ -8,8 +8,8 @@ Results land in `results/probes_<run_id>_<config_hash>.json`.
 
 ## What the suite is
 
-832 pairs: 16 seeds x 4 subject domains x 4 output shapes x 13 perturbation
-categories. 320 meaning-preserving, 512 meaning-breaking. 30-152 words per arm.
+896 pairs: 16 seeds x 4 subject domains x 4 output shapes x 14 perturbation
+categories. 256 preserving, 512 breaking, 128 register. 30-152 words per arm.
 
 Both arms of every pair come from the same renderer and the same seed, so the
 only difference is the intended one. **Preserving perturbations change the
@@ -18,13 +18,28 @@ hold the rendering fixed.** That asymmetry is not a stacked deck — it is the
 production situation, where a model swap rewrites the surface of every output
 and changes the substance of a few.
 
-| Preserving | Breaking |
-|---|---|
-| paraphrase (full template rewrite) | polarity (verdict word inverted) |
-| reorder (independent facts swapped) | negation (syntactic, per-seed) |
-| format (prose to bullets, JSON compacted) | number, unit, temporal, entity |
-| synonym (exactly one phrase) | quantifier |
-| verbosity (hedging clause added) | omission (material caveat dropped) |
+| Preserving (facts and stance fixed) | Breaking (a fact changed) | Register (stance changed) |
+|---|---|---|
+| paraphrase (full template rewrite) | polarity (verdict word inverted) | hedging (qualifier added) |
+| reorder (independent facts swapped) | negation (syntactic, per-seed) | overconfidence (certainty added) |
+| format (prose to bullets, JSON compacted) | number, unit, temporal, entity | |
+| synonym (exactly one phrase) | quantifier, omission | |
+
+### Why register is a third class rather than a verdict
+
+Hedging changes no fact, so labelling it BREAKING makes that bucket
+inhomogeneous — every other member is "a fact changed". But labelling it
+PRESERVING would call a documented fault class a non-event: **F9 in the frozen
+taxonomy is persona and sycophancy drift**, and GPT-4o's case was exactly this,
+a register change with no accuracy change where every labelled eval passed.
+
+So it is excluded from both the 5% false-alarm budget and the detection rate,
+and reported on its own. Two directions are included, because stance drifts both
+ways and the dangerous one is the confident direction.
+
+An earlier version labelled hedging as preserving. The NLI predicate refused to
+merge those pairs 80% of the time, which was the first sign the label was doing
+work it could not support (MTH-021).
 
 ## Why the suite has its own test file
 
@@ -176,6 +191,38 @@ the contribution narrative should stop saying it is.
 Reformatting prose as bullets trips NLI on **18.8%** of pairs — and format
 changes are among the most common consequences of a model swap. Paraphrase
 trips MiniLM on 20.3%, reorder trips BGE on 17.2%.
+
+### The signed directional channel is two-tailed (MTH-022)
+
+Thresholds from the preserving distribution at 2.5% per tail (lower -0.055,
+upper +0.096):
+
+| group | n | median | above upper | below lower |
+|---|---|---|---|---|
+| preserving | 256 | 0.000 | 2.7% | 2.7% |
+| breaking excl. omission | 448 | 0.000 | 1.8% | 4.0% |
+| omission | 64 | +0.957 | **98.4%** | 0% |
+| hedging | 64 | -0.758 | 0% | **100%** |
+| overconfidence | 64 | -0.848 | 0% | **100%** |
+
+One statistic, two tails, two fault classes, and the sign says which: positive
+means information was removed, negative means it was added.
+
+`directional_abs` is therefore redundant *and worse* — the absolute value
+conflates the tails, fires on both, and distinguishes neither. Dropped.
+
+Caveat that must travel with this: it is **not** a stance detector. Both
+register directions go negative because both add a clause, so what is measured
+is directional information volume. Whether it separates stance addition from
+factual addition is untested.
+
+### Relabelling register recovered a signal
+
+The false alarms previously attributed to `verbosity` were never false alarms —
+the channel was correctly detecting a change the suite had mislabelled as a
+non-change. Relabelling also fixed the clustering fit: the argmax moved from
+0.05 to 0.65 and peak balanced accuracy rose from 0.909 to 0.956, converging on
+the threshold that had been chosen by argument alone (MTH-020 append).
 
 ## Consequences for the design
 

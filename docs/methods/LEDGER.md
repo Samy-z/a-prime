@@ -379,3 +379,69 @@ quarter of the time, and no threshold fixes it.
 free-text system under test. This entry rests on an argument about error
 asymmetry, not on a measurement of the thing that matters, and should be
 replaced by the measurement when one exists.
+
+## MTH-020 — CONVERGENCE (dated append, 2026-09-25)
+MTH-020 set the clustering threshold at 0.7 on an asymmetry argument and flagged
+that it rested on an argument rather than a measurement. Re-fitting after
+`verbosity` moved out of the preserving set (MTH-021) moved the fitted argmax
+from **0.05 to 0.65**, and lifted peak balanced accuracy from 0.909 to **0.956**.
+
+Argument and measurement now agree. Verbosity was distorting the fit, exactly as
+suspected — it was the one preserving category the predicate refused to merge,
+and it dragged the optimum two orders of magnitude away from where the error
+asymmetry said it belonged.
+
+Default stays at 0.7: it sits inside the flat region (0.45-0.85 all score
+0.952-0.956), and the asymmetry argument still says lean to the validity-safe
+side of the optimum. Merge rates at the refit: format 100%, paraphrase 100%,
+synonym 96.9%, reorder 75.0% on the preserving side; omission 9.4%, unit 4.7%,
+everything else 0% on the breaking side.
+
+## MTH-021 — Register is a third class, and relabelling it revealed a channel
+**Date:** 2026-09-25
+**Finding:** Stance change — facts identical, commitment to them altered — is
+now `REGISTER`, excluded from both the false-alarm budget and the detection
+rate, with two directions (`hedging`, `overconfidence`). Owner decision.
+
+Rationale, which is independent of any model's behaviour: calling it PRESERVING
+would label a documented fault class a non-event, since F9 in the frozen
+taxonomy is persona and sycophancy drift and GPT-4o's case was exactly this.
+Calling it BREAKING would make that bucket inhomogeneous, since every other
+member is "a fact changed".
+**The unplanned consequence:** the false alarms the design had been attributing
+to `verbosity` were never false alarms. The channel was correctly detecting a
+change we had mislabelled as a non-change. Relabelling did not just tidy the
+ground truth — it recovered a signal the design had been discarding, and it
+fixed the clustering fit (see the MTH-020 append).
+**Evidence:** run 20260925T041059Z, config norm-*, 896 pairs.
+**Reopen if:** never as a label question. The class boundary may be refined.
+
+## MTH-022 — The signed directional channel is two-tailed, and the sign names the fault
+**Date:** 2026-09-25
+**Finding:** P(A entails B) minus P(B entails A), with two-tailed thresholds
+taken from the preserving distribution at 2.5% per tail (lower -0.055, upper
++0.096):
+
+| group | n | median | above upper | below lower |
+|---|---|---|---|---|
+| preserving | 256 | 0.000 | 2.7% | 2.7% |
+| breaking excl. omission | 448 | 0.000 | 1.8% | 4.0% |
+| omission | 64 | +0.957 | **98.4%** | 0% |
+| hedging | 64 | -0.758 | 0% | **100%** |
+| overconfidence | 64 | -0.848 | 0% | **100%** |
+
+**Consequence:** one statistic, two tails, two fault classes, and the sign says
+which. Positive means information was removed; negative means it was added. This
+comes free — same forward passes as the contradiction channel.
+
+It also makes `directional_abs` redundant and worse: taking the absolute value
+conflates the two tails, so it fires on both and can distinguish neither. Drop
+it from the primary set.
+**What this is NOT.** It is not a stance detector. Both register directions go
+negative because both *add* a clause, so what the channel measures is
+directional information volume, not register as such. Whether it separates
+stance addition from factual addition is untested and is the obvious next probe.
+Do not describe it as an F9 detector until that probe exists.
+**Evidence:** run 20260925T041059Z.
+**Reopen if:** the addition probe shows factual additions land in the same tail
+with the same magnitude, which would confirm the channel is purely volumetric.

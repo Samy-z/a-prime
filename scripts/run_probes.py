@@ -75,8 +75,9 @@ def main() -> int:
     print(f"  domains    {sorted({p.domain for p in pair_list})}")
     print(f"  shapes     {sorted({p.shape for p in pair_list})}")
     print(f"  categories {len({p.category for p in pair_list})}")
-    n_pres = sum(p.relation == 'PRESERVING' for p in pair_list)
-    print(f"  preserving {n_pres}  breaking {len(pair_list) - n_pres}")
+    from collections import Counter as _C
+    rc = _C(p.relation for p in pair_list)
+    print("  " + "  ".join(f"{k.lower()} {v}" for k, v in sorted(rc.items())))
     wc = [p.words_a for p in pair_list]
     print(f"  words/arm  median {int(np.median(wc))}  range {min(wc)}-{max(wc)}")
 

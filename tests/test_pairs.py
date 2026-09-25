@@ -39,7 +39,7 @@ def test_no_degenerate_pairs():
 
 def test_factorial_is_complete():
     ps = pairs.build_pairs()
-    n_cat = len(pairs.PRESERVING) + len(pairs.BREAKING)
+    n_cat = len(pairs.ALL_BUILDERS)
     assert len(ps) == len(seeds.SEEDS) * len(pairs.SHAPES) * n_cat
     counts = {}
     for p in ps:
@@ -69,13 +69,19 @@ def test_omission_strictly_removes_the_caveat():
             assert len(b) < len(a)
 
 
-def test_preserving_pairs_keep_every_content_field():
-    """A preserving perturbation that drops or alters a fact is mislabelled,
-    and would show up in the results as the channel being oversensitive."""
+def test_preserving_and_register_pairs_keep_every_content_field():
+    """A preserving perturbation that drops or alters a fact is mislabelled, and
+    would show up in the results as the channel being oversensitive.
+
+    REGISTER is checked by the same rule: its whole definition is that the facts
+    are identical and only stance moved. A register pair that lost a fact would
+    be a breaking pair wearing the wrong label.
+    """
+    builders = {**pairs.PRESERVING, **pairs.REGISTER}
     for seed in seeds.SEEDS:
         for shape in pairs.SHAPES:
-            for name in pairs.PRESERVING:
-                a, b = pairs.PRESERVING[name](shape, seed.fields)
+            for name in builders:
+                a, b = builders[name](shape, seed.fields)
                 for key in ("subject", "number", "verdict", "date"):
                     val = seed.fields[key]
                     if val not in a:
@@ -90,6 +96,31 @@ def test_synonym_actually_substitutes_something():
         for shape in pairs.SHAPES:
             a, b = pairs.PRESERVING["synonym"](shape, seed.fields)
             assert a != b, f"{seed.id}/{shape}: synonym pass was a no-op"
+
+
+def test_register_is_its_own_relation_and_is_not_counted_as_either():
+    """F9 (persona/sycophancy drift) is a real fault class, so calling stance
+    change 'preserving' would label a documented fault a non-event. But the
+    facts are identical, so calling it 'breaking' makes that bucket
+    inhomogeneous. It is measured separately instead."""
+    ps = pairs.build_pairs()
+    rels = {p.relation for p in ps}
+    assert rels == {"PRESERVING", "BREAKING", "REGISTER"}
+    reg = [p for p in ps if p.relation == "REGISTER"]
+    assert {p.category for p in reg} == {"hedging", "overconfidence"}
+    assert len(reg) == len(seeds.SEEDS) * len(pairs.SHAPES) * 2
+    assert not (set(pairs.REGISTER) & set(pairs.PRESERVING))
+    assert not (set(pairs.REGISTER) & set(pairs.BREAKING))
+
+
+def test_the_two_register_directions_differ_from_each_other():
+    """Hedging and overconfidence are opposite stance moves, not one
+    perturbation applied twice."""
+    for seed in seeds.SEEDS[:4]:
+        for shape in pairs.SHAPES:
+            _, hedged = pairs.REGISTER["hedging"](shape, seed.fields)
+            _, boosted = pairs.REGISTER["overconfidence"](shape, seed.fields)
+            assert hedged != boosted, f"{seed.id}/{shape}"
 
 
 def test_shapes_span_a_real_length_range():

@@ -4,9 +4,10 @@ A probe pair is two texts plus a known ground-truth relation between them:
 
     PRESERVING  the two texts mean the same thing; a channel that scores this
                 pair as "changed" is producing a false alarm
-    BREAKING    the two texts differ in a way that would matter to whoever
-                reads the output; a channel that scores this pair as "unchanged"
+    BREAKING    the facts differ; a channel that scores this pair as "unchanged"
                 is blind
+    REGISTER    the facts are identical and the *stance* changed — how committed
+                the system is to what it says
 
 Both arms of every pair are produced by the same renderer from the same seed,
 so the only difference between them is the intended one. Preserving
@@ -16,6 +17,17 @@ perturbations vary the facts and hold the rendering fixed.
 This asymmetry is deliberate and is the whole point: it is exactly the
 situation a regression detector faces in production, where a model swap
 rewrites the surface of every output while changing the substance of a few.
+
+REGISTER is a third class rather than a verdict, because we could not honestly
+label it either way. Hedging changes no fact, so calling it BREAKING makes that
+bucket inhomogeneous — every other member is "a fact changed". But calling it
+PRESERVING would label a documented fault class a non-event: F9 in the frozen
+taxonomy is persona and sycophancy drift, and GPT-4o's was exactly this, a
+register change with no accuracy change where every labelled eval passed.
+
+So it is measured and reported separately, excluded from both the false-alarm
+budget and the detection rate. Two directions are included, because stance can
+drift either way and the dangerous one is the confident direction.
 """
 
 from __future__ import annotations
@@ -28,7 +40,7 @@ from typing import Callable, Literal
 from .seeds import SEEDS, Seed
 
 Shape = Literal["short_answer", "json", "summary", "reasoning"]
-Relation = Literal["PRESERVING", "BREAKING"]
+Relation = Literal["PRESERVING", "BREAKING", "REGISTER"]
 
 SHAPES: tuple[Shape, ...] = ("short_answer", "json", "summary", "reasoning")
 
@@ -64,6 +76,12 @@ SYNONYMS: dict[str, str] = {
 }
 
 HEDGE = "Based on the information available at the time of review, "
+BOOST = "It is beyond reasonable doubt that "
+STANCE_PREFIX = {"hedge": HEDGE, "boost": BOOST}
+STANCE_NOTE = {
+    "hedge": "Based on the information available at the time of review.",
+    "boost": "This determination is beyond reasonable doubt.",
+}
 
 
 @dataclass(frozen=True)
@@ -90,7 +108,7 @@ def _cap(s: str) -> str:
     return s[0].upper() + s[1:] if s else s
 
 
-def _render_short(f: dict[str, str], v: int, swap: bool, hedge: bool, drop: bool) -> str:
+def _render_short(f: dict[str, str], v: int, swap: bool, stance, drop: bool) -> str:
     d1, d2 = (f["detail2"], f["detail1"]) if swap else (f["detail1"], f["detail2"])
     tail = "" if drop else " " + f["caveat"]
     if v == 0:
@@ -105,10 +123,11 @@ def _render_short(f: dict[str, str], v: int, swap: bool, hedge: bool, drop: bool
             f"{f['verdict']} ({f['date']}). Requirements reviewed: "
             f"{f['quantifier']}. {d1}{tail}"
         )
-    return (HEDGE + body[0].lower() + body[1:]) if hedge else body
+    pre = STANCE_PREFIX.get(stance)
+    return (pre + body[0].lower() + body[1:]) if pre else body
 
 
-def _render_summary(f: dict[str, str], v: int, swap: bool, hedge: bool, drop: bool) -> str:
+def _render_summary(f: dict[str, str], v: int, swap: bool, stance, drop: bool) -> str:
     d1, d2 = (f["detail2"], f["detail1"]) if swap else (f["detail1"], f["detail2"])
     tail = "" if drop else " " + f["caveat"]
     # The framing sentences below carry no perturbable content and are identical
@@ -147,10 +166,11 @@ def _render_summary(f: dict[str, str], v: int, swap: bool, hedge: bool, drop: bo
             f"set out. The note is for internal reference and replaces any "
             f"earlier draft issued on the same matter.{tail}"
         )
-    return (HEDGE + body[0].lower() + body[1:]) if hedge else body
+    pre = STANCE_PREFIX.get(stance)
+    return (pre + body[0].lower() + body[1:]) if pre else body
 
 
-def _render_reasoning(f: dict[str, str], v: int, swap: bool, hedge: bool, drop: bool) -> str:
+def _render_reasoning(f: dict[str, str], v: int, swap: bool, stance, drop: bool) -> str:
     d1, d2 = (f["detail2"], f["detail1"]) if swap else (f["detail1"], f["detail2"])
     tail = "" if drop else f"\n5. Note: {f['caveat']}"
     if v == 0:
@@ -172,11 +192,12 @@ def _render_reasoning(f: dict[str, str], v: int, swap: bool, hedge: bool, drop: 
             f"over {f['number']} {f['unit']}, and the outcome is therefore "
             f"{f['verdict']}.{tail}"
         )
-    return (HEDGE + body[0].lower() + body[1:]) if hedge else body
+    pre = STANCE_PREFIX.get(stance)
+    return (pre + body[0].lower() + body[1:]) if pre else body
 
 
 def _render_json(
-    f: dict[str, str], v: int, swap: bool, hedge: bool, drop: bool, compact: bool
+    f: dict[str, str], v: int, swap: bool, stance, drop: bool, compact: bool
 ) -> str:
     d1, d2 = (f["detail2"], f["detail1"]) if swap else (f["detail1"], f["detail2"])
     if v == 0:
@@ -203,8 +224,8 @@ def _render_json(
         }
     if not drop:
         obj["condition"] = f["caveat"]
-    if hedge:
-        obj["note"] = "Based on the information available at the time of review."
+    if stance in STANCE_NOTE:
+        obj["note"] = STANCE_NOTE[stance]
     if compact:
         return json.dumps(obj, separators=(",", ":"), sort_keys=True)
     return json.dumps(obj, indent=2)
@@ -232,17 +253,17 @@ def render(
     variant: int = 0,
     *,
     swap_details: bool = False,
-    hedge: bool = False,
+    stance: str | None = None,
     drop_caveat: bool = False,
     compact: bool = False,
 ) -> str:
     if shape == "json":
-        return _render_json(f, variant, swap_details, hedge, drop_caveat, compact)
+        return _render_json(f, variant, swap_details, stance, drop_caveat, compact)
     text = {
         "short_answer": _render_short,
         "summary": _render_summary,
         "reasoning": _render_reasoning,
-    }[shape](f, variant, swap_details, hedge, drop_caveat)
+    }[shape](f, variant, swap_details, stance, drop_caveat)
     if compact:
         text = _as_bullets(text)
     return text
@@ -272,7 +293,13 @@ PRESERVING: dict[str, Builder] = {
     "reorder": lambda s, f: (render(s, f, 0), render(s, f, 0, swap_details=True)),
     "format": lambda s, f: (render(s, f, 0), render(s, f, 0, compact=True)),
     "synonym": lambda s, f: (render(s, f, 0), synonymize(render(s, f, 0))),
-    "verbosity": lambda s, f: (render(s, f, 0), render(s, f, 0, hedge=True)),
+}
+
+# Stance changes: every fact identical, commitment to it altered. Reported
+# separately; see the module docstring and MTH-021.
+REGISTER: dict[str, Builder] = {
+    "hedging": lambda s, f: (render(s, f, 0), render(s, f, 0, stance="hedge")),
+    "overconfidence": lambda s, f: (render(s, f, 0), render(s, f, 0, stance="boost")),
 }
 
 BREAKING: dict[str, Builder] = {
@@ -288,8 +315,11 @@ BREAKING: dict[str, Builder] = {
 
 CATEGORIES: dict[str, Relation] = {
     **{k: "PRESERVING" for k in PRESERVING},
+    **{k: "REGISTER" for k in REGISTER},
     **{k: "BREAKING" for k in BREAKING},
 }
+
+ALL_BUILDERS: dict[str, Builder] = {**PRESERVING, **REGISTER, **BREAKING}
 
 
 def build_pairs(seeds: list[Seed] | None = None) -> list[Pair]:
@@ -298,7 +328,7 @@ def build_pairs(seeds: list[Seed] | None = None) -> list[Pair]:
     out: list[Pair] = []
     for seed in seeds:
         for shape in SHAPES:
-            for name, builder in {**PRESERVING, **BREAKING}.items():
+            for name, builder in ALL_BUILDERS.items():
                 a, b = builder(shape, seed.fields)
                 out.append(
                     Pair(
