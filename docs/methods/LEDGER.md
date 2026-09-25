@@ -331,3 +331,51 @@ distribution, not a point estimate, and should be reported as such.
 **Reopen if:** a different statistic (energy distance on embeddings, semantic
 mode clustering) changes the envelope — it must be re-measured, not assumed to
 inherit these numbers.
+
+## MTH-019 — Normalisation buys detection, not fewer false alarms
+**Date:** 2026-09-25
+**Finding:** Normalising both arms before scoring cut the `format` false-alarm
+rate from 18.8% to 1.6% on the contradiction channel and 18.8% to 0.0% on the
+directional channel. But the total false-alarm rate is **pinned at 5% by the
+threshold definition**, so it did not fall — it moved, to `synonym` (0% to
+14.1%) and `paraphrase` (0% to 6.2%).
+**The real gain is detection at fixed budget.** Removing format noise tightens
+the preserving distribution, which lowers the 5%-FPR threshold, which lets more
+true changes through: unit 84.4% to 100%, quantifier 92.2% to 100%, polarity
+98.4% to 100%, omission-on-contradiction 0% to 18.8%, pooled AUC 0.938 to 0.945.
+**Consequence:** Normalisation is kept and is on by default. Report it as a
+power gain, never as a false-alarm reduction — the latter would be false, and
+the kind of false that survives review because it sounds right.
+**Caveat worth carrying:** the false alarms relocated to minimal lexical change,
+which is harder to normalise away than formatting. That is a worse place for
+them to live, even though the count is unchanged.
+**Evidence:** runs 20260924T031004Z (raw) and 20260925T034115Z (normalised),
+same pair set, same checkpoint.
+**Reopen if:** a normalisation step is added that touches lexical choice, which
+would change where the residual false alarms sit.
+
+## MTH-020 — Clustering threshold set at 0.7 on an asymmetry argument, not the argmax
+**Date:** 2026-09-25
+**Finding:** Fitted against the probe suite (320 equivalent, 512 different
+pairs), pooled balanced accuracy peaks at threshold 0.05 (0.909) and is
+essentially flat to 0.65 (0.893). The argmax is inside the noise and is driven
+by `verbosity`, a preserving category whose label is arguable — adding a hedge
+does change what is claimed.
+
+Per-category merge rate at the chosen operating point of 0.7: format 100%,
+paraphrase 98%, synonym 95%, reorder 75%, verbosity 20% on the preserving side;
+negation/number/temporal/polarity/entity 0%, quantifier 0%, unit 3%, omission
+9.4% on the breaking side.
+**Consequence:** default threshold 0.7. The reasoning is that the two error
+types cost different things — over-splitting inflates the decoy arm's floor
+identically to the target's, so the threshold compensates and only power is
+lost, whereas over-merging is systematic blindness that nothing absorbs. At the
+argmax, 40.6% of omission pairs merge, which would undo MTH-016 outright.
+**Known floors:** `reorder` plateaus near 76% merged across the whole grid —
+swapping two independent sentences changes entailment for this model about a
+quarter of the time, and no threshold fixes it.
+**Evidence:** `results/clustering_threshold.json`, sweep 2026-09-25.
+**Reopen if:** end-to-end detection power is measured across thresholds on a
+free-text system under test. This entry rests on an argument about error
+asymmetry, not on a measurement of the thing that matters, and should be
+replaced by the measurement when one exists.

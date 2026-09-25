@@ -8,6 +8,9 @@
 - `dedup.py` — exact and normalised input dedup. Semantic near-dup is a gap.
 - `stats.py`, `fdr.py` — mode-share statistics and target-decoy selection.
   `docs/knowledge/decoy-fdr.md`.
+- `normalize.py`, `clustering.py` — output normalisation and semantic mode
+  clustering, which is what lets every statistic above apply to free text.
+  `docs/knowledge/mode-clustering.md`. Equivalence threshold 0.7 (MTH-020).
 
 Validated: realised FDR at or below 0.101 against a target of 0.10 on ground
 truth, across nine (k, severity) cells (MTH-018).
@@ -30,6 +33,9 @@ corpora rather than reducing k: k is load-bearing, corpus size is not.
 
 ## Not built
 
-Embedding style-stability gate (MTH-012); semantic mode clustering, which blocks
-every statistic from applying to free text; structural conformance; shape
-stratification of thresholds; format normalisation before scoring.
+Embedding style-stability gate (MTH-012); structural conformance; shape
+stratification of thresholds; the Palworld adapter; run provenance.
+
+Clustering exists but has **not been run inside the detector on real clouds** —
+only fitted and unit-tested. Its cost figures are structural expectations, not
+measurements.

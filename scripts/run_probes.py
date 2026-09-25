@@ -28,6 +28,7 @@ from aprime.net import enable_os_truststore  # noqa: E402
 
 enable_os_truststore()
 
+from aprime.normalize import normalise  # noqa: E402
 from aprime.probes import analysis, channels, pairs  # noqa: E402
 
 
@@ -63,6 +64,8 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="build pairs, skip models")
     ap.add_argument("--fpr", type=float, default=0.05)
     ap.add_argument("--only", default=None, help="comma-separated model keys")
+    ap.add_argument("--normalise", action="store_true",
+                    help="normalise both arms before scoring (D4)")
     args = ap.parse_args()
 
     pair_list = pairs.build_pairs()
@@ -93,10 +96,17 @@ def main() -> int:
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     cfg = config_hash(pair_list, specs)
+    if args.normalise:
+        cfg = "norm-" + cfg
     print(f"\nrun_id={run_id}  config={cfg}")
 
-    texts_a = [p.text_a for p in pair_list]
-    texts_b = [p.text_b for p in pair_list]
+    if args.normalise:
+        texts_a = [normalise(p.text_a) for p in pair_list]
+        texts_b = [normalise(p.text_b) for p in pair_list]
+        print("  normalisation: ON")
+    else:
+        texts_a = [p.text_a for p in pair_list]
+        texts_b = [p.text_b for p in pair_list]
     relations = [p.relation for p in pair_list]
     cats = [p.category for p in pair_list]
     shapes = [p.shape for p in pair_list]
@@ -108,6 +118,7 @@ def main() -> int:
         "platform": platform.platform(),
         "n_pairs": len(pair_list),
         "fpr_budget": args.fpr,
+        "normalised": bool(args.normalise),
         "channels": {},
     }
 
