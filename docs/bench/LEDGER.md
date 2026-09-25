@@ -114,3 +114,103 @@ Anthropic routing figures (request 0.8-16% vs user ~30%) motivate F8a.
 **Reopen if:** the control arm shows no per-user clustering at all in an
 identity-aware system with no fault, which would mean the confound is not real
 and F8b can collapse back into F8a.
+
+## BCH-007 — Model pool measured, not read; capability barely discriminates
+**Date:** 2026-09-25
+**Finding:** The published record does not answer the question. There is no
+BFCL v4 figure for Qwen3.5-9B (only an open request to evaluate it), none for
+Ministral 3 8B, and the one 8B-class v4 number that exists appears as 52.39 in
+one secondary source and 50.29 in another. So it was measured on this box.
+
+Chained two-step tool loop, n=12 per model (call one tool, carry its returned id
+into a second, answer): **granite4.2:8b 12/12, ministral-3:8b 12/12, qwen3.5:9b
+12/12, ministral-3:3b 9/12**. The constraint binds by **size, not family** —
+every 8B drives the loop; the 3B gets single-shot calls right 12/12 and fails
+chaining a quarter of the time. 12/12 gives a Clopper-Pearson lower bound of
+0.74, which rules out "broken", not "good"; n>=100 before agent cells are built.
+**Consequence:** capability is not the discriminator at this size. Pick for
+family diversity instead, per MTH-008 and the MTH-017 precedent where one
+instrument reproduced every direction and no magnitude.
+**Proposed pool (awaiting owner ratification):** granite4.2:8b (IBM, hybrid
+Mamba-2 — the only real architectural difference available at this size),
+ministral-3:8b (Mistral, dense), qwen3.5:9b (Alibaba, dense), plus a 3B as a
+*deliberate weak system* whose high natural error floor tests that the detector
+does not read "bad" as "changed". All Apache-2.0.
+**Ruled out with reasons:** Hermes, which the owner named — smallest is 14B and
+does not fit in 8 GB. Llama 4 — smallest is Scout at 109B, leaving only stale
+3.1/3.2 under a 700M-MAU licence. Phi for the banking cell — over-refusal 26.4%
+vs 15.6% for Llama-3.2-3B, and disputes/fraud/AML sit in that zone, so F13 would
+contaminate both arms. Anything >=12B, including MoE: Nemotron 3 Nano is 3B
+active but 30B resident.
+**Evidence:** bench survey 2026-09-25, `.agents/bench-model-survey.md`,
+reproducible from scratchpad scripts.
+**Reopen if:** a larger n on tool chaining separates the 8B models.
+
+## BCH-008 — The 16k context cap costs 3-4x and defeats its own purpose
+**Date:** 2026-09-25
+**Finding:** Measured aggregate throughput at 150 output tokens, concurrency
+swept, VRAM sampled throughout:
+
+| Model | 4k best | 16k best | penalty | peak VRAM |
+|---|---|---|---|---|
+| granite4.2:8b | 65.8 t/s | 21.4 t/s | 3.1x | 6041 MiB at both |
+| ministral-3:3b | 222.2 t/s | 56.4 t/s | 3.9x | 7024 / 7908 MiB |
+| qwen3.5:9b | 41.6 t/s | 28.3 t/s | 1.5x | 7888 MiB |
+
+Two independent mechanisms, same conclusion. For dense transformers four slots
+of KV at 16k push the model partly off the GPU (7908 of 8188 MiB) and the
+offload cliff is a 3x step, not a gradient. For hybrid-Mamba Granite there is no
+spill at all — identical VRAM at 4k and 16k — and it still costs 3.1x, from
+attention-window compute.
+**Also measured:** Ollama's default configuration does not batch. Aggregate
+throughput was flat to within 0.5% across an 8x concurrency change while
+per-request latency scaled linearly. And qwen3.5:9b cannot batch on 8 GB at all
+— at 7888 MiB there is no room for a second slot.
+**Consequence:** the 16k cap carried over from prior work is counterproductive
+here. Recommend 4-8k per slot, with knowledge packs designed to fit. Owner
+decision, since the constraint was theirs.
+**Evidence:** bench survey 2026-09-25.
+**Reopen if:** a model with materially different KV behaviour enters the pool.
+
+## BCH-009 — Two models on this disk silently inject fault classes we intend to measure
+**Date:** 2026-09-25
+**Finding:** Both invisible until somebody counted prompt tokens.
+
+**Ministral 3's Ollama template injects a hidden system prompt** — 560 prompt
+tokens with no system message, 20 with one. The injected ~540 tokens interpolate
+`{{ currentDate }}` and `{{ yesterdayDate }}`, so **the system prompt changes
+every midnight**. An A arm on one date and a B arm on the next differ by a
+prompt edit nobody made: F2 at blast radius B0 with a 24-hour period. If one arm
+straddles midnight the decoy absorbs it as baseline noise and destroys power.
+
+**Qwen3.5 defaults `thinking: true`.** At a 40-token budget it emitted 40 tokens
+entirely into `thinking` and returned an **empty** content string. A 150-token
+budget can be consumed by reasoning and return nothing — a signature
+indistinguishable from F12, which the harness injects deliberately.
+
+**The Ollama client auto-updated itself 0.32.5 to 0.34.4 unprompted** during the
+survey. That is F4 provider drift at B0, injected by our own tooling, and it is
+what the pinned-instruments rail exists to forbid.
+**Consequence:** the harness must assert an explicit system message and explicit
+sampling parameters for every system under test, rather than trusting vendor
+defaults — default temperature alone differs 1.0 vs 0.15 across the pool, so
+comparing defaults compares sampling configs, not models. `Recording.
+spans_utc_date_boundary()` now flags the midnight case directly. Moving off
+Ollama to a pinned llama.cpp is recommended on the auto-update alone.
+**Evidence:** bench survey 2026-09-25, token counts measured.
+**Reopen if:** never — these are demonstrated.
+
+## BCH-010 — The 1M generation budget was roughly 3x what the design needs
+**Date:** 2026-09-25
+**Finding:** At 150 tokens per generation, decode only, Granite at 4k is 26.4
+days and at 16k is 81.2 days; prefill adds roughly as much again (estimated).
+But MTH-018 fixes 60 calls per input and measured its own power envelope at 400
+inputs, so 9 cells x 600 inputs x 60 = **324,000 generations, about 8.5 days**
+at the measured rate.
+**Consequence:** budget rescoped to ~324k. Combined with input-grouped
+scheduling (ENG-001) the prefill component drops from roughly twenty days to
+hours.
+**Unverified and it gates everything above:** thermal sustain over multi-day
+runs. The longest measurement was 85 seconds.
+**Evidence:** bench survey 2026-09-25.
+**Reopen if:** thermal throttling is measured and changes the sustained rate.

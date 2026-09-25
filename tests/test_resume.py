@@ -136,3 +136,79 @@ def test_running_without_a_checkpoint_still_works(tmp_path):
     assert len(rec.samples) == 2 * 2 * 3
     assert rec.sessions == 1
     assert not list(tmp_path.iterdir()), "no checkpoint should have been written"
+
+
+# ------------------------------------------------------------- scheduling ---
+
+
+def _order_of_first_sample(rec, input_id):
+    return min(s.order for s in rec.samples if s.input_id == input_id)
+
+
+def test_grouping_by_input_keeps_an_inputs_samples_together():
+    """All k*3 calls for one input share a prompt prefix, so grouping lets a
+    caching server pay prefill once per input instead of once per call. Measured
+    on this hardware that is worth roughly twenty days."""
+    ids = [f"i{n}" for n in range(4)]
+    rec = record(iter_invocations(ids), _arms(ids), k=3, group_by_input=True)
+    for iid in ids:
+        orders = sorted(s.order for s in rec.samples if s.input_id == iid)
+        assert orders == list(range(orders[0], orders[0] + len(orders))), (
+            f"{iid} samples were not contiguous"
+        )
+
+
+def test_ungrouped_spreads_each_input_across_the_run():
+    ids = [f"i{n}" for n in range(4)]
+    rec = record(iter_invocations(ids), _arms(ids), k=3, group_by_input=False)
+    orders = sorted(s.order for s in rec.samples if s.input_id == "i0")
+    assert orders != list(range(orders[0], orders[0] + len(orders)))
+
+
+def test_the_triple_stays_atomic_under_both_schedules():
+    """Grouping changes the order of triples, never the contents of one. A, B
+    and the decoy for a given sample must remain adjacent."""
+    ids = [f"i{n}" for n in range(3)]
+    for grouped in (True, False):
+        rec = record(iter_invocations(ids), _arms(ids), k=2, group_by_input=grouped)
+        by_order = sorted(rec.samples, key=lambda s: s.order)
+        for i in range(0, len(by_order), 3):
+            chunk = by_order[i : i + 3]
+            assert len({s.triple for s in chunk}) == 1, f"triple split, grouped={grouped}"
+            assert {s.arm for s in chunk} == set(ARMS)
+
+
+def test_both_schedules_collect_the_same_work():
+    ids = [f"i{n}" for n in range(4)]
+    g = record(iter_invocations(ids), _arms(ids), k=3, group_by_input=True)
+    u = record(iter_invocations(ids), _arms(ids), k=3, group_by_input=False)
+    assert len(g.samples) == len(u.samples)
+    assert {(s.input_id, s.sample_idx, s.arm) for s in g.samples} == {
+        (s.input_id, s.sample_idx, s.arm) for s in u.samples
+    }
+
+
+def test_samples_carry_wallclock_and_the_span_is_reported():
+    """Grouping means an input's noise floor spans a short window while the run
+    spans a long one. The span is what says how much room there is for drift the
+    floor cannot see."""
+    ids = ["a", "b"]
+    rec = record(iter_invocations(ids), _arms(ids), k=2)
+    assert all(s.ts > 0 for s in rec.samples)
+    assert rec.wallclock_span_s() >= 0.0
+    assert not rec.spans_utc_date_boundary()
+
+
+def test_a_run_straddling_midnight_is_flagged():
+    """A widely used chat template interpolates the current date into a hidden
+    system prompt, so a run crossing midnight gets a prompt edit nobody made."""
+    ids = ["a"]
+    rec = record(iter_invocations(ids), _arms(ids), k=1)
+    day = 86400
+    base = (rec.samples[0].ts // day) * day
+    shifted = [
+        type(s)(**{**s.__dict__, "ts": base - 10 if i == 0 else base + 10})
+        for i, s in enumerate(rec.samples)
+    ]
+    rec.samples = shifted
+    assert rec.spans_utc_date_boundary()

@@ -37,11 +37,32 @@ across two load regimes.
 
 A resumed run still has a seam *between* triples, recorded per sample as
 `session` so the seam is visible in the data rather than invisible in the method.
+
+## Grouping: by input, not by sample index
+
+All k*3 calls for one input share a prompt prefix, so a server with prompt
+caching pays prefill once per input instead of once per call. Measured on this
+hardware that is the difference between roughly twenty days of prefill and a few
+hours — larger than any other scheduling choice available.
+
+Grouping does not weaken the interleaving guarantee, because the guarantee is
+about the *triple*: A, A_prime and B for one sample must share conditions, and
+grouping puts them closer together in time, not further apart.
+
+What it does change is the timescale the noise floor spans. Grouped, an input's
+k samples are drawn from one short window rather than across the whole run, so
+the floor measures short-timescale variability. That is acceptable precisely
+because B for that input sits in the same window — the comparison stays
+apples-to-apples — but it means the floor no longer captures drift across the
+run. Every sample therefore carries a wall-clock `ts`, so drift between the
+first and last inputs of a long run can be checked after the fact instead of
+assumed away.
 """
 
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -57,6 +78,7 @@ class Sample:
     order: int
     output: str
     latency_ms: float
+    ts: float = 0.0
     model_id: str | None = None
     finish_reason: str | None = None
     error: str | None = None
@@ -103,6 +125,33 @@ class Recording:
             prev = s.arm
             worst = max(worst, run)
         return worst
+
+    def wallclock_span_s(self) -> float:
+        """Seconds between the first and last recorded sample.
+
+        Grouping by input means an input's noise floor spans a short window
+        while the run spans a long one. This is the number that says how far
+        apart those two timescales are, and therefore how much room there is for
+        drift the floor cannot see.
+        """
+        ts = [s.ts for s in self.samples if s.ts]
+        return (max(ts) - min(ts)) if len(ts) > 1 else 0.0
+
+    def spans_utc_date_boundary(self) -> bool:
+        """Did this recording cross midnight UTC?
+
+        Not a stylistic concern. At least one widely used chat template
+        interpolates the current date into a hidden system prompt, so a run that
+        straddles midnight has a system prompt that changed under it — a prompt
+        regression (F2) at global blast radius that nobody made and nothing
+        logged. If the arms fall on opposite sides, the decoy absorbs it as
+        baseline noise and quietly destroys power.
+        """
+        ts = [s.ts for s in self.samples if s.ts]
+        if len(ts) < 2:
+            return False
+        day = 86400
+        return int(min(ts) // day) != int(max(ts) // day)
 
     @property
     def sessions(self) -> int:
@@ -153,6 +202,7 @@ def record(
     k: int = 10,
     checkpoint: str | Path | None = None,
     progress_every: int = 0,
+    group_by_input: bool = True,
 ) -> Recording:
     """Collect k samples per input per arm, interleaved across arms.
 
@@ -162,6 +212,12 @@ def record(
 
     With `checkpoint`, each completed triple is appended to that file and a
     rerun skips what is already there. Safe to kill at any point.
+
+    `group_by_input` (default true) runs all k samples of one input before
+    moving on, so a prompt-caching server pays prefill once per input rather
+    than once per call. Set it false to spread each input's samples across the
+    whole run, which makes the noise floor span the run's full conditions at
+    large cost in prefill. See the module docstring.
     """
     missing = set(ARMS) - set(arms)
     if missing:
@@ -190,55 +246,62 @@ def record(
 
     order = max((s.order for s in samples), default=-1) + 1
     n_new = 0
+    # Grouped: every sample of one input, then the next input. Ungrouped: one
+    # sample of every input, then the next sample index.
+    if group_by_input:
+        schedule = [(inv, idx) for inv in invocations for idx in range(k)]
+    else:
+        schedule = [(inv, idx) for idx in range(k) for inv in invocations]
     try:
-        for idx in range(k):
+        for inv, idx in schedule:
             # Rotate which arm leads, so no arm owns the cold position.
             rotated = ARMS[idx % len(ARMS) :] + ARMS[: idx % len(ARMS)]
-            for inv in invocations:
-                if (inv.input_id, idx) in done:
-                    continue
-                triple: list[Sample] = []
-                for arm in rotated:
-                    try:
-                        resp = arms[arm].invoke(inv)
-                        triple.append(
-                            Sample(
-                                input_id=inv.input_id,
-                                arm=arm,
-                                sample_idx=idx,
-                                order=order,
-                                output=resp.output,
-                                latency_ms=resp.trace.latency_ms,
-                                model_id=resp.trace.model_id,
-                                finish_reason=resp.trace.finish_reason,
-                                error=resp.trace.error,
-                                session=session,
-                            )
+            if (inv.input_id, idx) in done:
+                continue
+            triple: list[Sample] = []
+            for arm in rotated:
+                try:
+                    resp = arms[arm].invoke(inv)
+                    triple.append(
+                        Sample(
+                            input_id=inv.input_id,
+                            arm=arm,
+                            sample_idx=idx,
+                            order=order,
+                            output=resp.output,
+                            latency_ms=resp.trace.latency_ms,
+                            ts=time.time(),
+                            model_id=resp.trace.model_id,
+                            finish_reason=resp.trace.finish_reason,
+                            error=resp.trace.error,
+                            session=session,
                         )
-                    except Exception as exc:  # noqa: BLE001
-                        triple.append(
-                            Sample(
-                                input_id=inv.input_id,
-                                arm=arm,
-                                sample_idx=idx,
-                                order=order,
-                                output="",
-                                latency_ms=0.0,
-                                error=f"{type(exc).__name__}: {exc}",
-                                session=session,
-                            )
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    triple.append(
+                        Sample(
+                            input_id=inv.input_id,
+                            arm=arm,
+                            sample_idx=idx,
+                            order=order,
+                            output="",
+                            latency_ms=0.0,
+                            ts=time.time(),
+                            error=f"{type(exc).__name__}: {exc}",
+                            session=session,
                         )
-                    order += 1
-                # All three arms or none. A kill between arms leaves a partial
-                # set that load_checkpoint discards, so the triple is redone.
-                samples.extend(triple)
-                if fh is not None:
-                    for s in triple:
-                        fh.write(json.dumps(asdict(s)) + "\n")
-                    fh.flush()
-                n_new += 1
-                if progress_every and n_new % progress_every == 0:
-                    print(f"  {n_new} triples this session, {len(samples)} samples total")
+                    )
+                order += 1
+            # All three arms or none. A kill between arms leaves a partial
+            # set that load_checkpoint discards, so the triple is redone.
+            samples.extend(triple)
+            if fh is not None:
+                for s in triple:
+                    fh.write(json.dumps(asdict(s)) + "\n")
+                fh.flush()
+            n_new += 1
+            if progress_every and n_new % progress_every == 0:
+                print(f"  {n_new} triples this session, {len(samples)} samples total")
     finally:
         if fh is not None:
             fh.close()
