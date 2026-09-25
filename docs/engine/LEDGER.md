@@ -85,3 +85,65 @@ That 9x reduction is what makes a cross-encoder predicate affordable at all,
 and it is measured rather than hoped for.
 **Evidence:** `scripts/demo_detect.py` cost line.
 **Reopen if:** fixed — then this entry gets a dated append saying so.
+
+## ENG-004 — Semantic clustering produces real gradation, and hides F7 entirely
+**Date:** 2026-09-25
+**Finding:** Re-running the titration with the NLI predicate (30 inputs, k=8,
+q=0.10, realistic 152-word outputs) gave the gradation exact match could not
+(ENG-002). All curves monotone, 0% false alarms throughout:
+
+| fault | sev 0.10 | 0.50 | 0.90 | caught by |
+|---|---|---|---|---|
+| refusal | 100% | 100% | 100% | channels + conformance |
+| output_truncation | 96.7% | 100% | 100% | channels + conformance |
+| omission | 73.3% | 100% | 100% | channels |
+| script_corruption | 0% | 50% | 86.7% | **conformance at every severity** |
+| unicode_escape | 0% | 0% | 0% | **conformance at every severity** |
+| verbosity | 0% | 0% | 0% | length rule only |
+
+**Two things the channel column alone would have got wrong.**
+
+First, the recall figure counts only per-input findings, and **conformance is
+corpus-level** — it reports "the system broke this rule on N of M outputs", not
+"input X changed". So `unicode_escape` reads 0% while `no_unicode_escape [F7]`
+fired at every severity, and `script_corruption` reads 0% at the lowest rung
+while `script_subset(('LATIN',))` fired there too. The detector was not blind;
+the metric was looking in one of two places.
+
+Second, and this is the designed division of labour working: **semantic
+clustering actively hides F7**. Appending `\uC548\uB155` does not change what a
+text entails, so the NLI predicate merges the corrupted output with the clean
+one — correct semantically, useless operationally. Exact-match clustering caught
+it trivially. Structural conformance is not a supplement here, it is the only
+thing standing between the detector and a whole fault class, exactly as the
+blind-spot map predicted.
+**Consequence:** coverage must be assessed over channels **and** conformance
+together. Reporting either alone misstates it in opposite directions.
+**`verbosity` is genuinely near-invisible**, caught only incidentally by a tight
+length bound. A 12-word hedge inside 152 words is diluted past the predicate's
+resolution — the dilution effect the probe suite's shape ladder was built to
+measure, now showing up in the detector.
+**Evidence:** `results/titration_20260925T044050Z_2a7802f548686e8d.json`.
+**Reopen if:** a semantic predicate is found that preserves charset sensitivity,
+which would change the division of labour.
+
+## ENG-005 — The stub's decoy arm is too clean to exercise rule pruning
+**Date:** 2026-09-25
+**Finding:** `word_count_range(133, 152)` was induced as a **hard** invariant and
+fires on every injected fault, including ones that change nothing about meaning.
+It is a coincidental rule that survived the decoy prune.
+
+The reason is the stub: A and A_prime share an identical behaviour table, so
+A_prime reproduces A's word counts exactly and a range fitted tight to A is
+never contradicted. In a real system A_prime would vary, the range would widen
+or be demoted to the band, and the rule would not reach `hard`.
+**Consequence:** the decoy pruning mechanism — the answer to Daikon
+over-generation and one of the two mechanisms the project claims as novel — is
+**not being exercised by the current stub**, and every "0 knocked down by the
+decoy arm" reading so far is an artifact of that, not evidence the pruning is
+unnecessary.
+**Action:** the stub needs a mode of within-system variation that A_prime
+expresses differently from A — length jitter at minimum. Until then, no claim
+about rule pruning may rest on stub evidence.
+**Evidence:** every titration row shows the same `word_count_range` violation.
+**Reopen if:** fixed, with a dated append.
