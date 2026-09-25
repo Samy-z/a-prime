@@ -147,3 +147,41 @@ expresses differently from A — length jitter at minimum. Until then, no claim
 about rule pruning may rest on stub evidence.
 **Evidence:** every titration row shows the same `word_count_range` violation.
 **Reopen if:** fixed, with a dated append.
+
+## ENG-005 — CORRECTION (dated append, 2026-09-25)
+ENG-005 called `word_count_range` a coincidental rule that survived the decoy
+prune and "fires on every injected fault, including ones that change nothing
+about meaning", implying a false-positive generator. **That was wrong, and the
+diagnostic that should have preceded the claim shows the opposite.**
+
+Measured, 40 inputs, k=8, 320 samples per arm:
+
+| | range | support A | support A' | support on unchanged B | violations on unchanged B |
+|---|---|---|---|---|---|
+| no jitter | 133-152 | 1.0000 | 1.0000 | 1.0000 | **none** |
+| jitter 0.4 | 133-160 | 1.0000 | 1.0000 | 1.0000 | **none** |
+
+It fires **zero times on an unchanged candidate**. Under injected verbosity it
+fires at 66.3% without jitter and 17.5% with. So it is a legitimate detector for
+the one fault class the semantic channels miss entirely — not noise.
+
+**Jitter does work**, just not the way the entry predicted. It widens the
+induced range, which costs sensitivity (66% to 17.5%) and buys honesty: the
+tight range was overfitted to one sample of A, and the wider one is what the
+system's real variability supports. The trade is the right way round.
+
+**What stands from ENG-005:** the decoy pruning mechanism is still not exercised
+by the realistic stub — but for a better reason than stated. There is no
+coincidental rule here *to* prune. Every induced rule genuinely holds on both
+arms. The mechanism is unit-tested and demonstrably works
+(`test_decoy_arm_knocks_down_a_coincidental_rule`); it simply has nothing to do
+in this scenario.
+
+**Hypothesis worth testing later:** Daikon's over-generation problem may be
+milder at this sample size than its reputation suggests. With 320 baseline
+samples a tight-fitted rule is mostly not coincidental, because 320 draws
+already explore the range. If that holds, the middle band matters more than the
+decoy prune, and the contribution should be described accordingly.
+**Lesson recorded against process, not the finding:** ENG-005 asserted a
+false-positive claim without running the one-line check that would have refuted
+it. The check took thirty seconds.

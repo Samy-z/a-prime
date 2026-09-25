@@ -18,6 +18,21 @@ Arms A and A_prime share one behaviour table: they are the same system, and any
 difference between them is sampling noise by construction. Arm B carries a
 perturbed table on a known subset of inputs — that subset is the ground truth
 the detector is graded against, and it is not visible to anything downstream.
+
+## Jitter, and why it is not decoration
+
+Sharing a table exactly makes A_prime *too* faithful a copy. Every run produces
+the same word counts, so a length rule fitted tight to A is never contradicted
+by A_prime and survives into the hard-invariant set — where it then fires on
+every candidate that changes anything at all.
+
+That is not the decoy arm failing. It is the decoy arm having nothing to prune,
+because a real system varies run to run in ways a shared lookup table does not.
+`jitter` supplies that variation: meaning-preserving edits drawn independently
+per call, so A and A_prime differ the way two runs of one system differ. Without
+it, the rule-pruning mechanism the project claims as novel is not exercised at
+all, and any reading of "0 rules knocked down by the decoy arm" is an artifact.
+See ENG-005.
 """
 
 from __future__ import annotations
@@ -150,6 +165,19 @@ def collapse(b: Behaviour, strength: float, rng: random.Random) -> Behaviour:
     return Behaviour(b.modes, tuple(probs))
 
 
+# Meaning-preserving edits a real system would vary between runs. Each changes
+# surface only — length, connective choice, punctuation — so a content-sensitive
+# rule survives while a coincidental length bound does not.
+_JITTERS = (
+    lambda s: s.replace("The review", "This review", 1),
+    lambda s: s.replace(" and ", " and also ", 1),
+    lambda s: s.replace(". ", ", and ", 1),
+    lambda s: s + " No further action is required at this stage.",
+    lambda s: s.replace("Supporting", "The supporting", 1),
+    lambda s: s.replace("the outcome", "the final outcome", 1),
+)
+
+
 PERTURBATIONS = {
     "mode_share": shift_mode_share,
     "add_mode": add_mode,
@@ -173,6 +201,7 @@ class StubSystem:
     sticky_principals: frozenset[str] | None = None
     seed: int = 0
     latency_ms: float = 1.0
+    jitter: float = 0.0
     _counter: dict = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
@@ -205,6 +234,8 @@ class StubSystem:
         self._counter[inv.input_id] = n + 1
         rng = random.Random(_stable_hash(str(self.seed), self.arm, inv.input_id, str(n)))
         out = rng.choices(b.modes, weights=b.probs, k=1)[0]
+        if self.jitter and rng.random() < self.jitter:
+            out = rng.choice(_JITTERS)(out)
         return Response(
             output=out,
             trace=Trace(latency_ms=self.latency_ms, model_id=f"{self.name}:{self.arm}"),
@@ -218,6 +249,8 @@ def build_arms(
     strength: float = 0.5,
     seed: int = 0,
     sticky_principals: frozenset[str] | None = None,
+    jitter: float = 0.0,
+    table: dict[str, Behaviour] | None = None,
 ) -> tuple[StubSystem, StubSystem, StubSystem]:
     """Construct A, A_prime and B with a known ground-truth affected set.
 
@@ -226,18 +259,19 @@ def build_arms(
     """
     if perturbation not in PERTURBATIONS:
         raise ValueError(f"unknown perturbation {perturbation!r}")
-    base = default_table(input_ids)
+    base = default_table(input_ids) if table is None else dict(table)
     fn = PERTURBATIONS[perturbation]
     rng = random.Random(seed)
     b_table = {
         iid: (fn(bh, strength, rng) if iid in affected else Behaviour(bh.modes, bh.probs))
         for iid, bh in base.items()
     }
-    a = StubSystem("stub", "A", dict(base), seed=seed)
-    a_prime = StubSystem("stub", "A_prime", dict(base), seed=seed + 1_000_003)
+    a = StubSystem("stub", "A", dict(base), seed=seed, jitter=jitter)
+    a_prime = StubSystem("stub", "A_prime", dict(base), seed=seed + 1_000_003,
+                         jitter=jitter)
     if sticky_principals is None:
         # Uniform fault: B carries the perturbed behaviour for everyone.
-        b = StubSystem("stub", "B", b_table, seed=seed + 2_000_003)
+        b = StubSystem("stub", "B", b_table, seed=seed + 2_000_003, jitter=jitter)
     else:
         # Sticky fault (F8a): B behaves like the baseline except for the
         # principals it sticks to.
@@ -248,5 +282,6 @@ def build_arms(
             perturbed=b_table,
             sticky_principals=sticky_principals,
             seed=seed + 2_000_003,
+            jitter=jitter,
         )
     return a, a_prime, b
