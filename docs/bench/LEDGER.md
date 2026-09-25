@@ -214,3 +214,30 @@ hours.
 runs. The longest measurement was 85 seconds.
 **Evidence:** bench survey 2026-09-25.
 **Reopen if:** thermal throttling is measured and changes the sustained rate.
+
+## BCH-011 — Fault harness built; detector thresholds predate it, and git proves it
+**Date:** 2026-09-25
+**Finding:** `src/aprime/faults.py` implements seven injections mapped to
+taxonomy classes, four blast-radius regimes (B0-B3), and per-input activation
+logging. The injector **wraps** a system rather than reconfiguring it, so the
+same baseline object serves the A and A_prime arms while only B is wrapped —
+reconfiguring would put the fault in the system's own state and the decoy would
+inherit it.
+**Activation, not the cell label, is the ground truth.** A fault labelled at the
+cell level is wrong for every input it never touched: truncation cannot truncate
+four words, a schema break only bites JSON, a refusal only bites where the
+system would otherwise have answered. Tests assert both that a fault finding
+nothing records no activation, and that the detector is scored against
+activation end to end.
+**On seat separation (HANDOFF §2):** building the detector and the harness in
+one session is a contamination risk. The auditable guarantee is **commit
+order** — every detector threshold (MTH-013, MTH-016, MTH-018, MTH-020,
+MTH-022) was fitted and committed before this module existed, against the probe
+suite and the stub, neither of which contains an injected fault. That is
+checkable in the git history rather than promised.
+**Not implemented:** retrieval and knowledge-base faults (F5, F11) and prompt
+regression (F2). All three need a system that retrieves or has a prompt to edit,
+which is the Palworld adapter's job.
+**Evidence:** `tests/test_faults.py`, 13 tests.
+**Reopen if:** an injection is added that does not map to a frozen taxonomy
+class, which would break the taxonomy's validity argument.

@@ -22,3 +22,4 @@ These are not design documents and not history. Design rationale lives in
 | `provenance.md` — run ids, config hashes, how a number in the paper is traced | study | **done** 2026-09-25 |
 | `gating.md` — surface-drift gate for the embedding channel, output-shape inference, stratified selection | engine | **done** 2026-09-25 |
 | `detector.md` — the composed detector, end-to-end behaviour and measured results | engine | **done** 2026-09-25 |
+| `faults.md` — fault injection, per-input activation, blast-radius regimes | bench | **done** 2026-09-25 |
