@@ -104,13 +104,54 @@ silently invalidate the result rather than failing loudly:
 
 ## Commands
 
-> GAP — nothing is built yet. Populate when week 0 lands.
+Environment is a repo-local venv. Prefix with `.venv/Scripts/python.exe` on
+Windows.
+
+    python -m pytest tests/ -q              # 77 tests, all fast, no models
+    python scripts/run_probes.py --dry-run  # build probe pairs, no models
+    python scripts/run_probes.py            # full blind-spot map (downloads 4 models)
+    python scripts/run_probes.py --only deberta_mnli --normalise
+    python scripts/fit_clustering.py        # refit the equivalence threshold
+
+`src/aprime/net.py` must be imported and `enable_os_truststore()` called before
+anything opens HTTPS, or every model download fails behind this machine's TLS
+interception. Entry points already do it.
 
 ## Architecture map
 
-> GAP — populate when the adapter boundary and pipeline exist.
+    adapter.py      the system-under-test boundary: input -> output + trace.
+                    Nothing else. Resist widening it; log the pressure instead.
+    stub.py         synthetic system with known ground truth, so FDR control can
+                    be checked against something a real system never tells you.
+    recorder.py     three-arm interleaved replay. Grouped by input (ENG-001),
+                    triple-atomic, checkpointed and resumable.
+    dedup.py        exact + normalised. Semantic near-dup is a known gap.
+    normalize.py    strip presentation, never content. Runs before everything.
+    clustering.py   semantic modes via bidirectional entailment, threshold 0.7.
+    stats.py        mode-share distance, dispersion, novel-mode mass.
+    fdr.py          target-decoy selection. The decoys are the null.
+    conformance.py  induced structural rules, pruned by the decoy arm.
+    provenance.py   run id, config hash, git state, pinned instrument revisions.
+    probes/         the probe suite: what each channel can and cannot resolve.
+
+Pipeline: record three arms -> dedup -> normalise -> cluster jointly -> score
+(mode-share, dispersion, NLI contradiction, NLI directional both tails,
+conformance) -> target-decoy select at q.
+
+**Channel inventory lives in `docs/engine/METHODS.md`** and was measured, not
+assumed — embedding displacement turned out anti-correlated with meaning change
+and is now gated; NLI carries the load. Read that table before touching a
+channel.
 
 Related repository: **palworld-rag** (https://github.com/Samy-z/palworld-rag)
 — the instrumented reference system, consumed across the adapter boundary as an
 external system. It is the development system and is therefore **excluded from
 the headline transfer numbers**; it is reported separately. See HANDOFF §3.
+
+## Where things stand
+
+Week 0 and most of week 1 are done. Not built: the embedding style-stability
+gate, shape-stratified thresholds, the Palworld adapter, the cell factorial and
+fault-injection harness. Clustering and conformance exist but have **never run
+inside the detector on real outputs** — only unit-tested against synthetic
+corpora, so their cost figures are expectations rather than measurements.

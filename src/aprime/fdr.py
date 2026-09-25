@@ -20,7 +20,9 @@ statistic works as long as larger means more different.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
+from typing import Sequence
 
 import numpy as np
 
@@ -92,3 +94,61 @@ def realised_fdr(flagged: np.ndarray, truly_changed: np.ndarray) -> float:
     if n == 0:
         return 0.0
     return float((flagged & ~truly_changed).sum()) / n
+
+
+@dataclass(frozen=True)
+class StratifiedSelection:
+    per_stratum: dict[str, Selection]
+    flagged: np.ndarray
+    strata: tuple[str, ...]
+
+    @property
+    def n_discoveries(self) -> int:
+        return int(self.flagged.sum())
+
+    def summary(self) -> str:
+        parts = [
+            f"{s}: n={sum(1 for x in self.strata if x == s)} "
+            f"thr={sel.threshold:.3f} found={sel.n_discoveries}"
+            for s, sel in sorted(self.per_stratum.items())
+        ]
+        return f"{self.n_discoveries} discoveries | " + " | ".join(parts)
+
+
+def select_stratified(
+    targets: np.ndarray,
+    decoys: np.ndarray,
+    strata: Sequence[str],
+    q: float = 0.10,
+    min_stratum: int = 30,
+) -> StratifiedSelection:
+    """Select within each stratum, with its own threshold and its own decoys.
+
+    A single global threshold is wrong when strata differ in scale: the measured
+    5%-FPR threshold for the NLI channel spanned a factor of eighty across four
+    output shapes. Pooling them means over-flagging the tight strata and going
+    blind in the wide ones.
+
+    Each stratum carries its own decoys, so FDR is controlled within it. Strata
+    smaller than `min_stratum` are pooled into one remainder group rather than
+    given a threshold estimated from too little data — a threshold fitted to
+    fifteen decoys is a guess wearing a number's clothes.
+    """
+    targets = np.asarray(targets, dtype=float)
+    decoys = np.asarray(decoys, dtype=float)
+    strata = list(strata)
+    if not (len(targets) == len(decoys) == len(strata)):
+        raise ValueError("targets, decoys and strata must be the same length")
+
+    counts = Counter(strata)
+    effective = [s if counts[s] >= min_stratum else "__pooled__" for s in strata]
+
+    flagged = np.zeros(len(targets), dtype=bool)
+    per: dict[str, Selection] = {}
+    for name in sorted(set(effective)):
+        m = np.array([e == name for e in effective])
+        sel = select(targets[m], decoys[m], q)
+        per[name] = sel
+        flagged[m] = targets[m] >= sel.threshold
+    return StratifiedSelection(per_stratum=per, flagged=flagged,
+                               strata=tuple(effective))

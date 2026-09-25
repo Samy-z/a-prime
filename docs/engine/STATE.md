@@ -15,7 +15,10 @@
   `docs/knowledge/conformance.md`. The unoccupied mechanism (STD-003).
 - `provenance.py` — run id, config hash over everything that changes a result,
   git state, pinned instrument revisions.
-- Recorder checkpoints per triple and resumes; safe to kill.
+- `gating.py` — surface-drift gate for the embedding channel (MTH-012),
+  output-shape inference, and stratified selection. `docs/knowledge/gating.md`.
+- Recorder checkpoints per triple and resumes; safe to kill. Grouped by input
+  (ENG-001), with wall-clock timestamps and a midnight-crossing flag.
 
 Validated: realised FDR at or below 0.101 against a target of 0.10 on ground
 truth, across nine (k, severity) cells (MTH-018).
@@ -46,8 +49,11 @@ safe to kill. Owner constraint, 2026-09-25.
 
 ## Not built
 
-Embedding style-stability gate (MTH-012); shape stratification of thresholds;
-the Palworld adapter; the cell factorial and fault-injection harness.
+The Palworld adapter; the cell factorial and fault-injection harness.
+
+The embedding gate and shape stratification exist but the gate's 0.25 threshold
+is **unfitted** — a guess, labelled as one, where the clustering threshold was
+measured.
 
 Clustering and conformance both exist but **neither has run inside the detector
 on real outputs** — only fitted and unit-tested against synthetic corpora.

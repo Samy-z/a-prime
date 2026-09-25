@@ -20,3 +20,4 @@ These are not design documents and not history. Design rationale lives in
 | `mode-clustering.md` — semantic equivalence classes, dispersion test, NLI channel | engine | **done** 2026-09-25 |
 | `cells.md` — the domain x format factorial, knowledge packs, base-rate control | bench | GAP — week 3 |
 | `provenance.md` — run ids, config hashes, how a number in the paper is traced | study | **done** 2026-09-25 |
+| `gating.md` — surface-drift gate for the embedding channel, output-shape inference, stratified selection | engine | **done** 2026-09-25 |
