@@ -16,7 +16,7 @@ These are not design documents and not history. Design rationale lives in
 | `recorder.md` — trace capture format, the three-arm protocol, dedup | engine | **done** 2026-09-24 |
 | `adapters.md` — the system-under-test interface and how each system is wired | engine | **done** 2026-09-24 |
 | `decoy-fdr.md` — the calibration procedure and how flags are produced | engine | **done** 2026-09-24 |
-| `conformance.md` — rule induction from baseline output distribution, A-prime pruning, the three-tier band | engine | GAP — week 2 |
+| `conformance.md` — rule induction from baseline output distribution, A-prime pruning, the three-tier band | engine | **done** 2026-09-25 |
 | `mode-clustering.md` — semantic equivalence classes, dispersion test, NLI channel | engine | **done** 2026-09-25 |
 | `cells.md` — the domain x format factorial, knowledge packs, base-rate control | bench | GAP — week 3 |
-| `provenance.md` — run ids, config hashes, how a number in the paper is traced | study | GAP — week 1, needed before the first real run |
+| `provenance.md` — run ids, config hashes, how a number in the paper is traced | study | **done** 2026-09-25 |

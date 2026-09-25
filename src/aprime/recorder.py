@@ -19,7 +19,24 @@ cold-cache position. Rotating by sample index costs nothing and removes an
 entire class of argument about the result.
 
 Each sample carries a monotonic `order`, so that interleaving can be *checked*
-after the fact rather than assumed. `tests/test_recorder.py` does check it.
+after the fact rather than assumed.
+
+## Resumption
+
+Study runs are free in money and expensive in wall-clock, and they occupy the
+owner's only machine. A multi-hour run that cannot be paused is not a long job,
+it is a lockout — so recording checkpoints as it goes and restarts where it
+stopped.
+
+**The checkpoint unit is the triple, not the call.** All three arms for one
+(input, sample index) are written together or not at all, and a partial triple
+found on resume is discarded and redone. That is what preserves the property
+MTH-015 exists for: A, A_prime and B for a given sample must be collected under
+the same conditions, and a resume that restarted mid-triple would split them
+across two load regimes.
+
+A resumed run still has a seam *between* triples, recorded per sample as
+`session` so the seam is visible in the data rather than invisible in the method.
 """
 
 from __future__ import annotations
@@ -43,6 +60,11 @@ class Sample:
     model_id: str | None = None
     finish_reason: str | None = None
     error: str | None = None
+    session: int = 0
+
+    @property
+    def triple(self) -> tuple[str, int]:
+        return (self.input_id, self.sample_idx)
 
 
 @dataclass
@@ -82,6 +104,10 @@ class Recording:
             worst = max(worst, run)
         return worst
 
+    @property
+    def sessions(self) -> int:
+        return len({s.session for s in self.samples})
+
     def to_jsonl(self, path: str | Path) -> None:
         p = Path(path)
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -90,16 +116,52 @@ class Recording:
                 fh.write(json.dumps(asdict(s)) + "\n")
 
 
+def load_checkpoint(path: str | Path) -> tuple[list[Sample], set[tuple[str, int]], int]:
+    """Read a checkpoint, keeping only complete triples.
+
+    Returns usable samples, the set of finished (input_id, sample_idx) triples,
+    and the next session number. A triple missing any arm is dropped entirely
+    and will be redone, because a partial triple is exactly the split-load-regime
+    case MTH-015 forbids.
+    """
+    p = Path(path)
+    if not p.exists():
+        return [], set(), 0
+    rows: list[Sample] = []
+    with p.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(Sample(**json.loads(line)))
+            except (ValueError, TypeError):
+                # A truncated final line is expected after a hard kill.
+                continue
+    seen: dict[tuple[str, int], set[str]] = {}
+    for s in rows:
+        seen.setdefault(s.triple, set()).add(s.arm)
+    complete = {t for t, got in seen.items() if set(ARMS) <= got}
+    kept = [s for s in rows if s.triple in complete]
+    next_session = max((s.session for s in kept), default=-1) + 1
+    return kept, complete, next_session
+
+
 def record(
     invocations: Sequence[Invocation],
     arms: dict[str, SystemUnderTest],
     k: int = 10,
+    checkpoint: str | Path | None = None,
+    progress_every: int = 0,
 ) -> Recording:
     """Collect k samples per input per arm, interleaved across arms.
 
     `arms` maps arm name to system. All three of A, A_prime and B are required:
     the decoy arm is not optional, because without it there is no calibrated
     false-alarm rate and the thresholds are guesses (MTH-007).
+
+    With `checkpoint`, each completed triple is appended to that file and a
+    rerun skips what is already there. Safe to kill at any point.
     """
     missing = set(ARMS) - set(arms)
     if missing:
@@ -111,41 +173,76 @@ def record(
         if sys_.arm != name:
             raise ValueError(f"arm {name!r} holds a system labelled {sys_.arm!r}")
 
-    samples: list[Sample] = []
-    order = 0
-    for idx in range(k):
-        for inv in invocations:
+    samples, done, session = [], set(), 0
+    if checkpoint is not None:
+        samples, done, session = load_checkpoint(checkpoint)
+        if done:
+            print(
+                f"resuming: {len(done)} complete triples already recorded "
+                f"(starting session {session})"
+            )
+
+    fh = None
+    if checkpoint is not None:
+        cp = Path(checkpoint)
+        cp.parent.mkdir(parents=True, exist_ok=True)
+        fh = cp.open("a", encoding="utf-8")
+
+    order = max((s.order for s in samples), default=-1) + 1
+    n_new = 0
+    try:
+        for idx in range(k):
             # Rotate which arm leads, so no arm owns the cold position.
             rotated = ARMS[idx % len(ARMS) :] + ARMS[: idx % len(ARMS)]
-            for arm in rotated:
-                try:
-                    resp = arms[arm].invoke(inv)
-                    samples.append(
-                        Sample(
-                            input_id=inv.input_id,
-                            arm=arm,
-                            sample_idx=idx,
-                            order=order,
-                            output=resp.output,
-                            latency_ms=resp.trace.latency_ms,
-                            model_id=resp.trace.model_id,
-                            finish_reason=resp.trace.finish_reason,
-                            error=resp.trace.error,
+            for inv in invocations:
+                if (inv.input_id, idx) in done:
+                    continue
+                triple: list[Sample] = []
+                for arm in rotated:
+                    try:
+                        resp = arms[arm].invoke(inv)
+                        triple.append(
+                            Sample(
+                                input_id=inv.input_id,
+                                arm=arm,
+                                sample_idx=idx,
+                                order=order,
+                                output=resp.output,
+                                latency_ms=resp.trace.latency_ms,
+                                model_id=resp.trace.model_id,
+                                finish_reason=resp.trace.finish_reason,
+                                error=resp.trace.error,
+                                session=session,
+                            )
                         )
-                    )
-                except Exception as exc:  # noqa: BLE001
-                    samples.append(
-                        Sample(
-                            input_id=inv.input_id,
-                            arm=arm,
-                            sample_idx=idx,
-                            order=order,
-                            output="",
-                            latency_ms=0.0,
-                            error=f"{type(exc).__name__}: {exc}",
+                    except Exception as exc:  # noqa: BLE001
+                        triple.append(
+                            Sample(
+                                input_id=inv.input_id,
+                                arm=arm,
+                                sample_idx=idx,
+                                order=order,
+                                output="",
+                                latency_ms=0.0,
+                                error=f"{type(exc).__name__}: {exc}",
+                                session=session,
+                            )
                         )
-                    )
-                order += 1
+                    order += 1
+                # All three arms or none. A kill between arms leaves a partial
+                # set that load_checkpoint discards, so the triple is redone.
+                samples.extend(triple)
+                if fh is not None:
+                    for s in triple:
+                        fh.write(json.dumps(asdict(s)) + "\n")
+                    fh.flush()
+                n_new += 1
+                if progress_every and n_new % progress_every == 0:
+                    print(f"  {n_new} triples this session, {len(samples)} samples total")
+    finally:
+        if fh is not None:
+            fh.close()
+
     return Recording(
         samples=samples,
         k=k,

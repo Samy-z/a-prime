@@ -11,6 +11,11 @@
 - `normalize.py`, `clustering.py` — output normalisation and semantic mode
   clustering, which is what lets every statistic above apply to free text.
   `docs/knowledge/mode-clustering.md`. Equivalence threshold 0.7 (MTH-020).
+- `conformance.py` — induced structural conformance, pruned by the decoy arm.
+  `docs/knowledge/conformance.md`. The unoccupied mechanism (STD-003).
+- `provenance.py` — run id, config hash over everything that changes a result,
+  git state, pinned instrument revisions.
+- Recorder checkpoints per triple and resumes; safe to kill.
 
 Validated: realised FDR at or below 0.101 against a target of 0.10 on ground
 truth, across nine (k, severity) cells (MTH-018).
@@ -41,9 +46,9 @@ safe to kill. Owner constraint, 2026-09-25.
 
 ## Not built
 
-Embedding style-stability gate (MTH-012); structural conformance; shape
-stratification of thresholds; the Palworld adapter; run provenance.
+Embedding style-stability gate (MTH-012); shape stratification of thresholds;
+the Palworld adapter; the cell factorial and fault-injection harness.
 
-Clustering exists but has **not been run inside the detector on real clouds** —
-only fitted and unit-tested. Its cost figures are structural expectations, not
-measurements.
+Clustering and conformance both exist but **neither has run inside the detector
+on real outputs** — only fitted and unit-tested against synthetic corpora.
+Clustering cost figures are structural expectations, not measurements.
