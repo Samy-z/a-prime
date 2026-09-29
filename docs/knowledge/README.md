@@ -23,3 +23,4 @@ These are not design documents and not history. Design rationale lives in
 | `gating.md` — surface-drift gate for the embedding channel, output-shape inference, stratified selection | engine | **done** 2026-09-25 |
 | `detector.md` — the composed detector, end-to-end behaviour and measured results | engine | **done** 2026-09-25 |
 | `faults.md` — fault injection, per-input activation, blast-radius regimes | bench | **done** 2026-09-25 |
+| `systems.md` — the ratified model pool and the Ollama adapter's pinning discipline | bench | **done** 2026-09-29 |
