@@ -34,18 +34,13 @@ Each family also keeps `STATE.md` (what is live or frozen now) and
 ### Isolation rules (non-negotiable)
 
 1. All project memory lives inside this repository.
-2. Auto-memory (`~/.claude/projects/<key>/memory`) holds ONLY facts about the
-   owner: who they are, how they work, feedback on working style. It never
-   holds a project fact — no architecture, decision, finding, state, date,
-   number or file path. If asked to remember a project fact, write it to the
-   correct repo layer and say which one.
-3. This project's `CLAUDE.md` lives at this repo root ONLY. One file exists
-   above the repo — `~/.claude/CLAUDE.md`, inherited by every project — and it
-   is restricted to **machine and environment facts** (TLS interception, git
-   line-ending conversion, display size, Python location). It carries no
-   project facts and no working-style preferences, by its own stated contract.
-   Never add a project fact to it, and never create a `CLAUDE.md` at any other
-   level. Ancestors were otherwise checked clean on 2026-09-24. See HANDOFF §7.
+2. Auto-memory (`~/.claude/projects/<key>/memory`) holds ONLY owner facts: who
+   they are, how they work, feedback on working style. Never a project fact.
+   If asked to remember one, write it to the right repo layer and say which.
+3. This project's `CLAUDE.md` lives at this repo root ONLY. The one file above
+   it, `~/.claude/CLAUDE.md`, is machine and environment facts by its own
+   contract: never add a project fact there, never create a `CLAUDE.md`
+   anywhere else. See HANDOFF §7.
 4. Spawned agents receive memory through their briefs. Agents never write to
    auto-memory and never read another project's files.
 5. Open every session with this repo root as the working directory. The
@@ -75,23 +70,21 @@ on-ramp. See HANDOFF §11.
 
 ## Standing disciplines
 
-- **Same-commit rule** — code and its layer-2 doc land together. A stale
-  current-state doc is worse than none.
-- **Grep-before-investigate** — ledgers first, then HANDOFF, then code.
+- **Same-commit rule** — code and its layer-2 doc land together.
+- **Grep-before-investigate** — ledgers first, then HANDOFF, then code. A fact
+  already settled may still have an unexamined implication; look for both.
 - **Ask for the instrument, not the summary** — a claim is verified by the
-  command, query or test that produced it, never by re-reading text.
-- **Reports to the owner** — one self-contained page, full quality, numbers
-  always with denominators, every finding graded by how many independent
-  derivations support it, and a step-back closing paragraph.
-- **Close every reply with a standing position block** — a short paragraph
-  saying where the project stands, followed by a light list of decisions the
-  owner needs to take or ratify. Carrying open decisions forward is the point:
-  a decision that is never restated is a decision that gets made by default.
-- **Staging** — each seat stages only its own files by explicit path. The Lead
-  stages a shared file only after the author hands it off. Read the diff
+  command that produced it. This applies to our own null results: `0 flagged`
+  and a blind channel look identical in a report (ENG-007).
+- **Reports to the owner** — one self-contained page, numbers always with
+  denominators, findings graded by how many independent derivations support
+  them, and a step-back closing paragraph.
+- **Close every reply with a standing position block** — where the project
+  stands, then the decisions the owner must take or ratify. A decision never
+  restated is a decision made by default.
+- **Staging** — each seat stages its own files by explicit path. Read the diff
   before committing.
-- **Documentation threshold** — HANDOFF gets substantial changes only. Minor
-  or cosmetic changes get no section and no mention in commit messages.
+- **Documentation threshold** — HANDOFF gets substantial changes only.
 - **Study constraints are configuration, never code.** The study controls
   variables the tool must still expose. `think=False` is uniform across the
   study pool so that measured differences cannot come from thinking
@@ -175,27 +168,18 @@ the headline transfer numbers**; it is reported separately. See HANDOFF §3.
 
 ## Where things stand
 
-The nine domain cells run against a live model, and the detector has run end to
-end against one of them. Two results from that dominate current planning:
+The nine cells run against a live model and the detector has run end to end
+against one of them. **It separates a real fault cleanly**: mode-share,
+novel-mode and NLI contradiction each put zero decoys above their best cut, and
+the two blind channels reported nothing rather than noise (ENG-007). **Nothing
+was flagged anyway**, because the estimator cannot report fewer than `1/q`
+findings and 9 inputs cleared the cut against a floor of 10. Sizing is
+`n >= (1/q)/(a*s)`, with `s` set by cloud size (MTH-024).
 
-- **The detector separates a real fault cleanly.** Mode-share, novel-mode and
-  NLI contradiction each put zero decoys above their best cut on a stale
-  knowledge base (ENG-007). Dispersion and directional entailment are blind to
-  that fault class, by design, and the decoy arm made them report nothing rather
-  than noise.
-- **Nothing was flagged anyway**, because the FDR estimator cannot report fewer
-  than `1/q` findings and only 9 inputs cleared the cut against a floor of 10
-  (MTH-024). Corpus sizing is `n >= (1/q)/(a*s)`: activation rate `a`, and `s`
-  the share of activated inputs scoring above every decoy. `s` is set by cloud
-  size, because mode-share over k samples takes only k+1 values.
+**Recording is the binding constraint, not detection**: 589s against 10s. Long
+runs are pausable, see `docs/knowledge/recorder.md`.
 
-**Recording is the binding constraint, not detection.** Measured at 589s
-recording against 10s detecting. Long runs are therefore pausable: see
-`--status`, `--stop` and `--clear-stop` on `scripts/run_cell_detection.py`, and
-`docs/knowledge/recorder.md`.
-
-Not built: the embedding style-stability gate, shape-stratified thresholds in
-anger (every run so far pooled into one stratum), the Palworld adapter, the full
-nine-cell factorial, F11 retrieval degradation, F2 prompt regression. The agent
-output format is distinct but only 4/12 compliant, kept deliberately (HANDOFF
-§13).
+Not built: embedding style-stability gate, shape-stratified thresholds in anger
+(every run so far pooled to one stratum), Palworld adapter, the nine-cell
+factorial, F11, F2. The agent output format is distinct but 4/12 compliant,
+kept deliberately (HANDOFF §13).
