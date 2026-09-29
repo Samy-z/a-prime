@@ -549,3 +549,50 @@ more decoy pairs.
 `tests/fixtures/ollama_chat.json` (`seed_regimes`).
 **Reopen if:** anyone measures what actually drives the two clusters. Until
 then the instability, not the collapse, is the open risk.
+
+## MTH-024 — The FDR estimator cannot report fewer than 1/q findings, which sets the minimum corpus
+**Date:** 2026-09-30
+**Finding:** `estimate_fdr` is `(1 + decoys_above) / max(targets_above, 1)`
+(`src/aprime/fdr.py:52`), the Barber-Candes correction. The `+1` is what makes
+the estimate conservative and it is not optional. Its consequence had not been
+written down.
+
+**Even with zero decoys above the threshold, the best achievable estimate is
+1/targets_above.** So at q=0.10 nothing can be reported until **ten inputs are
+selected**, and at q=0.05 until twenty. This is arithmetic, not a tuning
+artifact, and it holds for every channel independently.
+
+**The product consequence is sharper than the study one.** *The tool cannot
+report a single changed input.* A customer who swaps a model, breaks exactly one
+behaviour and runs this at q=0.10 gets an empty report, and the report is
+telling the truth: one finding out of one selection has an estimated false
+discovery rate of 1.0. This belongs in the README under honest limits, because a
+user will otherwise read silence as reassurance. Raising q to make one finding
+reportable means q=1.0, which is no control at all.
+
+**Stratification multiplies the requirement rather than sharing it.**
+`select_stratified` calls `select` once per stratum with that stratum's own
+decoys, so **each stratum** needs its own 1/q discoveries. And `min_stratum=30`
+means a stratum needs 30 inputs before it is given a threshold at all, otherwise
+it is pooled into a remainder group. Both are correct choices; together they mean
+per-shape detection needs 30 or more inputs **per output shape**, not in total.
+
+**Minimum corpus, as a formula.** With per-input fault activation rate `a`, at
+least `1/q` inputs must genuinely have changed, so the corpus must satisfy
+`n >= (1/q) / a` per stratum, floored at `min_stratum`. The first end-to-end run
+had `a = 2/12 = 0.17` and `n = 12`, requiring `n >= 60`; flagging anything was
+arithmetically impossible before the run started, and it flagged nothing. That
+outcome carries no information about the detector.
+
+**Budget consequence, unwelcome.** Nine cells at 3 output shapes means the 30
+input floor applies per shape. At 30 inputs per cell, k=4 and three arms, one
+system is 1,080 invocations, and a cell invocation of the cheapest output format
+measured 4.1 seconds against a live 8B model. That is roughly 75 minutes per
+system per domain-format cell, and the transfer matrix needs several systems.
+**The recording cost, not the detector cost, is the binding constraint on this
+study** and it has not been budgeted at these sizes.
+**Evidence:** `src/aprime/fdr.py:42-78` and `:118-155`;
+`results/cell_detection_20260929T230714Z.json`.
+**Reopen if:** anyone proposes reporting at a q above 0.2, where the floor
+relaxes enough to change the design, or proposes dropping the `+1`, which would
+trade conservatism for a lower floor and needs its own argument.

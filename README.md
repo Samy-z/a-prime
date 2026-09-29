@@ -154,6 +154,22 @@ cases into one and threw away the only part that identified the fault.
 
 ## Honest limits
 
+- **The tool cannot report fewer than ten changed inputs at its default
+  setting, so a single broken behaviour comes back as an empty report.** The
+  false alarm estimate is built by counting how many inputs cleared the bar, and
+  it is deliberately pessimistic: it adds one imaginary false alarm before
+  dividing, so that a lucky run cannot claim perfection. When ten inputs are
+  reported, that one imaginary alarm comes to exactly the 10% false alarm rate
+  the default asks for. When one input is reported, the same arithmetic gives
+  100%, so the tool says nothing rather than hand you a finding it cannot stand
+  behind. Two practical consequences follow. An empty report means "fewer than
+  ten inputs changed", which is not the same as "nothing changed", and the two
+  cannot be told apart. And your test set has to be large enough that at least
+  ten of its inputs genuinely do change when the system does, which for a
+  change that only affects one request in five means at least fifty inputs. If
+  what you need is to catch one specific broken input, compare that input's
+  outputs directly and do not use this.
+
 - **Twenty samples from each system is the real minimum, which works out to 60
   model calls for every input you test.** Distinguishing a genuine change from
   random variation needs several samples from each of the three runs: the old

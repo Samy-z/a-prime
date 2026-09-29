@@ -480,3 +480,56 @@ because "semantic mode" is the older and better-established use of the word.
 
 Results recorded before today carry `mode` where the new ones carry `format`;
 `check_shape_distinctness.py` reads either.
+
+## §14 — Long runs are pausable, because quality is not being traded for speed (2026-09-30)
+
+The first end-to-end detector run put a number on something that had been a
+guess: recording took 589 seconds and the entire detector stage took 10. The
+detector is not the expensive part and never was. Sizing the study properly, per
+MTH-024, means 30 or more inputs per output shape, which is roughly 75 minutes of
+GPU per cell and a full day per system across nine cells.
+
+Asked to choose between fewer inputs and more time, the owner chose time: the run
+should be pausable and resumable, started when the machine is otherwise idle and
+stopped on request. That is the right call. The alternative was cutting the
+corpus, and MTH-024 makes that unusually expensive because the discovery floor is
+a hard 1/q rather than a gradual loss of power.
+
+Three things had to be true for this to work, and only the first already was.
+
+**Stopping must not cost the work.** The recorder was already checkpointed and
+triple-atomic, so a kill only ever lost the triple in flight. `should_stop` now
+adds a clean stop at a triple boundary, signalled by a file appearing on disk
+rather than a process signal, because whoever wants the run stopped is usually
+not at the terminal that started it.
+
+**A paused run must not be analysable.** `record` raises `RunPaused` instead of
+returning what it has. A partial recording has short clouds for the inputs it
+reached and none for the rest, and the detector consumes it perfectly happily:
+thresholds fitted to fewer decoys, mode shares over two samples instead of ten,
+and nothing in the report to say so. There is no way to notice it downstream, so
+it is refused upstream.
+
+**The checkpoint key must be the configuration, not the run.** The first version
+named the checkpoint after the run timestamp, which no rerun can find. That is a
+crash log wearing a checkpoint's name. Keying on the configuration hash also
+means a resume cannot silently mix work from two different configurations,
+because changing the corpus, k, the fault or an instrument changes the key.
+
+**One consequence that was nearly missed.** A resumed session never re-invokes
+the triples it skips, so anything the harness learns while invoking is lost
+unless it is written down. The per-input fault activation labels are exactly
+that, and they are ground truth. They are now persisted after every invocation,
+and the run says how many inputs carry no label so an activation rate from a
+resumed run reads as a lower bound rather than a measurement. This generalises:
+**any instrumentation that observes the act of recording, rather than the
+recording itself, has to be persisted alongside the checkpoint.**
+
+### The README now states the discovery floor
+
+MTH-024 is a product limitation before it is a study parameter, so it went into
+the README's honest limits in the reader register: the tool cannot report fewer
+than ten changed inputs at its default setting, an empty report means "fewer than
+ten changed" rather than "nothing changed", and anyone who needs to catch one
+specific broken input should compare that input directly instead. Ratified by the
+owner before writing.

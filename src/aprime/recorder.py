@@ -65,7 +65,7 @@ import json
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Callable, Iterable, Sequence
 
 import warnings
 
@@ -258,6 +258,77 @@ def decoy_independence_warnings(arms: dict[str, SystemUnderTest]) -> list[str]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# pausing and resuming
+# ---------------------------------------------------------------------------
+
+
+class RunPaused(Exception):
+    """A recording stopped at a triple boundary before finishing.
+
+    **Raised rather than returned**, so that a paused run cannot be analysed by
+    accident. A partial recording has short clouds for the inputs it reached and
+    none at all for the rest, and a detector run over it produces numbers that
+    look entirely ordinary and mean nothing: thresholds fitted to fewer decoys,
+    mode shares over two samples instead of ten. There is no way to see that in
+    the report, so the only safe place to stop it is here.
+
+    Everything collected is already on disk. Rerun with the same configuration
+    and it resumes.
+    """
+
+    def __init__(self, completed: int, remaining: int, checkpoint: Path | None):
+        self.completed = completed
+        self.remaining = remaining
+        self.checkpoint = checkpoint
+        where = f" Checkpoint: {checkpoint}" if checkpoint else (
+            " NOTHING WAS SAVED: this run had no checkpoint, so the work is "
+            "lost. Pass `checkpoint` to make a run resumable.")
+        super().__init__(
+            f"recording paused after {completed} triples with {remaining} "
+            f"still to do.{where}")
+
+
+def stop_requested(path: str | Path) -> Callable[[], bool]:
+    """A stop signal that is a file appearing on disk.
+
+    A file rather than a signal handler, because the point is to stop a run from
+    outside the process that started it: a long recording is left running
+    overnight and the person who wants it to stop is at a different terminal, or
+    is asking an agent to do it. Checked at triple boundaries only, so a stop
+    never lands mid-triple and never costs more than one triple of work.
+    """
+    p = Path(path)
+
+    def check() -> bool:
+        return p.exists()
+
+    return check
+
+
+def recording_progress(
+    checkpoint: str | Path,
+    invocations: Sequence[Invocation],
+    k: int,
+) -> dict:
+    """How much of a planned recording is already on disk.
+
+    Reads the checkpoint without touching a model, so progress can be reported
+    while a run is stopped, or checked before deciding to start one.
+    """
+    want = {(inv.input_id, idx) for inv in invocations for idx in range(k)}
+    if not Path(checkpoint).exists():
+        return {"planned": len(want), "done": 0, "remaining": len(want),
+                "fraction": 0.0, "sessions": 0}
+    samples, done, next_session = load_checkpoint(checkpoint)
+    have = done & want
+    return {"planned": len(want), "done": len(have),
+            "remaining": len(want - have),
+            "fraction": len(have) / max(1, len(want)),
+            "sessions": next_session, "samples_on_disk": len(samples),
+            "stale_triples": len(done - want)}
+
+
 def record(
     invocations: Sequence[Invocation],
     arms: dict[str, SystemUnderTest],
@@ -265,6 +336,7 @@ def record(
     checkpoint: str | Path | None = None,
     progress_every: int = 0,
     group_by_input: bool = True,
+    should_stop: Callable[[], bool] | None = None,
 ) -> Recording:
     """Collect k samples per input per arm, interleaved across arms.
 
@@ -274,6 +346,12 @@ def record(
 
     With `checkpoint`, each completed triple is appended to that file and a
     rerun skips what is already there. Safe to kill at any point.
+
+    `should_stop`, if given, is checked at every triple boundary. When it
+    returns true the run stops and raises `RunPaused` rather than returning a
+    partial recording, because a partial recording is indistinguishable from a
+    complete one once it reaches the detector. Everything already collected is
+    on disk if `checkpoint` was given, and a rerun continues from there.
 
     `group_by_input` (default true) runs all k samples of one input before
     moving on, so a prompt-caching server pays prefill once per input rather
@@ -320,11 +398,17 @@ def record(
     else:
         schedule = [(inv, idx) for idx in range(k) for inv in invocations]
     try:
-        for inv, idx in schedule:
+        for pos, (inv, idx) in enumerate(schedule):
             # Rotate which arm leads, so no arm owns the cold position.
             rotated = ARMS[idx % len(ARMS) :] + ARMS[: idx % len(ARMS)]
             if (inv.input_id, idx) in done:
                 continue
+            # Checked here, between triples, so a stop never splits a triple.
+            if should_stop is not None and should_stop():
+                left = sum(1 for j, (i2, x2) in enumerate(schedule)
+                           if j >= pos and (i2.input_id, x2) not in done)
+                raise RunPaused(n_new, left,
+                                Path(checkpoint) if checkpoint else None)
             triple: list[Sample] = []
             for arm in rotated:
                 try:

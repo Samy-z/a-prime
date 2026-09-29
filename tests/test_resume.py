@@ -22,10 +22,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from aprime.adapter import ARMS  # noqa: E402
 from aprime.recorder import (  # noqa: E402
+    RunPaused,
     decoy_independence_warnings,
     iter_invocations,
     load_checkpoint,
     record,
+    recording_progress,
+    stop_requested,
 )
 from aprime.stub import build_arms  # noqa: E402
 
@@ -304,3 +307,117 @@ def test_an_ordinary_run_raises_no_such_warning():
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
         record(iter_invocations(ids), _arms(ids), k=2)
+
+
+# ------------------------------------------------------------ pause and resume
+
+
+def test_a_paused_run_raises_rather_than_returning_a_partial_recording(tmp_path):
+    """A partial recording is indistinguishable from a complete one once it
+    reaches the detector: shorter clouds, thresholds fitted to fewer decoys, and
+    nothing in the report to say so. Raising is the only place to stop that."""
+    ids = [f"i{n}" for n in range(6)]
+    cp = tmp_path / "run.jsonl"
+    stop = {"after": 2}
+    calls = {"n": 0}
+
+    def should_stop():
+        calls["n"] += 1
+        return calls["n"] > stop["after"]
+
+    with pytest.raises(RunPaused) as caught:
+        record(iter_invocations(ids), _arms(ids), k=1, checkpoint=cp,
+               should_stop=should_stop)
+    exc = caught.value
+    assert exc.completed == 2
+    assert exc.remaining == 4
+    assert exc.checkpoint == cp
+    assert "resumable" not in str(exc), "a checkpointed pause is not a data loss"
+
+
+def test_a_pause_lands_on_a_triple_boundary(tmp_path):
+    """Never mid-triple, so a stop costs at most one triple of work and never
+    leaves a partial set behind."""
+    ids = [f"i{n}" for n in range(6)]
+    cp = tmp_path / "run.jsonl"
+    n = {"c": 0}
+
+    def should_stop():
+        n["c"] += 1
+        return n["c"] > 3
+
+    with pytest.raises(RunPaused):
+        record(iter_invocations(ids), _arms(ids), k=1, checkpoint=cp,
+               should_stop=should_stop)
+    kept, done, _ = load_checkpoint(cp)
+    assert len(kept) % len(ARMS) == 0, "every saved triple must be complete"
+    assert len(done) == len(kept) // len(ARMS)
+
+
+def test_a_paused_run_resumes_and_completes(tmp_path):
+    """The whole point. Stop overnight, start again, get a full recording."""
+    ids = [f"i{n}" for n in range(6)]
+    cp = tmp_path / "run.jsonl"
+    n = {"c": 0}
+    with pytest.raises(RunPaused):
+        record(iter_invocations(ids), _arms(ids), k=2, checkpoint=cp,
+               should_stop=lambda: (n.__setitem__("c", n["c"] + 1)
+                                    or n["c"] > 4))
+    part = recording_progress(cp, iter_invocations(ids), k=2)
+    assert 0 < part["done"] < part["planned"]
+
+    rec = record(iter_invocations(ids), _arms(ids), k=2, checkpoint=cp)
+    assert len(rec.samples) == 6 * 2 * len(ARMS)
+    full = recording_progress(cp, iter_invocations(ids), k=2)
+    assert full["remaining"] == 0
+    assert full["fraction"] == 1.0
+    for iid in ids:
+        for arm in ARMS:
+            assert len(rec.cloud(iid, arm)) == 2
+
+
+def test_pausing_without_a_checkpoint_says_the_work_is_lost(tmp_path):
+    """Silence here would be the worst outcome: the run stops, nothing is on
+    disk, and the message implies otherwise."""
+    ids = ["i0", "i1"]
+    with pytest.raises(RunPaused) as caught:
+        record(iter_invocations(ids), _arms(ids), k=1, should_stop=lambda: True)
+    assert "NOTHING WAS SAVED" in str(caught.value)
+    assert caught.value.checkpoint is None
+
+
+def test_a_stop_file_is_the_signal(tmp_path):
+    """A file, not a signal handler, because whoever wants the run stopped is
+    usually not at the terminal that started it."""
+    flag = tmp_path / "STOP"
+    check = stop_requested(flag)
+    assert check() is False
+    flag.write_text("", encoding="utf-8")
+    assert check() is True
+
+
+def test_progress_reads_the_checkpoint_without_running_anything(tmp_path):
+    ids = [f"i{n}" for n in range(4)]
+    cp = tmp_path / "run.jsonl"
+    invs = iter_invocations(ids)
+    empty = recording_progress(cp, invs, k=3)
+    assert empty == {"planned": 12, "done": 0, "remaining": 12,
+                     "fraction": 0.0, "sessions": 0}
+    record(invs, _arms(ids), k=3, checkpoint=cp)
+    after = recording_progress(cp, invs, k=3)
+    assert after["done"] == 12 and after["remaining"] == 0
+    assert after["stale_triples"] == 0
+
+
+def test_progress_notices_triples_that_no_longer_belong(tmp_path):
+    """A checkpoint keyed on a configuration that has since changed holds work
+    for inputs the plan no longer contains. Counting those as progress would
+    report a run as further along than it is."""
+    cp = tmp_path / "run.jsonl"
+    old_ids = [f"i{n}" for n in range(4)]
+    record(iter_invocations(old_ids), _arms(old_ids), k=1, checkpoint=cp)
+    new_ids = ["i0", "i1", "zz9"]
+    prog = recording_progress(cp, iter_invocations(new_ids), k=1)
+    assert prog["done"] == 2
+    assert prog["remaining"] == 1
+    assert prog["stale_triples"] == 2

@@ -30,6 +30,52 @@ Adapter exceptions are captured as samples with an `error` field rather than
 aborting the run. A partial recording with visible failures is more useful than
 no recording, and the clouds exclude errored samples.
 
+## Pausing a long recording
+
+Recording dominates the cost of a run by roughly two orders of magnitude: the
+first end-to-end pass spent 589 seconds recording and 10 seconds detecting
+(MTH-024). A full study is hours of wall clock, so a run has to survive being
+stopped.
+
+`record(..., should_stop=callable)` checks at every **triple boundary**, so a
+stop never splits a triple and never costs more than one triple of work. When it
+fires, `record` raises `RunPaused`.
+
+**Raising rather than returning a partial recording is the whole design.** A
+partial recording has short clouds for the inputs it reached and none for the
+rest. Sent to the detector it produces thresholds fitted to fewer decoys and
+mode shares over two samples instead of ten, and **nothing in the report says
+so**. The numbers look entirely ordinary. Raising is the only place that failure
+can be stopped, so it is stopped there.
+
+`stop_requested(path)` makes the signal a file appearing on disk rather than a
+process signal, because whoever wants the run stopped is usually not at the
+terminal that started it: the run was left going overnight, and the person or
+agent asking for it to stop is somewhere else.
+
+`recording_progress(checkpoint, invocations, k)` reports how far along a run is
+without touching a model, and counts separately any triples on disk that the
+current plan no longer contains. Counting those as progress would report a run
+as further along than it is.
+
+### The checkpoint key has to be the configuration, not the run
+
+`scripts/run_cell_detection.py` names its checkpoint after the **configuration
+hash**. A checkpoint named after a run timestamp cannot be found by the next
+run, which makes it a crash log rather than a checkpoint. Keying on the
+configuration also means that changing the corpus, k, the fault or an instrument
+changes the key, so a resume can never silently mix work recorded under two
+different configurations.
+
+### Anything derived alongside the recording has to be persisted too
+
+A resumed session never re-invokes the triples it skips. Anything the harness
+learns *while* invoking is therefore lost unless it is written down, and the loss
+is silent. The per-input fault activation labels are the live case: they are
+saved next to the checkpoint after every invocation, and the run reports how
+many inputs carry no label so that an activation rate computed from a resumed
+run is read as a lower bound rather than a measurement.
+
 ## The decoy arm has to be able to vary
 
 `decoy_independence_warnings(arms)` warns when A and A-prime are configured with
