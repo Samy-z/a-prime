@@ -1,7 +1,8 @@
 # a-prime
 
-Detect when an LLM system's behaviour changes — without knowing what its outputs
-mean, and with a false-alarm rate you can actually state.
+**What changed when I swapped the model?** Same system, same prompts, same
+tools, one component replaced — and an answer that does not require knowing what
+any of the outputs mean, with a false-alarm rate you can actually state.
 
 The name is the method. Before comparing baseline **A** to candidate **B**, run
 A twice. The second baseline run, **A′**, is a comparison where *nothing

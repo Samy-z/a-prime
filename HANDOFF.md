@@ -259,3 +259,43 @@ implement, x 3 severities, x 1 blast regime (B0) = 18 comparisons per cell.
 Additional regimes only for the sticky-routing cells, where B3 is the point
 rather than a variation. This number is the compute bill, so it is chosen rather
 than discovered.
+
+
+---
+
+## §10 — Study constraints are configuration, not code (2026-09-29)
+
+**D18, and the owner's reasoning is the more useful half.**
+
+For the study, `think=False` uniformly across the pool. The purpose is confound
+control: the study asks whether detection transfers across domains, and if half
+the pool reasons before answering then measured overlaps and differences could
+come from thinking performance rather than from anything the detector does.
+Holding it off makes the pool differ by architecture and training rather than by
+which knobs happen to work — and two of the four models reject `think=True` with
+HTTP 400 anyway (BCH-012), so uniformity is also the only setting that runs.
+
+For the **tool**, thinking stays available. The owner's framing: the tool exists
+to assess light changes to a system whose LLM is swapped "like a pen's head",
+and to surface which metrics are actually useful for benchmarking one model
+against another. A user comparing a thinking model to a non-thinking one is
+doing exactly that — it is a real switch somebody makes, not an edge case.
+
+**The general rule, which is why this got a section rather than a ledger line:**
+a constraint the study imposes to control a variable must not harden into a
+limitation of the library. Audited on the day: every study-relevant value is a
+parameter with a default rather than a constant — `q`, `threshold`,
+`gate_threshold`, `hard_min`, `band_lo`, `min_stratum`, `think`, `keep_alive`.
+Nothing currently violates the rule. It is written down so that the next
+simplification does not.
+
+**A framing consequence worth carrying to the README.** "Regression detection"
+undersells it and is also more crowded. The narrower and truer description is
+*what changed when I swapped the model?* — same system, same prompts, same
+tools, one component replaced. That is the question the decoy arm exists to make
+answerable, and it is the question a user actually arrives with.
+
+**Noted, not scheduled:** if the intended use is comparing model against model,
+then thinking is not merely a config flag but something a report could
+*attribute* a difference to. That is a channel-level feature, out of scope now,
+and worth revisiting once the cells exist.

@@ -84,6 +84,13 @@ guard against developing against the answers, not bookkeeping. See HANDOFF §2.
   before committing.
 - **Documentation threshold** — HANDOFF gets substantial changes only. Minor
   or cosmetic changes get no section and no mention in commit messages.
+- **Study constraints are configuration, never code.** The study controls
+  variables the tool must still expose. `think=False` is uniform across the
+  study pool so that measured differences cannot come from thinking
+  performance — but thinking is a real thing a user might want to compare, so
+  the library defaults it off and never forbids it. Any study-time control that
+  hardens into a library constraint is a bug, not a simplification. See
+  HANDOFF §10.
 
 ## Study integrity rails
 
