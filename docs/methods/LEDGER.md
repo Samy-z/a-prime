@@ -596,3 +596,39 @@ study** and it has not been budgeted at these sizes.
 **Reopen if:** anyone proposes reporting at a q above 0.2, where the floor
 relaxes enough to change the design, or proposes dropping the `+1`, which would
 trade conservatism for a lower floor and needs its own argument.
+
+## MTH-024 — CORRECTION (dated append, 2026-09-30)
+
+**The sizing formula in the entry above is too generous, and a real run found
+the gap.** It said the corpus must satisfy `n >= (1/q) / a` for activation rate
+`a`. That counts inputs where the fault fired. What the estimator actually needs
+is `1/q` inputs scoring **above every decoy**, which is a strictly smaller set.
+
+ENG-007 measured the difference. Activation was 15 of 30, so `a = 0.5` and the
+old formula called for `n >= 20`, comfortably satisfied at 30. But only **9** of
+those 15 scored above every decoy, so the best achievable estimate was
+`(1 + 0) / 9 = 0.111` and nothing was reported. The run was correctly sized by
+the old rule and still could not report.
+
+**Corrected rule.** With `s` the fraction of activated inputs that score above
+every decoy, the requirement is:
+
+    n >= (1/q) / (a * s)
+
+At q=0.10, a=0.5 and s=0.6 that is `n >= 34`, against the 20 the old rule gave.
+`s` is not knowable before a run, which makes this a rule for reading a result
+rather than only for planning one: a run that reports nothing should be checked
+for how close its best estimate came, because `0.111` against a budget of `0.100`
+is a sizing miss and `0.867` is a blind channel, and the report shows both as
+`0 flagged`.
+
+**`s` is set by cloud size, not corpus size.** Mode-share over k samples can only
+take k+1 distinct values, so at k=4 the only cut with no decoys above it was
+1.000 and everything below it was unreachable. Raising k raises `s` by making the
+statistic finer; raising n raises the count of activated inputs. Both fix this
+particular miss and they are not interchangeable, because only k fixes the
+quantisation.
+**Evidence:** ENG-007; `scripts/diagnose_channels.py` against
+`results/cell_detection_20260929T231931Z.jsonl`.
+**Reopen if:** a channel is added whose statistic is continuous rather than
+quantised by k, where `s` would behave differently.

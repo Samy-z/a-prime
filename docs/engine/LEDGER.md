@@ -216,3 +216,57 @@ than three more duck-typed probes.
 and its correction; tests in `tests/test_resume.py`.
 **Reopen if:** a second such check is wanted. The count matters more than any
 one instance.
+
+## ENG-007 — The detector separates a real fault cleanly on three channels, and the discovery floor suppressed it
+**Date:** 2026-09-30
+**Finding:** First end-to-end run against a real system under test. Banking
+summary cell, `granite4.2:8b`, 30 inputs, k=4, 360 samples, 25 minutes of
+recording. Candidate arm reads from a stale knowledge base (F5/F11). Seeds unset
+on every arm. Fault fired on **15 of 30** inputs by per-input activation.
+
+The report said `0 of 30 inputs flagged`. That was wrong to read as a failure.
+
+| channel | best achievable estimate | at that cut |
+|---|---|---|
+| mode_share | **0.111** | 9 targets above, **0 decoys** |
+| novel_mode | **0.111** | 9 targets above, **0 decoys** |
+| nli_contradiction | **0.125** | 8 targets above, **0 decoys** |
+| nli_directional | 0.500 | 2 targets above, 0 decoys |
+| dispersion | 0.867 | 15 targets above, 12 decoys |
+
+**Three channels achieved perfect separation.** Zero decoys above the cut, on
+three statistics that are not variants of each other: cluster mix, unseen
+clusters, and entailment contradiction. Each reported nothing because
+`(1 + 0) / 9 = 0.111` exceeds q=0.10 by 0.011. **Ten targets would have cleared
+it; nine did not.** This is MTH-024's floor doing exactly what it is defined to
+do, on a detection that was otherwise clean.
+
+Separation as raw text, no models, confirms it independently: on inputs where the
+fault fired, A against B similarity was 0.593 while A against A-prime was 0.776;
+on inputs where it did not, 0.846 against 0.815. The signal is real, it is in the
+right direction, and it exceeds the system's own run-to-run variation.
+
+**Two channels are blind to this fault class, both understandably.** Dispersion
+measures spread within one cloud, and a stale value shifts a cloud without
+widening it, so its mean target-minus-decoy difference was -0.006. The
+directional channel is built for content removed or added, and substituting one
+value for another is neither; it reached +0.083 against mode-share's +0.525.
+Neither is a defect. Both are channels that should report nothing here, and the
+decoy arm made them report nothing rather than noise, which is the property the
+composition was designed for.
+
+**Conformance reported independently of the floor.** 8 induced rules, all held
+as hard, and two were violated on the candidate arm: a word-count range 2 times
+in 120 and a line-count range once. The structural path is not gated by the
+discovery floor, so it is the only part of the detector that can report a small
+number of changes at all. That is worth knowing and was not designed for.
+
+**k=4 is what cost the other six.** Mode-share over four samples can only take
+the values 0, 0.25, 0.5, 0.75 and 1.0. The decoys reached 0.75, so 1.0 is the
+only cut with zero decoys, and only 9 of the 15 fired inputs landed exactly
+there. With finer clouds the separation would not have to be all-or-nothing.
+**Evidence:** `results/cell_detection_20260929T231931Z.json` and its `.jsonl`
+recording, `scripts/diagnose_channels.py`.
+**Reopen if:** anything about the clustering predicate changes, since mode_share
+and novel_mode both read the partition it produces and both of their numbers
+here are statements about it.

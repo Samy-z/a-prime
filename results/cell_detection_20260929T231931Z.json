@@ -1,0 +1,94 @@
+{
+  "run_id": "20260929T231931Z",
+  "config_hash": "e79f92fb213b273d",
+  "git_commit": "627ebdf9e13fd5afe0fbfad775cb1a53bf1d78bd",
+  "git_dirty": false,
+  "params": {
+    "domain": "banking",
+    "output_format": "summary",
+    "n": 30,
+    "k": 4,
+    "q": 0.1,
+    "fault": "stale:history,lookup,search,verify",
+    "seed_policy": "unset"
+  },
+  "instruments": {
+    "system": "granite4.2:8b",
+    "system_digest": "unresolved",
+    "nli": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    "nli_revision": "6f5cf0a2b59cabb106aca4c287eed12e357e90eb",
+    "threshold": 0.7
+  },
+  "timing_s": {
+    "record": 1526.2,
+    "detect": 29.4,
+    "total": 1566.9
+  },
+  "samples": 360,
+  "activation": {
+    "banking-summary-act-007": false,
+    "banking-summary-act-016": false,
+    "banking-summary-act-025": false,
+    "banking-summary-compute-003": true,
+    "banking-summary-compute-012": true,
+    "banking-summary-compute-021": true,
+    "banking-summary-evaluate-004": false,
+    "banking-summary-evaluate-013": false,
+    "banking-summary-evaluate-022": false,
+    "banking-summary-history-005": true,
+    "banking-summary-history-014": true,
+    "banking-summary-history-023": true,
+    "banking-summary-lookup-000": true,
+    "banking-summary-lookup-009": false,
+    "banking-summary-lookup-018": true,
+    "banking-summary-lookup-027": false,
+    "banking-summary-mixed-008": true,
+    "banking-summary-mixed-017": true,
+    "banking-summary-mixed-026": true,
+    "banking-summary-policy-002": false,
+    "banking-summary-policy-011": false,
+    "banking-summary-policy-020": false,
+    "banking-summary-policy-029": false,
+    "banking-summary-search-001": true,
+    "banking-summary-search-010": true,
+    "banking-summary-search-019": true,
+    "banking-summary-search-028": true,
+    "banking-summary-verify-006": false,
+    "banking-summary-verify-015": false,
+    "banking-summary-verify-024": false
+  },
+  "cost": {
+    "predicate_calls": 365,
+    "clusterings": 60,
+    "samples_clustered": 480,
+    "distinct_after_normalisation": 267
+  },
+  "channels": {
+    "mode_share": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "dispersion": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "novel_mode": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "embedding": {
+      "flagged": 0,
+      "skipped": "no embedder supplied"
+    },
+    "nli_contradiction": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "nli_directional": {
+      "flagged": 0,
+      "skipped": null
+    }
+  },
+  "findings": [],
+  "notes": []
+}
