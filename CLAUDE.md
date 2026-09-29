@@ -125,11 +125,15 @@ silently invalidate the result rather than failing loudly:
 Environment is a repo-local venv. Prefix with `.venv/Scripts/python.exe` on
 Windows.
 
-    python -m pytest tests/ -q              # 77 tests, all fast, no models
+    python -m pytest tests/ -q              # 201 tests, all fast, no models
     python scripts/run_probes.py --dry-run  # build probe pairs, no models
     python scripts/run_probes.py            # full blind-spot map (downloads 4 models)
     python scripts/run_probes.py --only deberta_mnli --normalise
     python scripts/fit_clustering.py        # refit the equivalence threshold
+    python scripts/run_cell_detection.py --status   # progress of a paused run
+    python scripts/run_cell_detection.py --stop     # stop one at the next triple
+    python scripts/diagnose_channels.py     # why a channel reported nothing
+    python scripts/capture_chat_fixtures.py # refresh the API test fixtures
 
 `src/aprime/net.py` must be imported and `enable_os_truststore()` called before
 anything opens HTTPS, or every model download fails behind this machine's TLS
@@ -151,6 +155,9 @@ interception. Entry points already do it.
     conformance.py  induced structural rules, pruned by the decoy arm.
     provenance.py   run id, config hash, git state, pinned instrument revisions.
     probes/         the probe suite: what each channel can and cannot resolve.
+    cells/          nine systems under test: 3 domains x 3 output formats, with
+                    eight tools each. `retrieval_faults.py` degrades what they
+                    know rather than rewriting what they say.
 
 Pipeline: record three arms -> dedup -> normalise -> cluster jointly -> score
 (mode-share, dispersion, NLI contradiction, NLI directional both tails,
@@ -168,8 +175,27 @@ the headline transfer numbers**; it is reported separately. See HANDOFF §3.
 
 ## Where things stand
 
-Week 0 and most of week 1 are done. Not built: the embedding style-stability
-gate, shape-stratified thresholds, the Palworld adapter, the cell factorial and
-fault-injection harness. Clustering and conformance exist but have **never run
-inside the detector on real outputs** — only unit-tested against synthetic
-corpora, so their cost figures are expectations rather than measurements.
+The nine domain cells run against a live model, and the detector has run end to
+end against one of them. Two results from that dominate current planning:
+
+- **The detector separates a real fault cleanly.** Mode-share, novel-mode and
+  NLI contradiction each put zero decoys above their best cut on a stale
+  knowledge base (ENG-007). Dispersion and directional entailment are blind to
+  that fault class, by design, and the decoy arm made them report nothing rather
+  than noise.
+- **Nothing was flagged anyway**, because the FDR estimator cannot report fewer
+  than `1/q` findings and only 9 inputs cleared the cut against a floor of 10
+  (MTH-024). Corpus sizing is `n >= (1/q)/(a*s)`: activation rate `a`, and `s`
+  the share of activated inputs scoring above every decoy. `s` is set by cloud
+  size, because mode-share over k samples takes only k+1 values.
+
+**Recording is the binding constraint, not detection.** Measured at 589s
+recording against 10s detecting. Long runs are therefore pausable: see
+`--status`, `--stop` and `--clear-stop` on `scripts/run_cell_detection.py`, and
+`docs/knowledge/recorder.md`.
+
+Not built: the embedding style-stability gate, shape-stratified thresholds in
+anger (every run so far pooled into one stratum), the Palworld adapter, the full
+nine-cell factorial, F11 retrieval degradation, F2 prompt regression. The agent
+output format is distinct but only 4/12 compliant, kept deliberately (HANDOFF
+§13).

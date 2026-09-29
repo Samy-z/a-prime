@@ -100,7 +100,7 @@ STALE_SHAPES = frozenset({"lookup", "search", "history", "verify"})
 # with activation rate `a` the corpus must be at least 10/a. The first run had
 # a=0.17 and n=12, where flagging anything was arithmetically impossible
 # (MTH-024).
-N, K, Q = 30, 4, 0.10
+N, K, Q = 40, 6, 0.10
 
 RUNS = ROOT / "results" / "recordings"
 
