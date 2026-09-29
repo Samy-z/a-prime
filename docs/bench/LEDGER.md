@@ -313,3 +313,42 @@ between them was two wrong assumptions about what a real server returns.
 **Evidence:** `scripts/verify_ollama.py`, run 2026-09-29.
 **Reopen if:** the pinned server version changes — the pass must be re-run,
 because these are statements about 0.34.4 and its bundled templates.
+
+## BCH-013 — Eight-tool selection is a non-issue for the 8B pool; the schema cost is smaller than feared
+**Date:** 2026-09-29
+**Finding:** 16 single-tool requests, two phrasings per tool, plus 4 chained
+requests, at temperature 0 with an 8192-token window. 548 seconds of GPU.
+
+| Model | selection | chaining | tool schemas cost | prompt with tools |
+|---|---|---|---|---|
+| granite4.2:8b | **16/16** | 3/4 | 712 tokens | 759 |
+| ministral-3:8b | **16/16** | 3/4 | 461 tokens | 499 |
+| qwen3.5:9b | **16/16** | 3/4 | 751 tokens | 800 |
+| ministral-3:3b | 15/16 | 1/4 | 461 tokens | 499 |
+
+**Selection among eight tools is not a constraint.** All three 8B models picked
+correctly every time. The precondition the nine domain cells were about to be
+built on holds, and the owner's argument for eight tools over two costs nothing
+in reliability.
+
+**The 3B is weaker in exactly the way it is supposed to be.** 94% selection and
+1 of 4 chains, against 100% and 3 of 4 for the 8B models. That is the point of
+including it: a deliberate weak system with a high natural error floor, which
+tests that the detector reports "changed" rather than "bad".
+
+**Eight tool schemas cost 461 to 751 prompt tokens**, not the 1,200 to 2,000 the
+design assumed. Paid on every call, so it is the floor under the context cap,
+but an 8192-token window leaves roughly 7,400 tokens for the conversation. The
+context budget is comfortable rather than tight, which settles the sizing half of
+D11.
+
+**The chaining figure is probably a defect in the test, not the models.** All
+three 8B models, from three different families, failed the same one of four.
+Independent capability failures would not agree like that. The most likely
+culprit is the first chain, whose prompt supplies the account id directly, so
+going straight to the second tool is arguably the correct behaviour and the test
+scored it wrong. **The instrumentation did not record which chain failed**, which
+is a gap: fix that before quoting the chaining number anywhere.
+**Evidence:** `results/tool_selection.json`, `scripts/measure_tool_selection.py`.
+**Reopen if:** the chaining test is corrected, at which point the 3/4 figure
+should be re-derived rather than carried forward.

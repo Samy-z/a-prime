@@ -1,0 +1,51 @@
+[
+  {
+    "model": "granite4.2:8b",
+    "selection": 1.0,
+    "hits": 16,
+    "n_single": 16,
+    "chain_ok": 3,
+    "n_chain": 4,
+    "schema_tokens": 712,
+    "prompt_with_tools": 759,
+    "wrong": []
+  },
+  {
+    "model": "ministral-3:8b",
+    "selection": 1.0,
+    "hits": 16,
+    "n_single": 16,
+    "chain_ok": 3,
+    "n_chain": 4,
+    "schema_tokens": 461,
+    "prompt_with_tools": 499,
+    "wrong": []
+  },
+  {
+    "model": "qwen3.5:9b",
+    "selection": 1.0,
+    "hits": 16,
+    "n_single": 16,
+    "chain_ok": 3,
+    "n_chain": 4,
+    "schema_tokens": 751,
+    "prompt_with_tools": 800,
+    "wrong": []
+  },
+  {
+    "model": "ministral-3:3b",
+    "selection": 0.9375,
+    "hits": 15,
+    "n_single": 16,
+    "chain_ok": 1,
+    "n_chain": 4,
+    "schema_tokens": 461,
+    "prompt_with_tools": 499,
+    "wrong": [
+      [
+        "validate_document",
+        "NO CALL"
+      ]
+    ]
+  }
+]
