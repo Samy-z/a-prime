@@ -1,0 +1,624 @@
+{
+  "model": "granite4.2:8b",
+  "rows": [
+    {
+      "cell": "banking-extraction",
+      "domain": "banking",
+      "mode": "extraction",
+      "non_empty": 4,
+      "correct_shape": 4,
+      "n": 4,
+      "tool_calls": 9,
+      "mean_steps": 3.25,
+      "peak_prompt_tokens": 1479,
+      "truncated": 0,
+      "think_leaks": 1,
+      "exhausted": 1,
+      "model_calls": 13,
+      "seconds": 28.4,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "banking-extraction-lookup-000",
+          "text": "What is the current status of account AC-4000?",
+          "output": "{\"subject_id\": \"AC-4000\", \"status\": \"under review\", \"finding\": \"Account AC-4000 is currently under review.\", \"confidence\": \"high\"}",
+          "tools": [
+            "get_account"
+          ],
+          "finish": "stop",
+          "flags": {
+            "think_leak": true
+          }
+        },
+        {
+          "input_id": "banking-extraction-search-001",
+          "text": "Show the transactions on account AC-4007 above 100.",
+          "output": "{\n  \"subject_id\": \"AC-4007\",\n  \"status\": \"completed\",\n  \"finding\": \"Transactions above 100 USD on account AC-4007 are: 380 USD on 2026-02-18, 1250 USD on 2026-05-16, 1250 USD on 2026-09-21, and 5400 USD on 2026-08-24.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "search_transactions"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-extraction-policy-002",
+          "text": "What does our policy on income verification require?",
+          "output": "{\"subject_id\": \"income verification policy\", \"status\": \"resolved\", \"finding\": \"The policy requires at least 2 years on record, a ratio at or below 0.5, and a valid payslip document.\", \"confidence\": \"high\"}",
+          "tools": [
+            "get_lending_policy"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-extraction-compute-003",
+          "text": "For AP-103, work out the ratio from their figures and tell me whether it is within policy.",
+          "output": "{\n  \"subject_id\": \"AP-103\",\n  \"status\": \"within policy\",\n  \"finding\": \"Debt-to-income ratio is 0.0, which is below the maximum threshold of 0.5 from the income verification policy. Applicant has 6 years on record, meeting the minimum 2-year requirement. Both fixed-rate mortgage and personal loan eligibility checks confirm the ratio is within policy.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "list_prior_applications",
+            "compute_debt_ratio",
+            "get_lending_policy",
+            "get_lending_policy",
+            "check_eligibility",
+            "check_eligibility"
+          ],
+          "finish": "max_steps",
+          "flags": {
+            "exhausted_steps": true
+          }
+        }
+      ]
+    },
+    {
+      "cell": "banking-summary",
+      "domain": "banking",
+      "mode": "summary",
+      "non_empty": 4,
+      "correct_shape": 4,
+      "n": 4,
+      "tool_calls": 7,
+      "mean_steps": 2.75,
+      "peak_prompt_tokens": 1350,
+      "truncated": 0,
+      "think_leaks": 0,
+      "exhausted": 0,
+      "model_calls": 11,
+      "seconds": 22.3,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "banking-summary-lookup-000",
+          "text": "What is the current status of account AC-4000?",
+          "output": "The account AC-4000 is currently under review. It belongs to applicant AP-100 and is associated with a buy-to-let mortgage product. The account was opened in October 2019 and has a quantity of 9 units in USD. No further details about the review status or timeline are provided in the record.",
+          "tools": [
+            "get_account"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-summary-search-001",
+          "text": "Show the transactions on account AC-4007 above 100.",
+          "output": "I found four transactions on account AC-4007 that are above 100 USD: an $380 transaction on 2026-02-18, two $1,250 transactions on 2026-05-16 and 2026-09-21, and a $5,400 transaction on 2026-08-24. The total amount of these qualifying transactions is $8,280 USD. All listed transactions meet the minimum amount threshold of over 100 USD.",
+          "tools": [
+            "search_transactions"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-summary-policy-002",
+          "text": "What does our policy on income verification require?",
+          "output": "Our policy on income verification requires that an applicant have at least two years of income records on file and that the debt-to-income ratio be at or below 0.5. A valid payslip must be provided as documentation. These are the only formal requirements; no additional proof of income is specified beyond the payslip and the two\u2011year record condition.",
+          "tools": [
+            "get_lending_policy"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-summary-compute-003",
+          "text": "For AP-103, work out the ratio from their figures and tell me whether it is within policy.",
+          "output": "The debt-to-income ratio for AP-103 is 0.0, calculated from an existing debt of $0 and an annual income of $34,000. According to the income verification policy, the ratio must be at or below 0.5 and the applicant must have at least 2 years on record; AP-103 has 6 years on record, which satisfies the minimum requirement. Since the ratio is 0.0, it is well within the policy limit of 0.5. The policy also requires a valid payslip for income verification, but no document status was checked in this query. Thus, based solely on the ratio and years on record, AP-103 meets the policy criteria.",
+          "tools": [
+            "list_prior_applications",
+            "compute_debt_ratio",
+            "get_lending_policy",
+            "get_lending_policy"
+          ],
+          "finish": "stop",
+          "flags": {}
+        }
+      ]
+    },
+    {
+      "cell": "banking-agent",
+      "domain": "banking",
+      "mode": "agent",
+      "non_empty": 4,
+      "correct_shape": 1,
+      "n": 4,
+      "tool_calls": 17,
+      "mean_steps": 5.25,
+      "peak_prompt_tokens": 1946,
+      "truncated": 2,
+      "think_leaks": 1,
+      "exhausted": 1,
+      "model_calls": 21,
+      "seconds": 83.5,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "banking-agent-lookup-000",
+          "text": "account AC-4000 has come up for review. Check its status and decide what to do with it.",
+          "output": "The account AC-4000 is a buy-to-let mortgage under review for applicant AP-100. The lending policy requires at least 2 years on record (applicant has 12, satisfied) and a debt-to-income ratio \u2264 0.35. The eligibility check shows meets_criteria: true, but the computed debt ratio for the large transaction $67,000 (likely a deposit or property-related payment) against annual income $28,000 is 2.39, far exceeding 0.35. No tax return document is found (validate_document returned error). Since the debt ratio exceeds the policy max of 0.35 and no supporting document (tax return) is verified, the application cannot be approved. The status is \"under review\" and no further policy override is indicated. Therefore, the correct decision is to decline due to ratio violation and missing required document.\n\nDECLINE due to debt-to-income ratio of 2.39 exceeding the 0.35 maximum and missing required tax return document.",
+          "tools": [
+            "get_account",
+            "list_prior_applications",
+            "check_eligibility",
+            "get_lending_policy",
+            "search_transactions",
+            "validate_document",
+            "search_transactions",
+            "compute_debt_ratio",
+            "compute_debt_ratio"
+          ],
+          "finish": "max_steps",
+          "flags": {
+            "exhausted_steps": true
+          }
+        },
+        {
+          "input_id": "banking-agent-search-001",
+          "text": "Review the transactions on account AC-4007 above 100 and decide whether anything needs action.",
+          "output": "The transactions above 100 USD on account AC-4007 include a single large withdrawal of $5,400 on 2026-08-24, which warrants review for potential unusual activity or policy violation.\n\nAPPROVE no action needed as all transactions appear normal; the large withdrawal could be explained (e.g., legitimate expense), but no policy violation detected without further context. However, the instruction says \"decide whether anything needs action.\" Since the large withdrawal might need verification, but we have no policy guidance yet. Let's check lending policy? Not relevant. Might need to escalate if suspicious? But we don't have suspicion criteria. Better to just state that no action needed unless policy says otherwise. However, we should check if any transaction is below threshold? All above 100. The large withdrawal might be normal. Without additional context, we can say nothing needs action. But the instruction: \"decide whether anything needs action.\" We need to decide based on facts. Could be that large withdrawal > some limit? Not known. So we should not take action; just report findings. But the answer must be a single short decision line beginning with APPROVE, DECLINE, or ESCALATE. We need to decide if action needed. Since we don't have policy, we can APPROVE no action. But \"APPROVE\" typically means approve something; \"DECLINE\" means decline something; \"ESCALATE\" means escalate. The instruction: \"beginning with one of APPROVE, DECLINE, or ESCALATE, followed by one sentence of reason.\" So we must choose one of those verbs. Likely \"DECLINE\" if we decide no action needed? But DECLINE might mean decline a request. However, the context is \"Review the transactions ... decide whether anything needs action.\" So we need to output a decision line like \"APPROVE no action needed\" or \"DECLINE action needed\"? Let's interpret: The handler should decide if any action is required. If no action needed, we could say \"APPROVE no action needed\"? But \"APPROVE\" might be used for approving a request; \"DECLINE\" for declining a request; \"ESCALATE\" for escalating. Since the user asked to \"decide whether anything needs action\", we can output \"ESCALATE if suspicious\" or \"APPROVE if normal\". Safer to output \"APPROVE no action needed\" if we deem normal. However, we should check policy maybe \"large withdrawal\"",
+          "tools": [
+            "search_transactions"
+          ],
+          "finish": "length",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-agent-policy-002",
+          "text": "Case CS-222 turns on our policy for income verification. Check what the policy requires and decide whether the case can proceed.",
+          "output": "I need to check the applicant's details for case CS-222 to evaluate if they meet the income verification policy. However, the tools available don't directly retrieve case details by case ID. I need to find the applicant ID or account ID associated with case CS-222. Since the user mentioned \"Case CS-222 turns on our policy for income verification,\" I should first check if there's a way to get applicant information. The tools include `list_prior_applications` which requires an applicant_id, but I don't have that yet. Perhaps the case ID corresponds to an applicant ID? The policy says \"turns on our policy for income verification,\" meaning the case is invoking the policy. I need to check the applicant's records. Without additional info, I might need to ask the user for the applicant ID, but as an agent, I should use tools. However, I have no tool to get case details. I'll assume the case ID is linked to an applicant ID, but I need to retrieve it. Since I can't, I'll need to escalate or ask? But the instruction says use tools to look up facts. I could try to infer that the case CS-222 refers to an applicant, but I need to get the applicant ID. Perhaps the user expects me to check eligibility using `check_eligibility` which requires applicant_id and product. But I don't know product. Alternatively, maybe the case is about an applicant applying for a product, and I need to check eligibility against income verification policy. However, without applicant_id, I can't proceed. I should ask the user for the applicant ID? But the instruction says \"Gather what you need with the tools.\" I have no tool to get case details. I'll need to escalate? Let's think: The policy requires at least 2 years on record, ratio <=0.5, and a valid payslip. To decide if the case can proceed, I need to check if the applicant meets these. I need to retrieve applicant's transaction history or prior applications. But I need applicant_id. Since the user said \"Case CS-222 turns on our policy for income verification,\" perhaps CS-222 is the case ID, and I need to escalate or check eligibility? I could use `escalate_case` but that's for recording action. Better to ask for applicant ID? But as an agent, I should use tools. Maybe the case ID is the applicant ID? Possibly CS-222 is the applicant ID",
+          "tools": [
+            "get_lending_policy"
+          ],
+          "finish": "length",
+          "flags": {}
+        },
+        {
+          "input_id": "banking-agent-compute-003",
+          "text": "For AP-103, work out the ratio from their figures and decide whether it is within policy.",
+          "output": "APPROVE The ratio 0.0 is below the policy maximum of 0.4.",
+          "tools": [
+            "get_account",
+            "search_transactions",
+            "get_lending_policy",
+            "get_lending_policy",
+            "list_prior_applications",
+            "compute_debt_ratio"
+          ],
+          "finish": "stop",
+          "flags": {
+            "think_leak": true
+          }
+        }
+      ]
+    },
+    {
+      "cell": "logistics-extraction",
+      "domain": "logistics",
+      "mode": "extraction",
+      "non_empty": 4,
+      "correct_shape": 4,
+      "n": 4,
+      "tool_calls": 9,
+      "mean_steps": 3.25,
+      "peak_prompt_tokens": 1421,
+      "truncated": 0,
+      "think_leaks": 1,
+      "exhausted": 1,
+      "model_calls": 13,
+      "seconds": 22.8,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "logistics-extraction-lookup-000",
+          "text": "What is the current status of shipment SH-4000?",
+          "output": "{\"subject_id\": \"SH-4000\", \"status\": \"delivered\", \"finding\": \"The shipment SH-4000 is currently delivered.\", \"confidence\": \"high\"}",
+          "tools": [
+            "get_shipment"
+          ],
+          "finish": "stop",
+          "flags": {
+            "think_leak": true
+          }
+        },
+        {
+          "input_id": "logistics-extraction-search-001",
+          "text": "Show the movements on shipment SH-4007 above 1000.",
+          "output": "{\n  \"subject_id\": \"SH-4007\",\n  \"status\": \"found\",\n  \"finding\": \"Three movements above 1000 pallets: 67000 on 2026-09-11, 5400 on 2026-05-10, and 21400 on 2026-04-07.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "search_movements"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-extraction-policy-002",
+          "text": "What does our policy on dangerous goods require?",
+          "output": "{\n  \"subject_id\": \"dangerous goods policy\",\n  \"status\": \"resolved\",\n  \"finding\": \"The policy requires consignees to have at least 3 years on record and a ratio at or below 0.45, and requires a valid packing list.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "get_customs_rule"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-extraction-compute-003",
+          "text": "For CN-103, work out the ratio from their figures and tell me whether it is within policy.",
+          "output": "{\n  \"subject_id\": \"CN-103\",\n  \"status\": \"cannot determine\",\n  \"finding\": \"Missing capacity figure; cannot compute ratio; policy requires ratio \u22640.45 and \u22653 years on record. Years on record is 11 (\u22653), but ratio cannot be determined without capacity.\",\n  \"confidence\": \"medium\"\n}",
+          "tools": [
+            "get_shipment",
+            "search_movements",
+            "get_customs_rule",
+            "get_customs_rule",
+            "list_prior_movements",
+            "compute_load_factor"
+          ],
+          "finish": "max_steps",
+          "flags": {
+            "exhausted_steps": true
+          }
+        }
+      ]
+    },
+    {
+      "cell": "logistics-summary",
+      "domain": "logistics",
+      "mode": "summary",
+      "non_empty": 4,
+      "correct_shape": 4,
+      "n": 4,
+      "tool_calls": 5,
+      "mean_steps": 2.25,
+      "peak_prompt_tokens": 1072,
+      "truncated": 0,
+      "think_leaks": 0,
+      "exhausted": 0,
+      "model_calls": 9,
+      "seconds": 15.0,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "logistics-summary-lookup-000",
+          "text": "What is the current status of shipment SH-4000?",
+          "output": "The current status of shipment SH-4000 is delivered. It contains 3 pallets of express air product and was opened in August 2025. The consignee associated with this shipment is CN-100.",
+          "tools": [
+            "get_shipment"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-summary-search-001",
+          "text": "Show the movements on shipment SH-4007 above 1000.",
+          "output": "I found three movements for shipment SH-4007 with amounts above 1000 pallets: 67,000 pallets on 2026-09-11, 5,400 pallets on 2026-05-10, and 21,400 pallets on 2026-04-07. The total of these movements is 93,800 pallets. All three entries meet the minimum threshold of 1,000 pallets.",
+          "tools": [
+            "search_movements"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-summary-policy-002",
+          "text": "What does our policy on dangerous goods require?",
+          "output": "Our policy on dangerous goods requires that a consignee have at least three years on record and maintain a loaded-to-capacity ratio of 0.45 or lower. It also requires submission of a valid packing list for any shipment containing dangerous goods. These conditions must be satisfied before a consignee can receive such shipments.",
+          "tools": [
+            "get_customs_rule"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-summary-compute-003",
+          "text": "For CN-103, work out the ratio from their figures and tell me whether it is within policy.",
+          "output": "I cannot retrieve any record for shipment CN-103 because it does not exist in the system. Without a valid shipment record, I cannot compute a load factor or check policy compliance. Please provide a correct shipment ID or clarify the reference.",
+          "tools": [
+            "get_shipment",
+            "search_movements"
+          ],
+          "finish": "stop",
+          "flags": {}
+        }
+      ]
+    },
+    {
+      "cell": "logistics-agent",
+      "domain": "logistics",
+      "mode": "agent",
+      "non_empty": 4,
+      "correct_shape": 2,
+      "n": 4,
+      "tool_calls": 14,
+      "mean_steps": 4.5,
+      "peak_prompt_tokens": 2108,
+      "truncated": 0,
+      "think_leaks": 0,
+      "exhausted": 0,
+      "model_calls": 18,
+      "seconds": 49.2,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "logistics-agent-lookup-000",
+          "text": "shipment SH-4000 has come up for review. Check its status and decide what to do with it.",
+          "output": "DECLINE SH-4000 because consignee CN-100 does not meet the minimum 3-year record requirement for dangerous goods (express air falls under this category), causing clearance failure.",
+          "tools": [
+            "get_shipment",
+            "search_movements",
+            "list_prior_movements",
+            "check_clearance",
+            "get_customs_rule",
+            "get_customs_rule",
+            "flag_hold",
+            "flag_hold"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-agent-search-001",
+          "text": "Review the movements on shipment SH-4007 above 1000 and decide whether anything needs action.",
+          "output": "The movements above 1000 pallets are all routine transfers; no action needed.\n\n(Note: The tool returned three movements with amounts 67000, 5400, and 21400 pallets, all above 1000 pallets. No indication of irregularity, delay, or violation. Thus no action required.)",
+          "tools": [
+            "search_movements"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-agent-policy-002",
+          "text": "Case CS-222 turns on our policy for dangerous goods. Check what the policy requires and decide whether the case can proceed.",
+          "output": "ESCALATE - Need consignee ID and packing list verification to confirm policy compliance before proceeding.",
+          "tools": [
+            "get_customs_rule",
+            "get_shipment",
+            "flag_hold"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "logistics-agent-compute-003",
+          "text": "For CN-103, work out the ratio from their figures and decide whether it is within policy.",
+          "output": "The shipment ID \"CN-103\" does not exist in the system. Please provide a valid shipment ID or clarify the reference.",
+          "tools": [
+            "get_shipment",
+            "search_movements"
+          ],
+          "finish": "stop",
+          "flags": {}
+        }
+      ]
+    },
+    {
+      "cell": "hospitality-extraction",
+      "domain": "hospitality",
+      "mode": "extraction",
+      "non_empty": 4,
+      "correct_shape": 4,
+      "n": 4,
+      "tool_calls": 14,
+      "mean_steps": 4.5,
+      "peak_prompt_tokens": 1610,
+      "truncated": 0,
+      "think_leaks": 2,
+      "exhausted": 2,
+      "model_calls": 18,
+      "seconds": 33.5,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "hospitality-extraction-lookup-000",
+          "text": "What is the current status of booking BK-4000?",
+          "output": "{\"subject_id\": \"BK-4000\", \"status\": \"on hold\", \"finding\": \"The booking BK-4000 is currently on hold.\", \"confidence\": \"high\"}",
+          "tools": [
+            "get_booking"
+          ],
+          "finish": "stop",
+          "flags": {
+            "think_leak": true
+          }
+        },
+        {
+          "input_id": "hospitality-extraction-search-001",
+          "text": "Show the stays on booking BK-4007 above 5000.",
+          "output": "{\n  \"subject_id\": \"BK-4007\",\n  \"status\": \"no stays above 5000\",\n  \"finding\": \"All stays in booking BK-4007 have amounts 380, 1250, 1250, 380, 380 (total 3640), none exceed 5000.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "search_stays",
+            "get_booking",
+            "search_stays",
+            "search_stays",
+            "search_stays",
+            "search_stays"
+          ],
+          "finish": "max_steps",
+          "flags": {
+            "exhausted_steps": true
+          }
+        },
+        {
+          "input_id": "hospitality-extraction-policy-002",
+          "text": "What does our policy on late arrival require?",
+          "output": "{\n  \"subject_id\": \"late arrival policy\",\n  \"status\": \"resolved\",\n  \"finding\": \"The policy requires guests to have at least 1 year on record and a ratio at or below 0.35, and requires a valid corporate authorisation.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "get_rate_policy"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-extraction-compute-003",
+          "text": "For GU-103, work out the ratio from their figures and tell me whether it is within policy.",
+          "output": "{\n  \"subject_id\": \"GU-103\",\n  \"status\": \"not within policy\",\n  \"finding\": \"The ratio computed from the figures is 1.0, which exceeds the maximum ratio of 0.4 for group deposits. Therefore, the ratio is not within policy.\",\n  \"confidence\": \"high\"\n}",
+          "tools": [
+            "list_prior_stays",
+            "get_booking",
+            "search_stays",
+            "get_rate_policy",
+            "get_rate_policy",
+            "compute_occupancy"
+          ],
+          "finish": "max_steps",
+          "flags": {
+            "exhausted_steps": true,
+            "think_leak": true
+          }
+        }
+      ]
+    },
+    {
+      "cell": "hospitality-summary",
+      "domain": "hospitality",
+      "mode": "summary",
+      "non_empty": 4,
+      "correct_shape": 4,
+      "n": 4,
+      "tool_calls": 7,
+      "mean_steps": 2.75,
+      "peak_prompt_tokens": 1334,
+      "truncated": 0,
+      "think_leaks": 0,
+      "exhausted": 0,
+      "model_calls": 11,
+      "seconds": 19.7,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "hospitality-summary-lookup-000",
+          "text": "What is the current status of booking BK-4000?",
+          "output": "The current status of booking BK-4000 is \"on hold\". This booking is for 41 nights at the standard rate, opened in December 2024, and is associated with guest GU-100. No further details about restrictions or pending actions are indicated in the record.",
+          "tools": [
+            "get_booking"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-summary-search-001",
+          "text": "Show the stays on booking BK-4007 above 5000.",
+          "output": "There are no stays recorded for booking BK-4007 that are above 5000; the search returned zero items.\n\nIf you meant \"above or equal to 5000\" or a different threshold, please clarify, and I can adjust the query accordingly. Otherwise, based on the current data, no such stays exist for this booking.",
+          "tools": [
+            "search_stays"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-summary-policy-002",
+          "text": "What does our policy on late arrival require?",
+          "output": "Our policy on late arrival requires that a guest have at least one year on record and a ratio (presumably of late arrivals to total stays) at or below 0.35, and that a valid corporate authorisation be provided. The policy is enforced through the rate policy system, which checks these conditions before allowing a late arrival. If a guest meets these criteria, they can arrive late under the policy; otherwise, they may be subject to restrictions or fees.",
+          "tools": [
+            "get_rate_policy"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-summary-compute-003",
+          "text": "For GU-103, work out the ratio from their figures and tell me whether it is within policy.",
+          "output": "The occupancy ratio for GU-103 is 0.6667 (2 booked out of 3 available). The policy for group deposits requires a ratio at or below 0.4 and at least 1 year on record. GU-103 has 2 years on record, which meets the minimum, but the ratio 0.6667 exceeds the maximum allowed 0.4. Therefore, the ratio is not within the group deposits policy.",
+          "tools": [
+            "list_prior_stays",
+            "compute_occupancy",
+            "get_rate_policy",
+            "get_rate_policy"
+          ],
+          "finish": "stop",
+          "flags": {}
+        }
+      ]
+    },
+    {
+      "cell": "hospitality-agent",
+      "domain": "hospitality",
+      "mode": "agent",
+      "non_empty": 4,
+      "correct_shape": 1,
+      "n": 4,
+      "tool_calls": 20,
+      "mean_steps": 6.0,
+      "peak_prompt_tokens": 1981,
+      "truncated": 0,
+      "think_leaks": 0,
+      "exhausted": 1,
+      "model_calls": 24,
+      "seconds": 69.6,
+      "errors": [],
+      "outputs": [
+        {
+          "input_id": "hospitality-agent-lookup-000",
+          "text": "booking BK-4000 has come up for review. Check its status and decide what to do with it.",
+          "output": "APPROVE release of booking BK-4000 from hold status due to high occupancy (82%) and guest meeting standard rate criteria.\n\n**Decision:** APPROVE release from hold.",
+          "tools": [
+            "get_booking",
+            "search_stays",
+            "get_rate_policy",
+            "list_prior_stays",
+            "check_restrictions",
+            "compute_occupancy",
+            "create_request",
+            "create_request"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-agent-search-001",
+          "text": "Review the stays on booking BK-4007 above 5000 and decide whether anything needs action.",
+          "output": "No stays above 5000 found for booking BK-4007; no action needed.\n\nAnswer: DECLINE - No stays above 5000 found for booking BK-4007; no action needed.",
+          "tools": [
+            "search_stays"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-agent-policy-002",
+          "text": "Case CS-222 turns on our policy for late arrival. Check what the policy requires and decide whether the case can proceed.",
+          "output": "The case ID \"CS-222\" does not correspond to a booking ID in the system. Without a booking or guest record, I cannot evaluate whether the guest meets the late arrival policy criteria (minimum 1 year on record, ratio \u22640.35, and corporate authorisation). Therefore, the case cannot proceed based on the policy requirement.\n\nDECLINE: No booking record found for CS-222; insufficient data to verify guest eligibility under late arrival policy.",
+          "tools": [
+            "get_rate_policy",
+            "get_booking"
+          ],
+          "finish": "stop",
+          "flags": {}
+        },
+        {
+          "input_id": "hospitality-agent-compute-003",
+          "text": "For GU-103, work out the ratio from their figures and decide whether it is within policy.",
+          "output": "Based on the policy for cancellation windows (max_ratio 0.5) and the computed occupancy ratio 0.5 from figures (3 booked out of 6 available), the ratio meets the threshold. However, the policy also requires a valid loyalty card (\"requires_document\": \"loyalty card\"), and no loyalty card document was found for GU-103 (LOY-103 does not exist). Since the loyalty card requirement is not satisfied, the ratio alone does not guarantee policy compliance.\n\nAPPROVE is not appropriate because the loyalty card requirement is missing; DECLINE would be incorrect if the ratio alone were sufficient, but policy explicitly requires the document. Thus, without the loyalty card, we cannot confirm full compliance. However, the instruction says \"decide whether it is within policy\" based on the figures and policy. The policy states \"a valid loyalty card is required.\" Since we have no evidence of a loyalty card, we must consider it not meeting policy. But we should check if the ratio alone is sufficient? The policy text: \"For cancellation windows, a guest must have at least 1 years on record and a ratio at or below 0.5. A valid loyalty card is required.\" So both conditions must hold. Years on record is 2 (>=1), ratio is 0.5 (<=0.5), but loyalty card missing. Therefore, not within policy due to missing loyalty card.\n\nThus answer: DECLINE because missing loyalty card requirement.\n\nBut we should ensure we used only what we have. We have years_on_record=2 from figures, ratio=0.5 from compute_occupancy, policy requires loyalty card. No loyalty card found. So decision: DECLINE.\n\nHowever, the policy might be for cancellation windows specifically, and the guest is for group booking/flexible rate. The policy topic \"cancellation windows\" seems relevant. The check_restrictions for group booking returned meets_criteria true with ratio 0.439 (maybe from other data). But we have compute_occupancy gave ratio 0.5. The check_restrictions gave ratio 0.439 and meets_criteria true. That suggests internal check already considered ratio and years_on_record and found meets_criteria true. But it didn't check loyalty card? Possibly the check_restrictions already incorporates loyalty card? But we saw check_restrictions output didn't mention loyalty card. However, the policy explicitly says requires_document \"loyalty",
+          "tools": [
+            "list_prior_stays",
+            "get_rate_policy",
+            "get_rate_policy",
+            "compute_occupancy",
+            "check_restrictions",
+            "check_restrictions",
+            "check_restrictions",
+            "validate_id",
+            "search_stays"
+          ],
+          "finish": "max_steps",
+          "flags": {
+            "exhausted_steps": true
+          }
+        }
+      ]
+    }
+  ],
+  "peak": 2108
+}

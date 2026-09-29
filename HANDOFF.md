@@ -346,3 +346,63 @@ returns zero is only informative once you have watched it return non-zero on
 something you know is broken.
 
 Recorded as RDR-001 and RDR-002.
+
+## §12 — The first live run scored the bench, not the detector (2026-09-29)
+
+Running all nine cells against a real model for the first time produced four
+failures. Every one of them was in the bench, and three of the four would have
+contaminated the study silently rather than loudly.
+
+**Agent mode scored 0 of 4 on output shape in two domains, while answering
+every input.** The format rule demands a line beginning APPROVE, DECLINE or
+ESCALATE. The corpus asked "what is the current status of account AC-4000?".
+There is no decision in that question, so the model answered the question. A
+model doing the sensible thing with an incoherent instruction was being recorded
+as a compliance failure.
+
+The tempting fix was to relax the format rule, and it was the wrong one. Three
+output shapes exist so the detector's per-shape thresholds have three genuinely
+different shapes to be fitted against; a decision line is the most distinctive
+of the three, and softening it collapses `agent` into `summary` and costs the
+study an axis. The corpus was rephrased instead — same records, same tool shape,
+same position in the list, and decision framing only for the mode whose
+consumer sends decisions.
+
+**A quarter of every corpus came back empty.** The `compute` template asks for a
+ratio from a principal's figures, and no tool exposed those figures: entities
+were keyed by entity id, and the principal-keyed read returned only prior
+records. The model called four different tools hunting for an income number,
+exhausted the step budget, and the cell returned `""`. Two separate defects sat
+behind one symptom: an unreachable tool path, and a step budget whose exhaustion
+threw the input away. Both are fixed: the principal-keyed read now
+carries the figures, and exhaustion now withdraws the tools and demands one
+final answer, still flagged.
+
+**The model emitted its own deliberation into the output** with a closing
+`</think>` whose opener never arrived, despite `think` being off. Unstripped,
+the detector would have been scoring the model thinking aloud as output.
+The volume of that thinking is exactly the kind of thing that changes when a
+model is swapped, so it would have read as a loud and entirely spurious signal.
+
+**One quarter of outputs were truncated mid-sentence** at `num_predict=320`.
+Cut-off text is a confound in the same way: the detector would read a length
+difference that came from the cap rather than from the system. Raised to 512,
+and `finish_reason` records the cases where it still bites.
+
+### Why this is worth a section
+
+Nothing here was found by 159 passing unit tests. Every failure was a place
+where a hand-written test double had been more cooperative than reality, the
+fifth and sixth entries in a list that already had three. The scripted chat
+function always terminated, so exhaustion was never really exercised; no fake
+ever emitted a `</think>` tag; no fake ever declined to find what it was
+looking for.
+
+**The separation of the `bench` and `engine` seats did its job here.** All four
+defects are ones that would have flattered the detector if they had been
+discovered after tuning against them rather than before. They were found by
+running the systems under test on their own, with no detector attached and
+nothing yet to protect.
+
+The standing process fix is now overdue rather than merely open: build test
+doubles from captured real responses rather than from memory of the API.

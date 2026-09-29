@@ -352,3 +352,123 @@ is a gap: fix that before quoting the chaining number anywhere.
 **Evidence:** `results/tool_selection.json`, `scripts/measure_tool_selection.py`.
 **Reopen if:** the chaining test is corrected, at which point the 3/4 figure
 should be re-derived rather than carried forward.
+
+## BCH-014 — The first live run of the nine cells found four bench defects, three of them silent
+**Date:** 2026-09-29
+**Finding:** All nine cells run against `granite4.2:8b`, 4 inputs each, 36
+invocations, 185 seconds of GPU time. The cells worked structurally: tools were
+called, loops terminated, outputs came back. The content was another matter.
+
+| | run 1, as built | run 2, after the fixes below |
+|---|---|---|
+| non-empty output | 30/36 | **36/36** |
+| correct output shape, `extraction` + `summary` | 15/24 | **24/24** |
+| correct output shape, `agent` | 1/12 | 3/12 |
+| peak prompt tokens | 1723 | 1662 |
+
+**Four defects, all in the bench, none caught by 159 unit tests.**
+
+*A quarter of every corpus returned nothing.* The `compute` request asks for a
+ratio from a principal's figures, and no tool exposed those figures: entities
+were keyed by entity id and the principal-keyed read returned only prior
+records. The model called four different tools hunting for an income number,
+ran out of steps and the cell returned `""`. Two defects behind one symptom.
+The principal-keyed read now carries the figures, and exhausting the step
+budget now withdraws the tools and demands one final answer instead of
+discarding the input.
+
+*The model wrote its deliberation into the output*, closing it with `</think>`
+though `think` was off and no opening tag ever arrived. This is the dangerous
+one. How much a model thinks aloud is exactly the sort of thing that changes
+when you swap models, so left in place it would have produced a strong and
+entirely spurious regression signal. Stripped and flagged as `think_leak`.
+
+*A quarter of outputs were truncated mid-sentence* at `num_predict=320`. Same
+class of confound: a length difference the detector would read as the system
+changing when it came from the cap. Raised to 512, with `finish_reason`
+recording the cases where it still bites.
+
+*The amount filter was underspecified.* "Show the transactions above 1000" made
+the model call `max_amount=1000`, then spend 300 tokens arguing with itself
+about the result. The schema said "optionally filtered by amount" and named no
+direction. It does now.
+
+**What this says about the test doubles.** Every one of these is a place where
+a hand-written fake was more cooperative than reality. The scripted chat
+function always terminated, so exhaustion was never exercised; no fake ever
+emitted a `</think>` tag; no fake ever failed to find what it was looking for.
+That is the fourth, fifth and sixth entry in a list that already had three
+(`docs/knowledge/cells.md`). The standing fix, building doubles from captured
+real responses, is now overdue rather than open.
+
+**Peak prompt demand is 1,662 to 1,723 tokens against an 8,192 window**, so
+roughly 6,500 tokens of headroom. Combined with the 461-751 token schema floor
+of BCH-013, this settles the measurement half of D11: the context budget is
+comfortable, not tight.
+**Evidence:** `results/cells_smoke_before_fixes.json` (run 1),
+`results/cells_smoke_corpus_only.json` (run 2), `scripts/smoke_cells.py`.
+**Reopen if:** a different model is used as the cell driver. All four defects
+were observed on one model, and the reasoning leak in particular is a
+model-specific behaviour that others may express differently.
+
+## BCH-015 — Agent mode is shape-distinct but not compliant, and three rounds of fixes bought three inputs
+**Date:** 2026-09-29
+**Finding:** Agent mode demands a short line beginning APPROVE, DECLINE or
+ESCALATE. Compliance across three successive code states, 12 invocations each
+(3 domains x 4 inputs, `granite4.2:8b`, seed 7):
+
+| code state | agent compliance |
+|---|---|
+| as built | 1/12 |
+| decision-framed request corpus | 3/12 |
+| plus per-mode step budget, format rule restated at the end | 4/12 |
+
+The other two modes went from 15/24 to **24/24** over the same changes, so the
+fixes worked everywhere except here. **Stopping at three rounds was a
+deliberate call.** The third round bought one input for roughly 40% more GPU
+time, and continuing would have been tuning the bench until the number looked
+right. That is the failure the bench and engine seats are separated to prevent,
+and the absence of a detector does not make it a different mistake.
+
+**Compliance was the wrong question anyway.** The grid is three domains by
+three output formats and the detector fits a threshold per output shape. What
+that needs is for the three formats to be genuinely different shapes, which is
+not the same as each obeying its own format rule. Measured on the saved outputs
+(`scripts/check_shape_distinctness.py`, no GPU):
+
+| | agent | summary |
+|---|---|---|
+| decision token present | **10/12** | **0/12** |
+| median words | 32.5 | 51.5 |
+| three or more sentences | 7/12 | 12/12 |
+| spread, words | 11-396 | 30-104 |
+
+**The modes are shape-distinct.** A decision token appears in one and not the
+other, separation 0.83, which is a far cleaner split than length gives. The
+third arm of the grid is real.
+
+**It is distinct without being compliant.** 10 of 12 outputs contain a decision
+and only 4 lead with one: the model reasons in a paragraph and appends the
+verdict. The instruction asks for the verdict first.
+
+**The spread is the part that should worry us.** Agent outputs run from 11 to
+396 words while summary runs 30 to 104. A shape-stratified threshold fitted on
+a mode that varies by a factor of 36 has very little to hold on to, and this is
+a better argument for changing something than the compliance count is.
+
+**Agent mode costs 3.5x what summary costs**: 202 seconds against 57 for the
+same 12 invocations, 51 tool calls against 19, peak 2,108 prompt tokens against
+1,350. At the study's full corpus size this is the dominant term in the GPU
+budget and it has not been costed.
+
+**A first measurement misread this.** The initial verdict rule in
+`check_shape_distinctness.py` compared median lengths against an invented 0.6
+multiplier and ignored the decision token entirely, and it reported the two
+modes as not distinct. It was wrong on the evidence in its own table. The rule
+now leads on the token, which is the discriminative feature.
+**Evidence:** `results/cells_smoke.json` (run 4, outputs saved),
+`results/cells_smoke_before_fixes.json`, `results/cells_smoke_corpus_only.json`,
+`results/cells_smoke_counts_only.json`, `scripts/check_shape_distinctness.py`.
+**Reopen if:** a different model drives the agent cells. Compliance here is a
+statement about one 8B model's instruction following, and a stronger model may
+make the whole finding moot.

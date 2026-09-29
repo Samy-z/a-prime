@@ -445,3 +445,48 @@ Do not describe it as an F9 detector until that probe exists.
 **Evidence:** run 20260925T041059Z.
 **Reopen if:** the addition probe shows factual additions land in the same tail
 with the same magnitude, which would confirm the channel is purely volumetric.
+
+## MTH-023 — A pinned seed collapses the decoy arm, and BCH-012 already had the fact
+**Date:** 2026-09-29
+**Finding:** `granite4.2:8b`, banking summary cell, 3 inputs, temperature 0.2:
+
+| arms built with | outputs identical |
+|---|---|
+| the same seed (7, 7) | **3/3** |
+| different seeds (7, 8) | 2/3 |
+
+A-prime is the second baseline run and it **is** the null distribution. Target
+decoy FDR estimates the false-alarm rate from how far apart two runs of the
+same system land. If both baseline arms are built with the same pinned seed,
+they land in exactly the same place: the null has zero width, every difference
+between A and B clears every threshold, and the reported q is meaningless
+rather than merely wrong. The failure is silent. Nothing errors, the arms
+record cleanly, and the FDR column fills with confident numbers.
+
+**The fact was already in the ledger.** BCH-012 recorded byte-identical output
+under a repeated seed on all four models, correctly, as evidence that the
+explicit sampling options take effect rather than being ignored. That reading
+is right. Nobody drew the consequence for the arm whose entire job is to vary,
+and the project is named after that arm.
+
+**The two disciplines point opposite ways here.** Pinned instruments says fix
+every parameter so a result can be reproduced. The decoy arm needs one
+parameter free, or it has nothing to measure. Both cannot hold for the seed.
+The resolution has to be explicit rather than inherited: A and A-prime differ
+in seed by construction, the seeds used are recorded in provenance, and the run
+is reproducible because the seeds are known rather than because they are equal.
+
+**The null may be thin even once fixed.** With different seeds at temperature
+0.2, only 1 output in 3 differed at all, and that one differed by paraphrase.
+A null built from a third of the corpus is a weak instrument, and temperature
+is the obvious lever, but raising it changes the system under test as well as
+the null. Not resolved here.
+
+**Confidence: one derivation, small sample.** Three inputs, one mode, one
+model. The same-seed result is the decisive half and it is not really a
+sampling question -- determinism under a fixed seed is a designed property of
+the sampler, and BCH-012 saw it on four models independently. The thinness of
+the different-seed null is the part that needs a real measurement.
+**Evidence:** BCH-012; scratch run 2026-09-29 reproducing it against the cells.
+**Reopen if:** temperature, model or server version changes, any of which moves
+how much two differently-seeded runs diverge.

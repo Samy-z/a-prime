@@ -111,9 +111,14 @@ class ToolSet:
                     f"Retrieve one {ent} record by its id.",
                     {f"{ent}_id": _S}, (f"{ent}_id",)),
             ToolDef("search", NAMES["search"][d],
-                    f"Search the {v.event_kind} history of one {ent}, "
-                    f"optionally filtered by amount.",
-                    {f"{ent}_id": _S, "min_amount": _N, "max_amount": _N},
+                    f"Search the {v.event_kind} history of one {ent}. Use "
+                    f"min_amount for 'above' or 'over', max_amount for 'below' "
+                    f"or 'under'.",
+                    {f"{ent}_id": _S,
+                     "min_amount": {**_N, "description":
+                                    "Return only entries at or above this amount."},
+                     "max_amount": {**_N, "description":
+                                    "Return only entries at or below this amount."}},
                     (f"{ent}_id",)),
             ToolDef("policy", NAMES["policy"][d],
                     "Retrieve the written policy for a named topic.",
@@ -125,7 +130,8 @@ class ToolSet:
                     f"Evaluate whether a {pri} meets the criteria for a product.",
                     {f"{pri}_id": _S, "product": _S}, (f"{pri}_id", "product")),
             ToolDef("history", NAMES["history"][d],
-                    f"List a {pri}'s previous records.",
+                    f"List a {pri}'s previous records, together with their "
+                    f"current figures.",
                     {f"{pri}_id": _S}, (f"{pri}_id",)),
             ToolDef("verify", NAMES["verify"][d],
                     "Check whether a submitted document is valid and unexpired.",
@@ -264,7 +270,14 @@ def _h_history(ts: ToolSet, args: dict) -> dict:
         return {"error": f"no such {pri}: {pid}"}
     owned = [e for e in ts.pack.entities.values() if e.get(f"{pri}_id") == pid]
     owned = ts._shift(owned, "history" in ts.stale)
+    who = ts.pack.principals[pid]
+    # The figures live here because this is the only principal-keyed read in the
+    # set. Without them the compute shape is unreachable: on the first live run
+    # the model called four different tools hunting for an income figure, ran
+    # out of steps and returned nothing (BCH-014).
     return {"count": len(owned),
+            "figures": {k: who[k] for k in
+                        ("annual_income", "existing_debt", "years_on_record")},
             "records": [{"id": e["id"], "status": e["status"],
                          "product": e["product"], "opened": e["opened"]}
                         for e in owned]}

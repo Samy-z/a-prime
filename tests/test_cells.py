@@ -230,17 +230,166 @@ def test_string_encoded_arguments_are_parsed():
     assert c.tools.calls[0][1] == {"account_id": eid}
 
 
-def test_running_out_of_steps_still_returns_a_flagged_output():
-    """A real deployment returns something to the user, so this has to produce a
-    Response rather than an exception, with the exhaustion visible."""
+def test_running_out_of_steps_forces_a_final_answer_without_tools():
+    """Exhaustion must not cost the corpus an input.
+
+    On the first live run a quarter of every corpus came back empty this way:
+    the model hunted for a figure it could not reach and the cell yielded "".
+    A real deployment answers with what it has, so the tools are withdrawn and
+    one last answer is demanded. The exhaustion stays visible in the trace.
+    """
+    p = build_pack("banking", 10)
+    eid = p.entity_ids()[0]
+    seen_tools = []
+
+    def chat(messages, tools):
+        seen_tools.append(tools)
+        if len(seen_tools) > 3:
+            return _text_turn("ESCALATE, the figures were not available.")
+        return _tool_turn("get_account", {"account_id": eid})
+
+    c = Cell(p, "agent", chat, "A", max_steps=3)
+    r = c.invoke(Invocation("i0", "q"))
+    assert r.trace.steps == 4, "three tool rounds plus the forced answer"
+    assert r.trace.extra["exhausted_steps"] is True
+    assert "empty_output" not in r.trace.extra
+    assert r.output.startswith("ESCALATE")
+    assert seen_tools[-1] is None, "the final call must withhold the tools"
+    assert all(t for t in seen_tools[:-1])
+
+
+def test_the_forced_final_answer_may_still_come_back_empty():
+    """Withdrawing the tools does not guarantee an answer, and a blank is still
+    a blank. Both flags have to survive so the study can exclude these."""
     p = build_pack("banking", 10)
     eid = p.entity_ids()[0]
     looping = [_tool_turn("get_account", {"account_id": eid})] * 10
     c = Cell(p, "agent", _scripted(*looping), "A", max_steps=3)
     r = c.invoke(Invocation("i0", "q"))
-    assert r.trace.steps == 3
     assert r.trace.extra["exhausted_steps"] is True
     assert r.trace.extra["empty_output"] is True
+
+
+def test_a_transport_failure_during_the_forced_answer_is_an_errored_response():
+    calls = []
+
+    def flaky(messages, tools):
+        calls.append(tools)
+        if tools is None:
+            raise OSError("connection reset")
+        return _tool_turn("get_account", {"account_id": build_pack(
+            "banking", 10).entity_ids()[0]})
+
+    r = Cell(build_pack("banking", 10), "agent", flaky, "A",
+             max_steps=2).invoke(Invocation("i0", "q"))
+    assert r.output == ""
+    assert "connection reset" in r.trace.error
+
+
+def test_a_leaked_reasoning_block_is_stripped_and_flagged():
+    """granite4.2:8b emits its working into `content` with a closing tag whose
+    opener never arrives, even with `think` off. The answer is the part after
+    it; keeping the working would feed the detector the model's deliberation
+    as though it were output."""
+    p = build_pack("banking", 10)
+    leaked = ("Let me reconsider. Maybe 42." + chr(10) + "</think>"
+              + chr(10) + "APPROVE, the ratio holds.")
+    r = Cell(p, "agent", _scripted(_text_turn(leaked)), "A").invoke(
+        Invocation("i0", "q"))
+    assert r.output == "APPROVE, the ratio holds."
+    assert r.trace.extra["think_leak"] is True
+
+
+def test_output_without_a_leak_is_untouched():
+    p = build_pack("banking", 10)
+    r = Cell(p, "agent", _scripted(_text_turn("APPROVE, fine.")), "A").invoke(
+        Invocation("i0", "q"))
+    assert r.output == "APPROVE, fine."
+    assert "think_leak" not in r.trace.extra
+
+
+def test_agent_mode_inputs_ask_for_a_decision():
+    """Agent mode demands a line beginning APPROVE, DECLINE or ESCALATE. A
+    corpus of plain questions makes that instruction incoherent, which is how
+    the mode scored zero on output shape while answering every input."""
+    p = build_pack("banking", 18)
+    plain = build_inputs(p, n=9, seed=1)
+    decide = build_inputs(p, n=9, seed=1, mode="agent")
+    assert all("decid" in i.text.lower() for i in decide)
+    assert not any("decid" in i.text.lower() for i in plain)
+
+
+def test_every_agent_request_names_the_records_it_needs():
+    """An unanswerable request measures error handling, not detection. The
+    policy template asked the model to decide on a case it never named, and the
+    model replied asking which case."""
+    import re as _re
+    ids = _re.compile("[A-Z]{2,3}-" + chr(92) + "d+")
+    for domain in ("banking", "logistics", "hospitality"):
+        p = build_pack(domain, 18)
+        real = set(p.entity_ids()) | set(p.principal_ids()) |             set(p.document_ids()) | set(p.case_ids())
+        for inv in build_inputs(p, n=9, seed=1, mode="agent"):
+            named = set(ids.findall(inv.text))
+            assert named, f"no record named in {inv.input_id}: {inv.text}"
+            assert named <= real, f"{inv.input_id} names a record that does not exist"
+
+
+def test_each_mode_gets_a_step_budget_that_suits_it():
+    """Agent mode chains by design and exhausted a shared budget of six."""
+    p = build_pack("banking", 10)
+    budgets = {m: Cell(p, m, _scripted(), "A").max_steps for m in MODES}
+    assert budgets["agent"] > budgets["summary"]
+    assert Cell(p, "agent", _scripted(), "A", max_steps=3).max_steps == 3
+
+
+def test_the_forced_answer_restates_the_format_rule():
+    """By the time the tools are withdrawn the system prompt is several tool
+    results back, and the model answered in prose instead of the demanded
+    shape."""
+    p = build_pack("banking", 10)
+    eid = p.entity_ids()[0]
+    seen = []
+
+    def chat(messages, tools):
+        seen.append(list(messages))
+        if tools is None:
+            return _text_turn("APPROVE, fine.")
+        return _tool_turn("get_account", {"account_id": eid})
+
+    Cell(p, "agent", chat, "A", max_steps=2).invoke(Invocation("i0", "q"))
+    final = seen[-1][-1]
+    assert final["role"] == "user"
+    assert "APPROVE" in final["content"], "the format rule must be restated"
+
+
+def test_mode_specific_corpora_line_up_record_for_record():
+    """Only the wording may move, and a record may be added but never swapped.
+
+    The decision form of the policy request has to name the case it is deciding
+    on, because "check the policy and decide whether the case can proceed" with
+    no case in it is unanswerable -- the model asked which case, correctly. So
+    the agent corpus may reference more records than the plain one at the same
+    position, never different ones.
+    """
+    import re as _re
+    BS = chr(92)
+    p = build_pack("logistics", 18)
+    plain = build_inputs(p, n=9, seed=1)
+    decide = build_inputs(p, n=9, seed=1, mode="agent")
+    ids = _re.compile("[A-Z]{2,3}-" + BS + "d+")
+    for a, b in zip(plain, decide):
+        assert a.text != b.text
+        assert set(ids.findall(a.text)) <= set(ids.findall(b.text))
+
+
+def test_a_mode_specific_corpus_gets_its_own_input_ids():
+    """The recorder groups by input id. Two different request texts sharing one
+    id would silently pair unlike requests across arms."""
+    p = build_pack("banking", 18)
+    plain = {i.input_id for i in build_inputs(p, n=9, seed=1)}
+    decide = {i.input_id for i in build_inputs(p, n=9, seed=1, mode="agent")}
+    assert not (plain & decide)
+    assert all("-agent-" in i for i in decide)
 
 
 def test_a_transport_failure_becomes_an_errored_response():

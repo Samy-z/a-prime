@@ -33,6 +33,7 @@ control, per-user clustering the detector finds cannot be attributed to either.
 from __future__ import annotations
 
 import json
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Callable
@@ -42,6 +43,17 @@ from .packs import Pack
 from .tools import ToolSet
 
 MODES = ("extraction", "summary", "agent")
+
+# Steps a mode gets before the tools are withdrawn. Agent mode chains by design
+# and exhausted a shared budget of 6 on two inputs in three of nine cells; the
+# other two modes answer after one or two retrievals and never came close.
+_MAX_STEPS = {"extraction": 6, "summary": 6, "agent": 9}
+
+# Some servers emit a reasoning block into `content` even with `think` off,
+# closing it with a tag whose opener never arrived. Observed live on
+# granite4.2:8b: the answer is real, it just has the model's working in front of
+# it. Everything up to the last closing tag is that working.
+_THINK_LEAK = re.compile(r"^.*</think>", re.DOTALL)
 
 # The chat transport: messages and tool schemas in, an Ollama-shaped response
 # body out. Injectable so a cell can be tested without a model.
@@ -73,7 +85,8 @@ class Cell:
     chat: ChatFn
     arm: str
     tools: ToolSet = None  # type: ignore[assignment]
-    max_steps: int = 6
+    # 0 means "whatever this mode needs"; see _MAX_STEPS.
+    max_steps: int = 0
     identity_aware: bool = False
     name: str = ""
 
@@ -81,6 +94,8 @@ class Cell:
         check_arm(self.arm)
         if self.mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, got {self.mode!r}")
+        if not self.max_steps:
+            self.max_steps = _MAX_STEPS[self.mode]
         if self.tools is None:
             self.tools = ToolSet(self.pack)
         if not self.name:
@@ -154,13 +169,40 @@ class Cell:
                             error=f"{type(exc).__name__}: {exc}"),
             )
 
-        # Ran out of steps while still asking for tools. A real deployment would
-        # return something to the user, so this is a real output, flagged.
-        return self._done("", called, steps, t0, "max_steps", None,
+        # Ran out of steps while still asking for tools. Returning nothing here
+        # threw away a quarter of the corpus on the first live run: the model
+        # hunts for a figure, never finds it, and the cell yields "". A real
+        # deployment answers with what it has, so the tools are withdrawn and
+        # one final answer is demanded. Flagged either way, so the study can
+        # exclude these if it chooses rather than silently scoring blanks.
+        messages.append({
+            "role": "user",
+            "content": (
+                "Stop searching and answer now, using only what you have "
+                "already found. If something is missing, say so inside the "
+                "required format, which is: " + _FORMAT_RULES[self.mode]
+            ),
+        })
+        try:
+            body = self.chat(messages, None)
+        except Exception as exc:  # noqa: BLE001
+            return Response(
+                output="",
+                trace=Trace(latency_ms=(time.perf_counter() - t0) * 1000.0,
+                            tools_called=tuple(called), steps=steps,
+                            model_id=self.name,
+                            error=f"{type(exc).__name__}: {exc}"),
+            )
+        steps += 1
+        content = (body.get("message") or {}).get("content") or ""
+        return self._done(content, called, steps, t0, "max_steps", body,
                           extra={"exhausted_steps": True})
 
     def _done(self, content, called, steps, t0, finish, body, extra=None) -> Response:
         ex = dict(extra or {})
+        if "</think>" in content:
+            content = _THINK_LEAK.sub("", content, count=1).lstrip()
+            ex["think_leak"] = True
         if body is not None:
             ex["eval_count"] = body.get("eval_count")
             ex["prompt_eval_count"] = body.get("prompt_eval_count")
@@ -198,8 +240,39 @@ _TEMPLATES = [
 ]
 
 
+# The same nine requests as a decision to take rather than a question to answer.
+# Asking "what is the status of AC-4000?" and then demanding a line beginning
+# APPROVE, DECLINE or ESCALATE is an incoherent instruction, and on the first
+# live run the model did the sensible thing and answered the question: agent
+# mode scored 0 out of 4 on output shape in two domains out of three while
+# answering every input (BCH-015). The failure was in the corpus, not the model.
+#
+# Same record, same tool shape, same position in the list. Only the framing
+# changes, because only this mode's consumer sends a decision request.
+_AGENT_TEMPLATES = {
+    "lookup": "{entity} {eid} has come up for review. Check its status and "
+              "decide what to do with it.",
+    "search": "Review the {event}s on {entity} {eid} above {amount} and decide "
+              "whether anything needs action.",
+    "policy": "Case {cid} turns on our policy for {topic}. Check what the "
+              "policy requires and decide whether the case can proceed.",
+    "compute": "For {pid}, work out the ratio from their figures and decide "
+               "whether it is within policy.",
+    "evaluate": "Decide whether {pid} should be granted a {product}.",
+    "history": "Check what we already hold for {pid} and decide whether to take "
+               "their case forward.",
+    "verify": "Document {did} was submitted in support of a case. Verify it and "
+              "decide whether the case can proceed.",
+    "act": "Case {cid} has inconsistent paperwork. Decide what to do and record "
+           "the action.",
+    "mixed": "For {entity} {eid}, check the status, then decide whether {pid} "
+             "should be granted a {product}.",
+}
+
+
 def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
-                 n_principals_as_users: int = 0) -> list[Invocation]:
+                 n_principals_as_users: int = 0,
+                 mode: str | None = None) -> list[Invocation]:
     """Requests that reference real pack records, so the tools can succeed.
 
     Inputs must be answerable. A corpus of requests about entities that do not
@@ -209,6 +282,16 @@ def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
     `n_principals_as_users` assigns a requester identity to each input, drawn
     from that many distinct users. Needed for the sticky-routing fault, where
     the point is that the per-user rate and the per-request rate come apart.
+
+    `mode` phrases the request the way that mode's consumer would. Only `agent`
+    differs: a plain question is exactly what an extraction or summarisation
+    consumer sends, whereas a decision line answers a decision request and
+    nothing else. The records referenced, the tool shape exercised and the
+    position in the list are identical across modes, so a corpus stays
+    comparable; only the wording moves. Passing `mode` also puts it in the input
+    id, because two different request texts must never share one id -- the
+    recorder groups by input id, and a collision would silently pair
+    unlike requests.
     """
     import random
 
@@ -221,6 +304,8 @@ def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
     out: list[Invocation] = []
     for i in range(n):
         kind, tmpl = _TEMPLATES[i % len(_TEMPLATES)]
+        if mode == "agent":
+            tmpl = _AGENT_TEMPLATES[kind]
         text = tmpl.format(
             entity=v.entity_kind, event=v.event_kind,
             eid=eids[i % len(eids)], pid=pids[i % len(pids)],
@@ -231,6 +316,7 @@ def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
         principal = None
         if n_principals_as_users:
             principal = f"user{i % n_principals_as_users}"
-        out.append(Invocation(input_id=f"{pack.domain}-{kind}-{i:03d}",
+        tag = f"{pack.domain}-{mode}" if mode else pack.domain
+        out.append(Invocation(input_id=f"{tag}-{kind}-{i:03d}",
                               text=text, principal=principal))
     return out
