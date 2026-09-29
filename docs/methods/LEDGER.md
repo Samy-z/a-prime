@@ -490,3 +490,62 @@ the different-seed null is the part that needs a real measurement.
 **Evidence:** BCH-012; scratch run 2026-09-29 reproducing it against the cells.
 **Reopen if:** temperature, model or server version changes, any of which moves
 how much two differently-seeded runs diverge.
+
+## MTH-023 — CORRECTION (dated append, 2026-09-30)
+
+**The entry above overstated its evidence and its recommendation. Both are
+corrected here rather than edited above.**
+
+**What was claimed:** same seed gives byte-identical output, therefore the null
+has zero width, therefore A and A-prime must differ in seed by construction.
+Evidence was 3 inputs, one mode, one model.
+
+**What a real measurement shows.** 8 repeats of one identical request,
+`granite4.2:8b`, temperature 0.2:
+
+| seed policy | distinct outputs in 8 | mean similarity to first |
+|---|---|---|
+| pinned at 7 | **2** | 0.307 |
+| unset | **8** | 0.197 |
+
+So a pinned seed does not give byte-identical output. It collapses 8 runs onto
+2 points. The direction of the original finding survives and the mechanism does
+not: a null supported on 2 points cannot calibrate a tail quantile any more
+than a null supported on 1 can, so the conclusion holds for a different reason
+than the one given.
+
+**A contradiction worth keeping rather than tidying away.** An earlier check in
+the same session found 3 of 3 byte-identical under a repeated seed, and BCH-012
+found byte-identical output on four models. This measurement, on the same model
+and the same server, did not. The difference tracks whether other requests ran
+in between: the one call that differed from the other seven was the first.
+**Which cluster a pinned-seed run lands in appears to depend on server cache
+and batch state, which is not a study variable and is not in provenance.** That
+makes the null width unstable in a way nothing currently records. This is the
+more troubling half of the finding and it is unresolved.
+
+**The recommendation was too blunt.** "A and A-prime must differ in seed" is
+wrong as a universal rule. The arms have to mirror the seed policy of the
+deployment being audited:
+
+- Deployment leaves the seed unset, which is the ordinary case: the arms leave
+  it unset. Self-variance is real and A-prime measures it.
+- Deployment pins its seed, which happens for audit or caching: its true
+  self-variance really is near zero, and reporting that is correct. In that
+  regime target-decoy FDR is the wrong instrument, because there is no null to
+  estimate and an exact diff answers the question directly.
+
+The rule is therefore **mirror the deployment, and record which regime a run
+was made in**, not "always differ". The tool should refuse, or at least warn,
+when both baseline arms are configured with the same pinned seed, because that
+configuration silently produces confident meaningless numbers.
+
+**Thin nulls need more inputs, not more temperature.** The original entry
+suggested temperature as the lever for a thin null. That was wrong-headed:
+raising temperature changes the system under test as well as the null. A null
+that is thin because few pairs differ is a granularity problem, and the fix is
+more decoy pairs.
+**Evidence:** `results/seed_determinism.json`,
+`tests/fixtures/ollama_chat.json` (`seed_regimes`).
+**Reopen if:** anyone measures what actually drives the two clusters. Until
+then the instability, not the collapse, is the open risk.

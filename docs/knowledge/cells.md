@@ -141,23 +141,35 @@ shape-stratified threshold has little to hold on to there.
 same 12 invocations, 51 tool calls against 19. At full corpus size that is the
 dominant term in the GPU budget, and it is not yet costed.
 
-## A recurring defect worth naming
+## Test doubles are captured, not written
 
-Three times now a hand-written test double has diverged from the real API:
+Eight times a hand-written test double diverged from the real API:
 
 1. the fake transport invented a `sha256:` digest prefix a live server does not use
 2. a check conflated an errored response with an empty one
 3. the fake assistant message omitted `"role"`, which a real response includes
 4. no fake ever emitted a `</think>` tag, so the leak went unseen until a live run
 5. every scripted turn terminated, so nothing exercised a real exhaustion
+6. every fake tool found what it was asked for, so no fake ever ran out of options
+7. real `tool_calls` entries carry an `id`; no fake had one
+8. real `function` objects carry an `index`; no fake had one
 
-Each was caught only by running against reality. The third also revealed a real
-robustness gap — the cell now sets `role: "assistant"` explicitly rather than
-appending the model's message verbatim.
+Every one cost a live run to find and none was caught by a test. A fake written
+from memory encodes what we believe the API does. A fixture encodes what it
+does, and the two only differ where it matters.
 
-**The process fix is to build fakes from captured real responses** rather than
-from memory of the API. Not yet done; it needs one live capture per shape stored
-as a fixture.
+**So the doubles are now built from captured bodies.**
+`scripts/capture_chat_fixtures.py` records real responses into
+`tests/fixtures/ollama_chat.json`; the test helpers take the envelope from
+there and substitute only the payload a test needs to choose. With the fixture
+file absent the tests fail and say why, because a fallback to hand-written
+doubles is precisely what hid the eight divergences above.
+
+Items 7 and 8 were found by the capture itself, within a minute of it first
+running, and 7 was a live bug rather than a test artifact: **without echoing
+`tool_call_id`, a turn containing several tool calls has its results matched to
+calls by position alone**, so any reordering attaches an answer to the wrong
+question. The cell now echoes it.
 
 ## Not yet done
 
@@ -165,7 +177,11 @@ as a fixture.
 - `build_inputs` covers the eight shapes plus one mixed template. No multi-turn
   inputs, so chained tool use is only exercised when a model chooses to chain.
 - Only one model has ever driven a cell. Everything measured here, and the
-  reasoning leak in particular, may be specific to `granite4.2:8b`.
+  reasoning leak in particular, may be specific to `granite4.2:8b`. The captured
+  fixtures come from that model too, so they record one server's shapes.
+- `mode` names two unrelated things across the codebase: a cell's output format
+  here, and an output cluster in `clustering.py`. The collision has already
+  confused a reader once.
 - The stale view shifts a principal's prior records but not their figures,
   because the packs hold no history of the figures to shift. A knowledge-base
   staleness fault therefore has a narrower surface than it should.

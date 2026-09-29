@@ -1,12 +1,18 @@
 """Knowledge packs, the eight tools, and cells.
 
-Tested with a scripted chat function rather than a model, so this runs in
-milliseconds and needs no GPU. What it cannot check is whether a real model drives
-the loop sensibly; that is measured separately and recorded in BCH-013.
+Runs in milliseconds and needs no GPU. The chat function is scripted, but the
+response envelopes it replays were captured from a live server rather than
+written from memory of the API, because the hand-written ones were wrong eight
+times. See the note above `_tool_turn`.
+
+What this still cannot check is whether a real model drives the loop sensibly.
+That is measured separately, in BCH-014 and BCH-015.
 """
 
 from __future__ import annotations
 
+import copy
+import functools
 import json
 import sys
 from pathlib import Path
@@ -165,18 +171,111 @@ def _scripted(*turns):
     return chat
 
 
-# These mirror what a live Ollama 0.34.4 server returns, including the "role"
-# key. An earlier version omitted it, which is the third time in this project a
-# hand-written fake has diverged from the real API -- see the note in
-# docs/knowledge/cells.md.
+# ------------------------------------------------------- captured envelopes ---
+#
+# These are built from response bodies a live server actually returned, stored
+# in tests/fixtures/ollama_chat.json by scripts/capture_chat_fixtures.py.
+#
+# They used to be written from memory of the API, and did so wrongly eight
+# times: an invented `sha256:` digest prefix, a check that conflated errored
+# with empty, a missing `role`, no `</think>` leak, a turn that always
+# terminated, a tool that always found what it was asked for, a missing
+# `tool_calls[].id` and a missing `function.index`. Each cost a live run to
+# find. A fake written from memory encodes what we believe the API does; a
+# fixture encodes what it does, and the difference only shows up when they
+# disagree, which is exactly when it matters.
+#
+# The envelope comes from the capture. Only the payload -- a tool name, its
+# arguments, the text of an answer -- is substituted, because a test needs to
+# choose those. Everything structural stays as the server sent it.
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures" / "ollama_chat.json"
+
+
+def _captured():
+    if not FIXTURES.exists():
+        pytest.fail(
+            f"{FIXTURES.name} is missing. Run scripts/capture_chat_fixtures.py "
+            f"against a live server. These tests deliberately do not fall back "
+            f"to hand-written doubles, because that fallback is what hid eight "
+            f"divergences from the real API.")
+    return json.loads(FIXTURES.read_text(encoding="utf-8"))
+
+
+@functools.lru_cache(maxsize=1)
+def _by_label():
+    return {f["label"]: f for f in _captured()["fixtures"]}
+
+
+def _envelope(label):
+    """A deep copy of one captured response body, safe to mutate."""
+    fx = _by_label()
+    if label not in fx:
+        pytest.fail(f"no captured fixture labelled {label!r}; have "
+                    f"{sorted(fx)}")
+    return copy.deepcopy(fx[label]["response"])
+
+
 def _tool_turn(name, args):
-    return {"message": {"role": "assistant", "content": "",
-                        "tool_calls": [{"function": {"name": name, "arguments": args}}]}}
+    """A tool-call turn in the envelope a live server sends, including the `id`
+    and `function.index` that the hand-written version omitted."""
+    body = _envelope("tool_call")
+    call = body["message"]["tool_calls"][0]
+    call["function"]["name"] = name
+    call["function"]["arguments"] = args
+    return body
 
 
 def _text_turn(text, **kw):
-    return {"message": {"role": "assistant", "content": text},
-            "done_reason": "stop", **kw}
+    """A plain answer in a captured envelope, with the text substituted."""
+    body = _envelope("text_stop")
+    body["message"]["content"] = text
+    body.setdefault("done_reason", "stop")
+    body.update(kw)
+    return body
+
+
+def test_the_captured_envelope_carries_what_the_fakes_forgot():
+    """A canary on the fixtures themselves.
+
+    Two fields were absent from every hand-written double for the life of this
+    file. If a re-capture ever drops them, the doubles quietly go back to being
+    wrong in the same way, and nothing else here would notice.
+    """
+    call = _envelope("tool_call")["message"]["tool_calls"][0]
+    assert call.get("id"), "a real tool call carries an id"
+    assert "index" in call["function"], "a real tool call carries function.index"
+    assert _envelope("text_stop")["message"]["role"] == "assistant"
+    assert _envelope("truncated").get("done_reason") == "length"
+
+
+def test_a_turn_with_several_tool_calls_echoes_each_id():
+    """Without the id, results are matched to calls by position alone, so any
+    reordering attaches an answer to the wrong question."""
+    p = build_pack("banking", 10)
+    eid = p.entity_ids()[0]
+    two = _envelope("tool_call")
+    first = two["message"]["tool_calls"][0]
+    first["function"]["name"] = "get_account"
+    first["function"]["arguments"] = {"account_id": eid}
+    second = copy.deepcopy(first)
+    second["id"] = "SECOND_CALL_ID"
+    second["function"]["index"] = 1
+    second["function"]["name"] = "get_lending_policy"
+    second["function"]["arguments"] = {"topic": "income verification"}
+    two["message"]["tool_calls"].append(second)
+
+    seen = []
+
+    def chat(messages, tools):
+        seen.append(list(messages))
+        return two if len(seen) == 1 else _text_turn("APPROVE, fine.")
+
+    Cell(p, "agent", chat, "A").invoke(Invocation("i0", "q"))
+    tool_msgs = [m for m in seen[-1] if m.get("role") == "tool"]
+    assert len(tool_msgs) == 2
+    assert tool_msgs[0]["tool_call_id"] == first["id"]
+    assert tool_msgs[1]["tool_call_id"] == "SECOND_CALL_ID"
 
 
 def test_a_cell_presents_as_an_ordinary_system_under_test():

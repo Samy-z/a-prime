@@ -1,0 +1,21 @@
+{
+  "model": "granite4.2:8b",
+  "temperature": 0.2,
+  "num_predict": 120,
+  "regimes": {
+    "seed=7 repeated": {
+      "n": 8,
+      "distinct": 2,
+      "match_first": 1,
+      "mean_similarity_to_first": 0.307,
+      "min_similarity": 0.307
+    },
+    "seed unset": {
+      "n": 8,
+      "distinct": 8,
+      "match_first": 1,
+      "mean_similarity_to_first": 0.197,
+      "min_similarity": 0.094
+    }
+  }
+}

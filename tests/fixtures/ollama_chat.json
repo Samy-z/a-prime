@@ -1,0 +1,308 @@
+{
+  "captured": "granite4.2:8b",
+  "host_note": "local Ollama, see BCH-012 for version",
+  "fixtures": [
+    {
+      "label": "text_stop",
+      "why": "A plain answer with no tool call. The baseline shape.",
+      "captured_from": "granite4.2:8b",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a applicant case handler working with account records. Use the tools to look up facts rather than guessing them."
+          },
+          {
+            "role": "user",
+            "content": "Reply with exactly the word: ready."
+          }
+        ],
+        "tools_offered": false,
+        "overrides": {}
+      },
+      "response": {
+        "model": "granite4.2:8b",
+        "created_at": "2026-09-29T22:31:55.7922356Z",
+        "message": {
+          "role": "assistant",
+          "content": "ready"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 5193983300,
+        "load_duration": 5025755200,
+        "prompt_eval_count": 46,
+        "prompt_eval_cached_count": 0,
+        "prompt_eval_duration": 121627000,
+        "eval_count": 2,
+        "eval_duration": 39902000
+      }
+    },
+    {
+      "label": "tool_call",
+      "why": "A turn that asks for a tool. Note whether 'role' is present and what 'content' holds alongside tool_calls.",
+      "captured_from": "granite4.2:8b",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a applicant case handler working with account records. Use the tools to look up facts rather than guessing them."
+          },
+          {
+            "role": "user",
+            "content": "What is the status of account AC-4000?"
+          }
+        ],
+        "tools_offered": true,
+        "overrides": {}
+      },
+      "response": {
+        "model": "granite4.2:8b",
+        "created_at": "2026-09-29T22:31:57.3555987Z",
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "id": "dvbqCpHoF1rhMOOPYnSDDOm85xfluYNn",
+              "function": {
+                "index": 0,
+                "name": "get_account",
+                "arguments": {
+                  "account_id": "AC-4000"
+                }
+              }
+            }
+          ]
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1555870900,
+        "load_duration": 5704600,
+        "prompt_eval_count": 809,
+        "prompt_eval_cached_count": 26,
+        "prompt_eval_duration": 457536000,
+        "eval_count": 35,
+        "eval_duration": 1060313000
+      }
+    },
+    {
+      "label": "truncated",
+      "why": "done_reason 'length'. A cut-off output is a confound the detector would read as the system changing.",
+      "captured_from": "granite4.2:8b",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a applicant case handler working with account records. Use the tools to look up facts rather than guessing them."
+          },
+          {
+            "role": "user",
+            "content": "Explain, at length, what a debt to income ratio is and why lenders use it."
+          }
+        ],
+        "tools_offered": false,
+        "overrides": {
+          "num_predict": 24
+        }
+      },
+      "response": {
+        "model": "granite4.2:8b",
+        "created_at": "2026-09-29T22:31:58.2011695Z",
+        "message": {
+          "role": "assistant",
+          "content": "Certainly. Let's clarify the concept clearly, accurately, and in depth\u2014without jargon overload\u2014using only factual definitions"
+        },
+        "done": true,
+        "done_reason": "length",
+        "total_duration": 837291300,
+        "load_duration": 4715200,
+        "prompt_eval_count": 57,
+        "prompt_eval_cached_count": 31,
+        "prompt_eval_duration": 76137000,
+        "eval_count": 24,
+        "eval_duration": 689590000
+      }
+    },
+    {
+      "label": "after_tool_result",
+      "why": "The turn after a tool result is fed back. This is where the reasoning leak was first seen.",
+      "captured_from": "granite4.2:8b",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a applicant case handler working with account records. Use the tools to look up facts rather than guessing them."
+          },
+          {
+            "role": "user",
+            "content": "Show the transactions on account AC-4000 above 1000."
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "function": {
+                  "name": "search_transactions",
+                  "arguments": {
+                    "account_id": "AC-4000",
+                    "min_amount": 1000
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "name": "search_transactions",
+            "content": "{\"count\": 4, \"total\": 95050, \"items\": [{\"id\": \"AC-4000-E0\", \"kind\": \"transaction\", \"amount\": 1250, \"unit\": \"USD\", \"date\": \"2026-01-07\"}, {\"id\": \"AC-4000-E1\", \"kind\": \"transaction\", \"amount\": 21400, \"unit\": \"USD\", \"date\": \"2026-01-27\"}, {\"id\": \"AC-4000-E2\", \"kind\": \"transaction\", \"amount\": 67000, \"unit\": \"USD\", \"date\": \"2026-05-17\"}, {\"id\": \"AC-4000-E3\", \"kind\": \"transaction\", \"amount\": 5400, \"unit\": \"USD\", \"date\": \"2026-03-18\"}]}"
+          }
+        ],
+        "tools_offered": true,
+        "overrides": {}
+      },
+      "response": {
+        "model": "granite4.2:8b",
+        "created_at": "2026-09-29T22:32:02.755635Z",
+        "message": {
+          "role": "assistant",
+          "content": "Here are the transactions on account AC-4000 above 1000 USD:\n\n1. **Date:** 2026-01-07 | **Amount:** 1250 USD\n2. **Date:** 2026-01-27 | **Amount:** 21400 USD\n3. **Date:** 2026-03-18 | **Amount:** 5400 USD\n4. **Date:** 2026-05-17 | **Amount:** 67000 USD\n\n**Summary:** 4 transactions totaling 95,050 USD.\n\nLet me know if you'd like to see details of a specific transaction or need further analysis."
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 4547211600,
+        "load_duration": 3837600,
+        "prompt_eval_count": 1063,
+        "prompt_eval_cached_count": 791,
+        "prompt_eval_duration": 180941000,
+        "eval_count": 138,
+        "eval_duration": 4283067000
+      }
+    },
+    {
+      "label": "tools_withheld",
+      "why": "The forced final answer: same conversation, tools withdrawn. Exercises the exhaustion path.",
+      "captured_from": "granite4.2:8b",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a applicant case handler working with account records. Use the tools to look up facts rather than guessing them."
+          },
+          {
+            "role": "user",
+            "content": "What is the status of account AC-4000?"
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "function": {
+                  "name": "get_account",
+                  "arguments": {
+                    "account_id": "AC-4000"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "name": "get_account",
+            "content": "{\"id\": \"AC-4000\", \"kind\": \"account\", \"applicant_id\": \"AP-100\", \"status\": \"under review\", \"product\": \"buy-to-let mortgage\", \"opened\": \"2019-10\", \"quantity\": 9, \"unit\": \"USD\"}"
+          },
+          {
+            "role": "user",
+            "content": "Stop searching and answer now."
+          }
+        ],
+        "tools_offered": false,
+        "overrides": {}
+      },
+      "response": {
+        "model": "granite4.2:8b",
+        "created_at": "2026-09-29T22:32:03.3776464Z",
+        "message": {
+          "role": "assistant",
+          "content": "The status of account AC-4000 is **under review**."
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 612198900,
+        "load_duration": 4030200,
+        "prompt_eval_count": 175,
+        "prompt_eval_cached_count": 31,
+        "prompt_eval_duration": 117702000,
+        "eval_count": 15,
+        "eval_duration": 424123000
+      }
+    },
+    {
+      "label": "bad_tool_name",
+      "why": "A tool the set does not have. Models do this, and the error has to be readable enough to recover from.",
+      "captured_from": "granite4.2:8b",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a applicant case handler working with account records. Use the tools to look up facts rather than guessing them."
+          },
+          {
+            "role": "user",
+            "content": "Call the tool named get_nonexistent."
+          }
+        ],
+        "tools_offered": true,
+        "overrides": {}
+      },
+      "response": {
+        "model": "granite4.2:8b",
+        "created_at": "2026-09-29T22:32:06.9378868Z",
+        "message": {
+          "role": "assistant",
+          "content": "I cannot call the tool named \"get_nonexistent\" because it does not exist in the available tools. The available tools are:\n\n- `get_account`\n- `search_transactions`\n- `get_lending_policy`\n- `compute_debt_ratio`\n- `check_eligibility`\n- `list_prior_applications`\n- `validate_document`\n- `escalate_case`\n\nPlease provide a valid tool name and parameters, or clarify your request."
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 3553905100,
+        "load_duration": 4648800,
+        "prompt_eval_count": 807,
+        "prompt_eval_cached_count": 791,
+        "prompt_eval_duration": 65766999,
+        "eval_count": 111,
+        "eval_duration": 3385736000
+      }
+    }
+  ],
+  "seed_regimes": {
+    "pinned, shared": {
+      "seeds": [
+        7,
+        7
+      ],
+      "identical": false,
+      "a": "A debt-to-income (DTI) ratio tells a lender the proportion of a borrower's monthly gross income that goes toward paying all monthly debt obligations, such as mortgage or rent payments, car loans, credit card minimums, and other recurring liabilities. It helps the lender assess the borrower's ability to manage and repay additional debt, indicating financial risk and eligibility for credit.",
+      "a_prime": "A debt-to-income (DTI) ratio tells a lender the proportion of a borrower\u2019s monthly gross income that goes toward paying all debt obligations, including mortgages, auto loans, credit\u2011card minimums, etc. It helps the lender assess whether the borrower is likely to be able to afford additional debt and manage repayment comfortably."
+    },
+    "pinned, differing": {
+      "seeds": [
+        7,
+        8
+      ],
+      "identical": false,
+      "a": "A debt-to-income (DTI) ratio tells a lender the proportion of a borrower\u2019s monthly gross income that goes toward paying all debt obligations, including mortgages, auto loans, credit\u2011card minimums, etc. It helps the lender assess whether the borrower is likely to be able to afford additional debt and manage repayment comfortably.",
+      "a_prime": "A debt-to-income (DTI) ratio shows the proportion of a borrower's monthly income that goes toward paying existing debts. Lenders use it to assess whether the borrower can afford additional debt."
+    },
+    "unset": {
+      "seeds": [
+        null,
+        null
+      ],
+      "identical": false,
+      "a": "A debt-to-income (DTI) ratio tells a lender the proportion of a borrower\u2019s monthly gross income that goes toward paying all debt obligations, such as mortgages, car loans, credit\u2011card minimums, etc. It helps the lender assess how likely the borrower is to manage additional debt and meet repayment obligations.",
+      "a_prime": "A debt-to-income (DTI) ratio tells a lender the proportion of a borrower\u2019s monthly gross income that goes toward paying all debt obligations, such as mortgages, car loans, credit\u2011card minimums, etc. It helps the lender assess how likely the borrower is to repay new debt and whether the proposed loan amount is affordable."
+    }
+  }
+}

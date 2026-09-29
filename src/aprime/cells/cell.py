@@ -158,8 +158,17 @@ class Cell:
                             args = {}
                     called.append(name)
                     result = self.tools.call(name, args)
-                    messages.append({"role": "tool", "name": name,
-                                     "content": json.dumps(result)})
+                    # The real server stamps each tool call with an id, which
+                    # every hand-written fake here omitted. Without echoing it
+                    # back, a turn containing several tool calls has its results
+                    # matched by position alone, so any reordering silently
+                    # attaches an answer to the wrong question. Echoed when
+                    # present; servers that do not send one are unaffected.
+                    msg_out = {"role": "tool", "name": name,
+                               "content": json.dumps(result)}
+                    if tc.get("id"):
+                        msg_out["tool_call_id"] = tc["id"]
+                    messages.append(msg_out)
         except Exception as exc:  # noqa: BLE001
             return Response(
                 output="",
