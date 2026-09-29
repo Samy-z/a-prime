@@ -1,134 +1,223 @@
 # a-prime
 
-**What changed when I swapped the model?** Same system, same prompts, same
-tools, one component replaced — and an answer that does not require knowing what
-any of the outputs mean, with a false-alarm rate you can actually state.
+## The problem
 
-The name is the method. Before comparing baseline **A** to candidate **B**, run
-A twice. The second baseline run, **A′**, is a comparison where *nothing
-changed by construction*, so its scores are the null distribution — measured on
-your corpus, your models, and the same afternoon. No distributional assumption,
-no p-values, no hand-written assertions.
+You swap the model behind an LLM feature. Perhaps you move to something cheaper,
+perhaps your provider retires the snapshot you were pinned to, perhaps you bump a
+local model by one version. Your unit tests still pass, because they test your
+code rather than the model's judgement. You have no labelled data for your own
+domain, because almost nobody does. And every output now reads slightly
+differently, because the new model phrases things its own way.
+
+So how do you find out what actually broke?
+
+Most teams read fifty outputs and hope. That is not carelessness, it is the
+absence of anything better. Across 118 incidents published by the two largest
+model providers, not one describes a drop in output quality. Quality regressions
+in the wild have run from four days to ten months before anyone noticed them, and
+in the cases that have been written up, none was caught by the operator's own
+automated tests.
+
+a-prime is an attempt at something better. Give it your old system, your new
+system, and a few hundred of your own inputs. It tells you which inputs changed
+behaviour, and how often it is likely to be wrong when it says so.
+
+It does that without knowing what your outputs mean. No labels, no reference
+answers, no assertions to write by hand.
+
+## The idea: run the baseline twice
+
+The hard part is not spotting differences. Differences are everywhere, because a
+new model rewords everything. The hard part is knowing which differences matter,
+and that needs a sense of how much variation is normal.
+
+So before comparing the old system to the new one, a-prime runs **the old system
+against itself**, a second time:
 
 ```
-              ┌──► A   ─┐
-  your inputs ─┼──► A′  ─┼──►  A vs B  = targets   ─┐
-              └──► B   ─┘     A vs A′ = decoys    ─┴──► threshold at FDR q
+                    ┌──► A   (old system)  ─┐
+  your inputs  ─────┼──► A′  (old system,   ─┼──► A vs B  : did the new one differ?
+                    │        again)          │
+                    └──► B   (new system)  ─┘    A vs A′ : how much does the old
+                                                           one differ from itself?
 ```
 
-> **Status: week 1 of 4.** The detector runs end to end against a synthetic
-> system with known ground truth. It has never been pointed at a real one. Every
-> number below is reproducible from this repo; none of it is a product claim.
+The second run, `A′`, is a comparison where nothing changed by construction. Any
+difference it shows is pure noise. That gives a yardstick: a difference between
+the old and new systems only counts if it is bigger than the difference the old
+system shows against itself.
 
-## Measured end to end
+This is what makes the false alarm rate knowable. You choose a budget, say "at
+most 10% of what you flag may be a false alarm", and the second baseline run
+tells the tool where to put its threshold to honour that. There is no
+distributional assumption, no p-value, and nothing to calibrate by hand.
 
-300 inputs, 12 samples per arm, 30 genuinely changed, model-free path:
-
-| | |
-|---|---|
-| realised false-discovery rate | **0.034** against a 0.10 budget |
-| recall | **28 / 30 = 93%** |
-
-That FDR figure is the point of the whole design, and it can only be checked
-here — a real deployment never tells you which inputs genuinely changed, which
-is exactly why the synthetic system exists rather than being a shortcut.
+The measurement that matters is whether that promise holds. On a synthetic
+system where we know exactly which inputs really changed, asking for at most
+10% false alarms produced **3.4%**, while still catching **28 of the 30** inputs
+that genuinely changed.
 
 ```bash
 python scripts/demo_detect.py
 ```
 
-## What each channel can and cannot see
+```
+a-prime report: 29 of 300 inputs flagged at q=0.1
 
-Most of the value in this repo is the negative results. Measured on 896 probe
-pairs across 4 subject domains and 4 output shapes, at a 5% false-alarm budget:
+channels:
+  mode_share       28 flagged   short: n=300 thr=0.583 found=28
+  novel_mode       13 flagged   short: n=300 thr=0.500 found=13
+  dispersion        0 flagged   short: n=300 thr=inf   found=0
+  embedding     skipped - no embedder supplied
 
-| channel | catches | blind to |
+conformance: 8 candidates -> 7 hard, 0 surfaced, 1 discarded
+
+flagged inputs:
+  in025 [short] mode_share=+1.000, novel_mode=+1.000
+  in030 [short] mode_share=+1.000, novel_mode=+1.000
+  ...
+```
+
+Note the `dispersion` line. That check found no threshold it could justify, so it
+reported nothing rather than lowering its bar until something appeared. A tool
+that always finds something is not measuring anything.
+
+## What we found, including the parts that did not work
+
+The results below come from 896 hand-built text pairs where we know the intended
+relationship between the two versions. Some pairs say the same thing in different
+words. Others change a number, flip a decision, or quietly drop a condition. A
+good check catches the second kind and ignores the first.
+
+Several checks run in parallel, and none of them votes. Each reports separately,
+because combining them would need weights, and weights we invented would be
+weights nobody could audit.
+
+| check | what it catches | what it misses |
 |---|---|---|
-| NLI contradiction | 7 of 8 fact changes, 84–100% | omission, entirely |
-| NLI directional, **upper tail** | dropped conditions, 98.4% | everything else |
-| NLI directional, **lower tail** | added content, 100% | everything else |
-| structural conformance | broken schemas, wrong scripts, mid-sentence stops, refusals | anything semantic |
-| embedding displacement | **worse than chance, ungated** | see below |
+| contradiction | 7 of 8 kinds of factual change, 84% to 100% of the time | dropped conditions, completely |
+| information loss | dropped conditions, 98% | everything else |
+| information gain | added content such as hedging, 100% | everything else |
+| structural rules | broken JSON, wrong alphabets, answers cut mid-sentence, refusals | anything about meaning |
+| embedding distance | **less than nothing, if used naively** | see below |
 
-**Embedding displacement is anti-correlated with meaning change.** Across three
-model families, pooled separability was 0.391 / 0.440 / 0.532 — at or below a
-coin flip. Rewording moves the vector about **twenty times further** than
-changing a number, a date, or a negation. It recovers only when the candidate's
-surface style is stable, so it ships behind a gate that measures that
-precondition and refuses the channel when it fails. A channel below chance is
-worse than an absent one, because it will be trusted.
+The first three use a model trained to judge whether one piece of text follows
+from another. The fourth reads no meaning at all, which is exactly why it covers
+failures the others cannot see: a corrupted character is not a claim, so no
+amount of reading comprehension will notice it.
 
-## Ideas worth stealing
+### The result we did not expect
 
-**The decoy arm does two jobs.** Beyond calibrating the false-alarm rate, it
-prunes induced rules. Structural invariants are inferred from what the system
-actually produces — the Daikon idea, never ported to LLM outputs — and Daikon's
-famous problem is emitting far more candidates than a human can triage. A rule
-that holds on A and breaks on an independent re-run of A was never structural.
-Rules that survive both arms are enforced; rules that hold *often* are surfaced
-as questions; the rest are dropped.
+**Embedding distance is worse than useless here.** Embeddings turn text into
+vectors so that similar text sits close together, and comparing those vectors is
+the obvious way to ask whether an output changed. We tried it across three
+different embedding model families, and in all three it performed at or below a
+coin flip.
 
-**One statistic, two tails, two faults.** Entailment asymmetry is positive when
-information was removed and negative when it was added. The sign names the
-fault. Taking the absolute value — which was the first implementation — conflates
-them and discards the only piece of information that tells you which happened.
+The reason is mundane once you see it. Rewriting a sentence moves its vector
+about **twenty times further** than changing a number, a date, or a negation
+inside it. So the measure reliably reports that harmless rewording is a big
+change and that a flipped decision is a small one.
 
-**Control and power are measured separately.** Conflating them is how a detector
-ends up with its budget quietly widened to hit a recall target. Here the FDR
-test asserts only calibration; power has its own test and its own published
-envelope, including the regions where there isn't any.
+It recovers only when the new system happens to phrase things much like the old
+one. So it ships behind a check that measures whether that is true, and switches
+the whole thing off when it is not. A measure that performs below chance is worse
+than having none, because someone will believe it.
 
-## What's honest about the limits
+## Two ideas that might be useful elsewhere
 
-- k=10 samples per arm has **8% power** against a moderate change. k=20 reaches
-  73%. The operating point is 60 model calls per input, not 30.
-- A ~0.3 mode-share shift is undetectable at every k tested.
-- NLI results are **checkpoint-dependent**: a second model reproduced the
-  direction of every finding and none of the magnitudes, with per-category gaps
-  up to 48 points.
-- Deduplication is exact and normalised only; semantic near-duplicates are not
-  handled.
-- The embedding gate's threshold is a guess, and labelled as one.
+**The second baseline run does a second job.** As well as setting the false alarm
+rate, it filters rules.
 
-## Layout
+a-prime infers rules about your output by watching your baseline produce it. If
+every one of 300 baseline outputs is valid JSON, contains a `status` field, and
+uses only Latin characters, those become rules, and the new system is checked
+against them. This idea is borrowed from Daikon, a program analysis tool from
+2001 that watched software run and guessed the invariants its variables obeyed.
+Nobody seems to have applied it to the text a language model produces.
+
+Daikon's well known weakness is that it proposes far more rules than a person
+can review, most of them true by coincidence. The second baseline run handles
+that: a rule that holds for one run of a system and breaks on another run of the
+same system was never really a rule. What survives both runs is enforced
+automatically. What holds most of the time but not always is shown to a human as
+a question, phrased as "this was true in 87% of outputs, is that a rule or just
+usual variation?". The rest is discarded.
+
+**One number, read at both ends, names two different faults.** When we ask
+whether the old output implies the new one and vice versa, the asymmetry is
+informative. A strongly positive value means the new output says less than the
+old one, which is content going missing. A strongly negative value means it says
+more, such as hedging that was not there before. The sign tells you which
+happened. Our first implementation took the absolute value, which collapsed both
+cases into one and threw away the only part that identified the fault.
+
+## Honest limits
+
+- **Twelve samples per input is not enough.** Against a moderate change, ten
+  samples per system detected 8% of them. Twenty samples reached 73%. The real
+  operating point is therefore 60 model calls per input, not 30.
+- **There is a floor below which nothing is visible.** A change that shifts the
+  mix of answers by about 30% was undetectable at every sample size we tried.
+- **The results depend on which judge model you use.** A second model of the same
+  type reproduced the direction of every finding and none of the magnitudes, with
+  differences of up to 48 percentage points on individual categories. Numbers
+  here describe the model we pinned, not the technique.
+- **Duplicate inputs are only removed when the text matches after normalising.**
+  Two ways of asking the same question are not caught, and that inflates the
+  apparent amount of independent evidence.
+- **One threshold is still a guess**, the one that decides when to trust the
+  embedding check. It is labelled as a guess in the code.
+- **This has never been run against a production system.** Every number above
+  comes from a synthetic system or from hand-built text pairs. That is research
+  in progress, not a product.
+
+## Prior art
+
+This is not an empty field, and one project got to the core idea first.
+
+[Clausius](https://github.com/beatakouchnir/clausius) detects regressions without
+labels, using a measured baseline for comparison, and has published sensitivity
+figures. It reads the model's internal token probabilities, which means it only
+works with models you host yourself and cannot be pointed at a commercial API.
+a-prime looks only at the text that comes out, which is slower and less
+informative but works anywhere.
+
+[Inspect](https://inspect.aisi.org.uk/), from the UK AI Safety Institute, already
+has the statistics right, including repeated sampling and the correct error bars
+for comparing two models. It is a framework you configure for each evaluation you
+write, rather than something that infers what to check.
+
+[Giskard](https://github.com/Giskard-AI/giskard) generates tests from
+transformations that should not change an answer, such as rephrasing a question.
+Arize Phoenix groups outputs by meaning and ranks the groups by how much they
+have drifted.
+
+What appears not to exist yet: inferring structural rules from a baseline's own
+output, and using a repeated baseline run as a general purpose way to calibrate a
+black box comparison.
+
+## Repository layout
 
 ```
-src/aprime/     adapter, recorder, dedup, normalise, clustering, stats,
-                fdr, conformance, gating, provenance, detect
-docs/knowledge/ what is true now, one doc per subsystem
-docs/*/LEDGER.md settled findings with evidence and a reopen-if clause
-HANDOFF.md      why the design is what it is
+src/aprime/        the library
+docs/knowledge/    what is currently true, one file per component
+docs/*/LEDGER.md   findings, each with its evidence and what would overturn it
+HANDOFF.md         why the design is the way it is
 ```
 
-Start with [`docs/knowledge/probes.md`](docs/knowledge/probes.md) for the
-blind-spot map and [`docs/knowledge/detector.md`](docs/knowledge/detector.md)
-for how the pieces compose.
-
-## Prior art, honestly
-
-This is not an empty field. [Clausius](https://github.com/beatakouchnir/clausius)
-does label-free regression detection with a measured null and gets there first
-on the slogan; it reads logprobs, so it is local-only and cannot touch a hosted
-API. UK AISI's [Inspect](https://inspect.aisi.org.uk/) has the statistical core —
-repeated decodes, clustered and paired standard errors — as a harness you
-configure per eval. [Giskard](https://github.com/Giskard-AI/giskard) ships
-metamorphic invariance tests. Arize Phoenix orders embedding clusters by drift.
-
-What appears to be unoccupied: inducing structural rules from a baseline's own
-output distribution, and the A′ decoy arm as a black-box calibration primitive.
+Good entry points are
+[`docs/knowledge/probes.md`](docs/knowledge/probes.md), which lists what each
+check can and cannot see, and
+[`docs/knowledge/detector.md`](docs/knowledge/detector.md), which explains how
+the pieces fit together.
 
 ```bash
-python -m pytest tests/ -q     # 103 tests, no models required
+python -m pytest tests/ -q     # 134 tests, no model downloads required
 ```
 
 ## Licence
 
-Code is **Apache-2.0** ([LICENSE](LICENSE)) — permissive, with an explicit
-patent grant, and consistent with the Apache-2.0 models used as systems under
-test.
-
-Documentation and findings (`docs/`, `HANDOFF.md`, `results/`) are
-**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**. The measured
-results are the contribution; CC BY asks for attribution when they are quoted.
-
-See [NOTICE](NOTICE).
+The code is under [Apache 2.0](LICENSE). The documentation and the measured
+results are under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+which asks for attribution if you quote the numbers. See [NOTICE](NOTICE).

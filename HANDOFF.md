@@ -299,3 +299,50 @@ answerable, and it is the question a user actually arrives with.
 then thinking is not merely a config flag but something a report could
 *attribute* a difference to. That is a channel-level feature, out of scope now,
 and worth revisiting once the cells exist.
+
+---
+
+## §11 — A `reader` seat, because style follows audience (2026-09-29)
+
+Owner review of the README: too cryptic, referencing concepts a first-time reader
+cannot relate to, with compressed prose and recognisable machine-writing habits.
+Correct on all three counts. Measured, the old README had **11 terms it never
+defined**, 15 em dashes per 1000 words, and bold on every other clause.
+
+The owner offered two ways to fix it structurally: a new reviewer or style seat,
+or a writing style defined per existing family. Neither quite fits, and the
+reason is worth recording.
+
+**Style is not the variable. Audience is.** The family ledgers *should* be dense
+and identifier-heavy, because their reader is a maintainer with full context who
+wants the finding rather than an on-ramp. Defining a style per family would also
+misfire, since one family writes both a ledger and the paper — two different
+readers, two different contracts.
+
+So: a new seat, scoped by **perspective rather than task**. Not a style
+corrector, which would smooth prose without fixing the real problem. The real
+problem is writing for somebody who already knows, and that is invisible to the
+author because every internal term feels obvious after a week of use. You cannot
+audit your own blind spot. That is exactly the argument that separates `engine`
+from `bench`, applied to documents.
+
+The seat owns an audience contract, one row per artifact class, stating what each
+may assume and what it must define. `README.md` may assume general software
+literacy and must define everything else. `docs/*/LEDGER.md` may assume
+everything and must define nothing.
+
+**Made checkable rather than aspirational.** `scripts/check_prose.py` reports em
+dash density, sentence length distribution, bold density, internal identifiers,
+and terms used without a nearby explanation. Advisory, not a gate. This project
+measures things instead of asserting they improved, and prose is not an exception.
+
+**The checker itself was wrong twice, which is the useful part.** Its first
+version accepted any of `is`, `:` or `(` within 240 characters as evidence a term
+had been explained, so it reported zero undefined terms in a README that had
+eleven. After the fix, an escaping layer turned `\b` in one regex into a literal
+backspace character, silently disabling a pattern. Both were found by running it
+against a document already known to be bad, then checking it said so. A tool that
+returns zero is only informative once you have watched it return non-zero on
+something you know is broken.
+
+Recorded as RDR-001 and RDR-002.
