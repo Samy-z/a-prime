@@ -213,3 +213,49 @@ both blocked on the owner ratifying the model pool; prompt-regression and
 retrieval fault injection, which need a system with a prompt and a retriever;
 and the fix for ENG-003, where clustering is recomputed three times per
 comparison.
+
+---
+
+## §9 — Decisions ratified 2026-09-29
+
+**Model pool (D10).** Granite 4.2 8B, Ministral 3 8B, Qwen3.5 9B, plus a 3B as a
+deliberate weak system. Four labs, two architectures, all Apache-2.0. Hermes
+dropped at 14B despite being the owner's own suggestion. Recorded in
+`docs/bench/STATE.md`.
+
+**Context cap (D11) — framing corrected by the owner.** I had presented the cap
+as a throughput dial to be lowered. It is a constraint that must fit the systems,
+and the cells decide it. The multi-step agent cell is the binding case: tool
+definitions alone run 1-2k tokens and multi-turn accumulates. Sequence is now:
+build the cells, measure each one's peak token demand, then fix the cap to the
+smallest value that fits with headroom. Picking the budget before knowing the
+demand is how the agent cell spills to CPU in week 3.
+
+**Serving stack (D12) — recommendation reversed on reflection.** I initially
+recommended migrating off Ollama. The honest position is narrower: pin Ollama's
+version, disable auto-update, extract and pin its per-model templates explicitly,
+and record all of it in provenance. That addresses the actual incident — the
+client updating itself mid-survey, which is F4 provider drift injected by our own
+tooling — at a fraction of the cost.
+
+Migration is conditional on needing GBNF constrained decoding for the extraction
+cells. The drawback of migrating was understated at first: hand-rolling chat
+templates does not remove template risk, it *transfers* it from an invisible
+vendor default to a visible config of ours. Visible and pinnable is better for a
+study; it is not automatically safer, and F14 is precisely "somebody got the
+template wrong".
+
+**Budget (D13) — my error, corrected.** See the BCH-010 append. The 1M and 324k
+figures were different calculations, not a rescoping.
+
+**Licence (D14).** Apache-2.0 for code, CC BY 4.0 for documentation and
+findings. Apache rather than MIT for the patent grant; permissive rather than
+copyleft because copyleft would deter exactly the adoption that makes the tool
+worth publishing. The docs are split out because the measured findings are the
+contribution and CC BY asks for attribution when they are quoted.
+
+**Fault grid (D16).** Start at the six incident-evidenced classes our injections
+implement, x 3 severities, x 1 blast regime (B0) = 18 comparisons per cell.
+Additional regimes only for the sticky-routing cells, where B3 is the point
+rather than a variation. This number is the compute bill, so it is chosen rather
+than discovered.

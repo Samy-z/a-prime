@@ -119,3 +119,15 @@ output distribution, and the A′ decoy arm as a black-box calibration primitive
 ```bash
 python -m pytest tests/ -q     # 103 tests, no models required
 ```
+
+## Licence
+
+Code is **Apache-2.0** ([LICENSE](LICENSE)) — permissive, with an explicit
+patent grant, and consistent with the Apache-2.0 models used as systems under
+test.
+
+Documentation and findings (`docs/`, `HANDOFF.md`, `results/`) are
+**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**. The measured
+results are the contribution; CC BY asks for attribution when they are quoted.
+
+See [NOTICE](NOTICE).

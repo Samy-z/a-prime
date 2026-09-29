@@ -1,0 +1,18 @@
+a-prime
+Copyright 2026 Samy-z
+
+This product includes software developed as part of a research project on
+domain-agnostic regression detection for LLM-emitting systems.
+
+Licensing is split by artifact type:
+
+  * Source code (src/, tests/, scripts/)  -- Apache License 2.0, see LICENSE
+  * Documentation and findings (docs/, HANDOFF.md, README.md, results/)
+    -- Creative Commons Attribution 4.0 International (CC BY 4.0)
+       https://creativecommons.org/licenses/by/4.0/
+
+The split is deliberate. The code is permissively licensed so it can be adopted
+without friction. The documentation carries the measured findings -- the
+blind-spot map, the severity envelopes, the negative results -- and CC BY
+guarantees attribution when those numbers are quoted, which Apache-2.0 does not
+address.
