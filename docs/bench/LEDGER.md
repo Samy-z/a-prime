@@ -241,3 +241,30 @@ which is the Palworld adapter's job.
 **Evidence:** `tests/test_faults.py`, 13 tests.
 **Reopen if:** an injection is added that does not map to a frozen taxonomy
 class, which would break the taxonomy's validity argument.
+
+## BCH-010 — CORRECTION (dated append, 2026-09-29)
+BCH-010 said the budget was "rescoped from 1M generations to ~324k, which is
+what the factorial actually requires". **That conflated two different
+calculations and the word "rescoped" was wrong.**
+
+The two figures answer different questions:
+
+| | cells | fault x severity combos | inputs | calls/input | total |
+|---|---|---|---|---|---|
+| earlier estimate | 9 | **12** | 150 | 60 | 972,000 |
+| survey figure | 9 | **1** | 600 | 60 | 324,000 |
+
+The survey's 324k assumes **one comparison per cell** — a single A-vs-B with no
+fault grid. The earlier 972k assumed twelve fault-by-severity combinations per
+cell. Neither is a rescoping of the other; the survey's number is smaller
+because it drops the fault grid, not because it trims inputs. It actually uses
+*four times more inputs per cell*.
+
+**The real budget is 9 x F x N x 60**, where F is the number of fault-by-severity
+combinations actually run and N the inputs per cell. With the frozen taxonomy
+offering 14 classes x 3 severities x up to 4 blast regimes, F is a choice not yet
+made, and it is the dominant term. That choice is the budget decision; input
+count is not.
+**Owner ratification recorded 2026-09-29:** model pool approved as proposed in
+BCH-007 — granite4.2:8b, ministral-3:8b, qwen3.5:9b, plus a 3B as a deliberate
+weak system. Hermes dropped at 14B.

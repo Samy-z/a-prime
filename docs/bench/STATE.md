@@ -38,3 +38,19 @@ with no grade A/B source.
 > which fault at which severity in a given run — stay with `bench` and are not
 > visible to the seat tuning the detector. That is the separation, not the
 > class list.
+
+## Model pool — RATIFIED 2026-09-29
+
+| Model | Lab | Architecture | Role |
+|---|---|---|---|
+| granite4.2:8b | IBM | hybrid Mamba-2 | primary agent model; best batched throughput |
+| ministral-3:8b | Mistral | dense | include **with** the template mitigation (BCH-009) |
+| qwen3.5:9b | Alibaba | dense | best single-stream; cannot batch at 8 GB |
+| a 3B | — | dense | deliberate weak system: high natural error floor tests that the detector does not read "bad" as "changed" |
+
+All Apache-2.0. Four labs, two architectures. Chosen for family diversity, not
+quality — every 8B tested drove a chained tool loop 12/12, so capability does not
+discriminate at this size (BCH-007).
+
+Hermes dropped despite being named by the owner: smallest is 14B, does not fit
+8 GB.
