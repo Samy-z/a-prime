@@ -1,17 +1,17 @@
 """Are the three output formats actually three different shapes?
 
 `shape_ok` in the smoke script measures **compliance**: did the model produce
-the form its mode demanded. That is not the question the study rests on.
+the form its format demanded. That is not the question the study rests on.
 
 The grid is three domains by three output formats, and the detector fits a
 separate threshold per output shape. That only buys anything if the three
-formats really do produce three different shapes. A mode that quietly emits the
-same prose paragraphs as another mode costs the study an axis whether or not it
-obeys its format rule, and it does so silently: every cell still runs, every
+formats really do produce three different shapes. A format that quietly emits the
+same prose paragraphs as another costs the study an axis whether or not it
+obeys its own rule, and it does so silently: every cell still runs, every
 count still looks plausible.
 
 So this asks the other question. Reads the saved outputs from a smoke run and
-reports, per mode, what the outputs look like and how far apart the modes are.
+reports, per format, what the outputs look like and how far apart they are.
 No model, no GPU.
 """
 
@@ -63,20 +63,22 @@ def main() -> int:
         return 1
 
     print(f"{path.name}, model {data.get('model')}\n")
-    by_mode: dict[str, list[str]] = {}
+    by_fmt: dict[str, list[str]] = {}
     for r in rows:
-        by_mode.setdefault(r["mode"], []).extend(
+        # Runs recorded before the rename carry "mode" for this.
+        key = r.get("format") or r["mode"]
+        by_fmt.setdefault(key, []).extend(
             o["output"] for o in r.get("outputs", []))
 
-    hdr = (f"{'mode':<12}{'n':>4}{'words':>16}{'json':>7}{'leads':>7}"
+    hdr = (f"{'format':<12}{'n':>4}{'words':>16}{'json':>7}{'leads':>7}"
            f"{'has':>6}{'3+ sent':>9}")
     print(hdr)
     print("-" * len(hdr))
     profs = {}
-    for mode, texts in by_mode.items():
-        p = profs[mode] = profile(texts)
+    for fmt, texts in by_fmt.items():
+        p = profs[fmt] = profile(texts)
         span = f"{p['median_words']} ({p['min_words']}-{p['max_words']})"
-        print(f"{mode:<12}{p['n']:>4}{span:>16}{p['parses_as_json']:>7}"
+        print(f"{fmt:<12}{p['n']:>4}{span:>16}{p['parses_as_json']:>7}"
               f"{p['leads_with_decision']:>7}{p['contains_decision']:>6}"
               f"{p['multi_sentence']:>9}")
 
@@ -114,7 +116,7 @@ def main() -> int:
                       "decision; what it gets is a paragraph of reasoning with "
                       "the\n  decision appended.")
             if a["max_words"] > 4 * s["median_words"]:
-                print("\n  The spread is its own problem. A mode whose outputs "
+                print("\n  The spread is its own problem. A format whose outputs "
                       "run from a clause to\n  several paragraphs gives a "
                       "shape-stratified threshold very little to\n  hold on to.")
         else:

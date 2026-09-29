@@ -13,12 +13,20 @@ is discarded and redone rather than completed.
 from __future__ import annotations
 
 import sys
+import warnings
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from aprime.adapter import ARMS  # noqa: E402
-from aprime.recorder import iter_invocations, load_checkpoint, record  # noqa: E402
+from aprime.recorder import (  # noqa: E402
+    decoy_independence_warnings,
+    iter_invocations,
+    load_checkpoint,
+    record,
+)
 from aprime.stub import build_arms  # noqa: E402
 
 
@@ -212,3 +220,87 @@ def test_a_run_straddling_midnight_is_flagged():
     ]
     rec.samples = shifted
     assert rec.spans_utc_date_boundary()
+
+
+# ------------------------------------------------- decoy independence (MTH-023)
+
+
+class _Seeded:
+    """A system that exposes a sampling seed, as the ones in this repo do."""
+
+    def __init__(self, arm, seed):
+        self.arm = arm
+        self.seed = seed
+
+    def invoke(self, inv):  # pragma: no cover - never called by these tests
+        raise AssertionError("not invoked")
+
+
+class _NestedSeed:
+    """A system whose seed lives on a transport it holds, like Cell -> chat."""
+
+    def __init__(self, arm, seed):
+        self.arm = arm
+        self.chat = type("T", (), {"seed": seed})()
+
+    def invoke(self, inv):  # pragma: no cover
+        raise AssertionError("not invoked")
+
+
+def _trio(cls, a, ap, b=99):
+    return {"A": cls("A", a), "A_prime": cls("A_prime", ap), "B": cls("B", b)}
+
+
+def test_two_baseline_arms_sharing_a_pinned_seed_are_flagged():
+    """A_prime IS the null. Eight repeats under a pinned seed gave 2 distinct
+    outputs against 8 with it unset, and a null on two points calibrates a tail
+    quantile no better than one on a single point (MTH-023). Nothing about that
+    failure is loud on its own: every arm records cleanly."""
+    warns = decoy_independence_warnings(_trio(_Seeded, 7, 7))
+    assert len(warns) == 1
+    assert "seed" in warns[0] and "MTH-023" in warns[0]
+
+
+def test_differing_or_unset_seeds_are_not_flagged():
+    assert decoy_independence_warnings(_trio(_Seeded, 7, 8)) == []
+    assert decoy_independence_warnings(_trio(_Seeded, None, None)) == []
+
+
+def test_a_seed_held_one_level_down_is_still_found():
+    """Cell keeps its sampling on the chat transport it holds, not on itself."""
+    assert len(decoy_independence_warnings(_trio(_NestedSeed, 7, 7))) == 1
+    assert decoy_independence_warnings(_trio(_NestedSeed, 7, 8)) == []
+
+
+def test_a_system_that_exposes_nothing_is_not_flagged():
+    """The adapter Protocol carries no sampling configuration and must not start
+    to, so this check is a courtesy for systems built here and silent for
+    anything else. Silence must not read as approval, which is why it warns
+    rather than certifying."""
+    class Opaque:
+        arm = "A"
+
+        def invoke(self, inv):  # pragma: no cover
+            raise AssertionError("not invoked")
+
+    arms = {"A": Opaque(), "A_prime": Opaque(), "B": Opaque()}
+    assert decoy_independence_warnings(arms) == []
+
+
+def test_record_warns_rather_than_refusing_on_a_shared_seed():
+    """Best-effort checks must not refuse runs they cannot actually judge."""
+    ids = ["i0", "i1"]
+    arms = _arms(ids)
+    for system in arms.values():
+        system.seed = 7
+    with pytest.warns(RuntimeWarning, match="MTH-023"):
+        rec = record(iter_invocations(ids), arms, k=2)
+    assert len(rec.samples) == len(ids) * 2 * len(ARMS)
+
+
+def test_an_ordinary_run_raises_no_such_warning():
+    """The stub arms expose no seed, so the guard must stay quiet on them."""
+    ids = ["i0", "i1"]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        record(iter_invocations(ids), _arms(ids), k=2)

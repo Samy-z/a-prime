@@ -1,5 +1,13 @@
 """A cell: one domain crossed with one output format, as a system under test.
 
+The three formats are named `extraction`, `summary` and `agent`, and `agent`
+names what the cell must OUTPUT -- a short decision line -- not a kind of
+system being audited. All three call tools, so all three are agents in the
+ordinary sense. This used to be called a cell's `mode`, which collided with
+the semantic modes that `clustering.py` finds in an output cloud, and the
+collision confused a reader who had every reason to expect one word to mean
+one thing.
+
 Nine cells make the study's grid, three domains by three output formats. A cell
 implements the same `invoke(Invocation) -> Response` interface as everything else,
 so the recorder, the detector and the fault harness work on it unchanged.
@@ -11,7 +19,7 @@ retrieval and staleness faults to three of the nine cells. Real extraction and
 summarisation agents retrieve before they write, so all three formats call tools
 and differ in **what they must produce**:
 
-| format | must output | typical steps |
+| output format | must output | typical steps |
 |---|---|---|
 | `extraction` | a JSON object with named keys | 1-2 tool calls, then JSON |
 | `summary` | three to five sentences of prose | 1-2 tool calls, then prose |
@@ -42,11 +50,11 @@ from ..adapter import Invocation, Response, Trace, check_arm
 from .packs import Pack
 from .tools import ToolSet
 
-MODES = ("extraction", "summary", "agent")
+FORMATS = ("extraction", "summary", "agent")
 
-# Steps a mode gets before the tools are withdrawn. Agent mode chains by design
+# Steps a format gets before the tools are withdrawn. Agent chains by design
 # and exhausted a shared budget of 6 on two inputs in three of nine cells; the
-# other two modes answer after one or two retrievals and never came close.
+# other two answer after one or two retrievals and never came close.
 _MAX_STEPS = {"extraction": 6, "summary": 6, "agent": 9}
 
 # Some servers emit a reasoning block into `content` even with `think` off,
@@ -81,26 +89,28 @@ _FORMAT_RULES = {
 @dataclass
 class Cell:
     pack: Pack
-    mode: str
+    output_format: str
     chat: ChatFn
     arm: str
     tools: ToolSet = None  # type: ignore[assignment]
-    # 0 means "whatever this mode needs"; see _MAX_STEPS.
+    # 0 means "whatever this format needs"; see _MAX_STEPS.
     max_steps: int = 0
     identity_aware: bool = False
     name: str = ""
 
     def __post_init__(self) -> None:
         check_arm(self.arm)
-        if self.mode not in MODES:
-            raise ValueError(f"mode must be one of {MODES}, got {self.mode!r}")
+        if self.output_format not in FORMATS:
+            raise ValueError(
+                f"output_format must be one of {FORMATS}, got "
+                f"{self.output_format!r}")
         if not self.max_steps:
-            self.max_steps = _MAX_STEPS[self.mode]
+            self.max_steps = _MAX_STEPS[self.output_format]
         if self.tools is None:
             self.tools = ToolSet(self.pack)
         if not self.name:
             ident = "-identity" if self.identity_aware else ""
-            self.name = f"{self.pack.domain}-{self.mode}{ident}"
+            self.name = f"{self.pack.domain}-{self.output_format}{ident}"
 
     # ------------------------------------------------------------------ prompt
 
@@ -110,7 +120,7 @@ class Cell:
             f"You are a {v.principal_kind} case handler working with "
             f"{v.entity_kind} records. Use the tools to look up facts rather "
             f"than guessing them.",
-            _FORMAT_RULES[self.mode],
+            _FORMAT_RULES[self.output_format],
         ]
         if self.identity_aware:
             who = inv.principal or "an unidentified requester"
@@ -189,7 +199,7 @@ class Cell:
             "content": (
                 "Stop searching and answer now, using only what you have "
                 "already found. If something is missing, say so inside the "
-                "required format, which is: " + _FORMAT_RULES[self.mode]
+                "required format, which is: " + _FORMAT_RULES[self.output_format]
             ),
         })
         try:
@@ -253,11 +263,11 @@ _TEMPLATES = [
 # Asking "what is the status of AC-4000?" and then demanding a line beginning
 # APPROVE, DECLINE or ESCALATE is an incoherent instruction, and on the first
 # live run the model did the sensible thing and answered the question: agent
-# mode scored 0 out of 4 on output shape in two domains out of three while
+# the agent format scored 0 out of 4 on output shape in two domains of three while
 # answering every input (BCH-015). The failure was in the corpus, not the model.
 #
 # Same record, same tool shape, same position in the list. Only the framing
-# changes, because only this mode's consumer sends a decision request.
+# changes, because only this format's consumer sends a decision request.
 _AGENT_TEMPLATES = {
     "lookup": "{entity} {eid} has come up for review. Check its status and "
               "decide what to do with it.",
@@ -281,7 +291,7 @@ _AGENT_TEMPLATES = {
 
 def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
                  n_principals_as_users: int = 0,
-                 mode: str | None = None) -> list[Invocation]:
+                 output_format: str | None = None) -> list[Invocation]:
     """Requests that reference real pack records, so the tools can succeed.
 
     Inputs must be answerable. A corpus of requests about entities that do not
@@ -292,12 +302,14 @@ def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
     from that many distinct users. Needed for the sticky-routing fault, where
     the point is that the per-user rate and the per-request rate come apart.
 
-    `mode` phrases the request the way that mode's consumer would. Only `agent`
+    `output_format` phrases the request the way that format's consumer would.
+    Only `agent`
     differs: a plain question is exactly what an extraction or summarisation
     consumer sends, whereas a decision line answers a decision request and
     nothing else. The records referenced, the tool shape exercised and the
     position in the list are identical across modes, so a corpus stays
-    comparable; only the wording moves. Passing `mode` also puts it in the input
+    comparable; only the wording moves. Passing it also puts the format in the
+    input
     id, because two different request texts must never share one id -- the
     recorder groups by input id, and a collision would silently pair
     unlike requests.
@@ -313,7 +325,7 @@ def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
     out: list[Invocation] = []
     for i in range(n):
         kind, tmpl = _TEMPLATES[i % len(_TEMPLATES)]
-        if mode == "agent":
+        if output_format == "agent":
             tmpl = _AGENT_TEMPLATES[kind]
         text = tmpl.format(
             entity=v.entity_kind, event=v.event_kind,
@@ -325,7 +337,7 @@ def build_inputs(pack: Pack, n: int = 60, seed: int = 0,
         principal = None
         if n_principals_as_users:
             principal = f"user{i % n_principals_as_users}"
-        tag = f"{pack.domain}-{mode}" if mode else pack.domain
+        tag = f"{pack.domain}-{output_format}" if output_format else pack.domain
         out.append(Invocation(input_id=f"{tag}-{kind}-{i:03d}",
                               text=text, principal=principal))
     return out

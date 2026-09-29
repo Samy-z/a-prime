@@ -406,3 +406,77 @@ nothing yet to protect.
 
 The standing process fix is now overdue rather than merely open: build test
 doubles from captured real responses rather than from memory of the API.
+
+## §13 — Two ratifications and a rename (2026-09-30)
+
+### MTH-023 ratified: the seed mirrors the deployment
+
+The owner's first reading was that A against A-prime measures the system's
+self-variance, and that if production instantiates an agent at the same weights
+with the same seed then the arms should follow that standard. The first half is
+exactly right and is the whole point of the decoy arm. The second half rested on
+a premise about production that does not hold: deployments pin weights, and they
+almost never pin the seed. Anthropic's Messages API exposes no seed at all,
+OpenAI documents its `seed` as best effort and added `system_fingerprint`
+precisely because the backend can move underneath a pinned one, and local servers
+leave it unset by default. The standard is same weights, unpinned seed.
+
+So the owner's own principle, follow the deployment, decided it. The rule
+ratified is **mirror the seed policy of the deployment under audit and record
+which regime a run was made in**, not the blunt "always differ" first proposed.
+Where a deployment really does pin its seed, its self-variance really is near
+zero, that is the correct thing to report, and target-decoy FDR is the wrong
+instrument for it: an exact diff answers the question directly.
+
+This puts a hole in the pinned-instruments rail, deliberately and on the record.
+Pinning every parameter for reproducibility would destroy the one thing the
+method needs free. Reproducibility now means the seeds are **known**, not that
+they are **equal**. `docs/methods/METHODS.md` rail 4 and the CLAUDE.md summary
+both say so.
+
+The guard is `decoy_independence_warnings` in the recorder. It warns rather than
+refusing, and it is duck-typed rather than reading the adapter Protocol, because
+the Protocol carries no sampling configuration and widening it would make the
+detector depend on something a stranger's system may not expose. That pressure is
+recorded as ENG-006 instead of conceded.
+
+**Unresolved, and the part worth worrying about.** Two measurements of the same
+model on the same server disagreed about whether a pinned seed gives identical
+output, and the difference tracked whether other requests ran in between. Which
+cluster a pinned-seed run lands in appears to depend on server cache and batch
+state, which is not a study variable and is not in provenance. The null width is
+therefore unstable in a way nothing records.
+
+### The agent arm ratified: keep the heterogeneity, report the degradation
+
+The agent format's outputs run 11 to 396 words where summary runs 30 to 104, and
+a threshold fitted per output shape has little to hold on to across that spread.
+This was put to the owner as a problem to engineer away. The owner rejected that
+framing and was right to: real production agents do emit a one-line decision one
+time and three paragraphs the next, so narrowing the bench until the detector
+performs well is developing against the answers, and a tool validated only on
+well-behaved synthetic agents invites exactly the criticism that it does not
+apply to production, which is the target.
+
+Ratified: **the spread stays, and whether detection survives it becomes a
+measured axis rather than a design constraint.** One carve-out, narrow and worth
+holding: heterogeneity traceable to our own incoherent instructions is a bug and
+gets fixed, while heterogeneity a competent operator would also have produced
+stays. The test is whether a competent operator would have written that prompt.
+
+The corollary is that the fix belongs on the detector side rather than the bench
+side: stratify by **realised** output shape rather than by declared format. That
+has to land before any fault labels are consulted, or it becomes the same
+developing-against-the-answers failure by a different route.
+
+### A cell's `mode` is now its `output_format`
+
+`mode` named two unrelated things: a cell's output format, and a semantic mode
+that `clustering.py` finds in an output cloud. The owner hit the collision and
+could not tell which was meant, which is evidence rather than bad luck. `MODES`
+is now `FORMATS` and `Cell.mode` is `Cell.output_format`, confined to the cells
+package, its tests, its scripts and its docs. Nothing in the detector changed,
+because "semantic mode" is the older and better-established use of the word.
+
+Results recorded before today carry `mode` where the new ones carry `format`;
+`check_shape_distinctness.py` reads either.

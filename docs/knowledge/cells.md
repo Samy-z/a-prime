@@ -11,6 +11,15 @@ Maintainer doc, not linked from the README (D20).
 | `tools.py` | the eight tool shapes, instantiated per domain, plus fault hooks |
 | `cell.py` | `Cell` (a `SystemUnderTest`) and `build_inputs` |
 
+**A cell's three output formats are `extraction`, `summary` and `agent`, and
+`agent` names what the cell must OUTPUT** -- a short decision line -- not a kind
+of system being audited. All three call tools, so all three are agents in the
+ordinary sense. This was called a cell's `mode` until 2026-09-30, which collided
+with the semantic modes `clustering.py` finds in an output cloud. One word, two
+unrelated meanings, in one codebase; it confused a reader who had every reason
+to expect otherwise. The field is now `Cell.output_format` and the tuple is
+`FORMATS`.
+
 ## Packs are data, not behaviour
 
 Tool results are therefore **ground truth**: nothing about a tool's answer
@@ -61,7 +70,7 @@ retrieves. They are now implementable in all nine cells.
 
 All three formats call tools and differ in required output:
 
-| mode | output | shape inferred as |
+| output format | output | shape inferred as |
 |---|---|---|
 | `extraction` | one JSON object, four named keys | `json` |
 | `summary` | 3-5 sentences of prose | `prose` or `short` |
@@ -76,9 +85,9 @@ before they write.
 no fault present, which is what distinguishes a sticky routing fault from
 ordinary personalisation (BCH-006). Two cells carry it, per D2.
 
-### The request corpus is phrased per mode
+### The request corpus is phrased per output format
 
-`build_inputs(pack, ..., mode=...)` wording follows the mode. Only `agent`
+`build_inputs(pack, ..., output_format=...)` wording follows the format. Only `agent`
 differs from the plain corpus: a question is what an extraction or
 summarisation consumer actually sends, but a decision line answers a decision
 request and nothing else. Demanding APPROVE / DECLINE / ESCALATE in reply to
@@ -87,7 +96,7 @@ correctly ignored it (BCH-015).
 
 The two corpora line up record for record — same ids, same tool shape, same
 position — so nothing about the comparison moves except the framing. Passing
-`mode` also stamps it into the input id, because the recorder groups by input id
+the format is also stamped into the input id, because the recorder groups by input id
 and two different request texts under one id would pair unlike requests across
 arms.
 
@@ -109,9 +118,9 @@ that tag is deliberation, not output; the cell strips it and sets `think_leak`.
 Left in, the detector would be scoring the model thinking aloud as though it
 were the answer.
 
-## Agent mode is distinct but not compliant
+## The agent format is distinct but not compliant
 
-Measured live, `granite4.2:8b`, 12 invocations per mode (BCH-015):
+Measured live, `granite4.2:8b`, 12 invocations per format (BCH-015):
 
 | | extraction | summary | agent |
 |---|---|---|---|
@@ -127,7 +136,7 @@ that is a different question from whether each obeys its own instruction. The
 decision token separates agent from summary completely. **The third arm is
 real.**
 
-What agent mode does wrong is put the decision last. It reasons in a paragraph
+What the agent format does wrong is put the decision last. It reasons in a paragraph
 and appends the verdict; the rule asks for the verdict first. Three rounds of
 fixes moved compliance 1 to 3 to 4 out of 12, the last round buying one input
 for roughly 40% more GPU time, at which point further fixing becomes tuning the
@@ -137,7 +146,7 @@ The spread is the real problem, and it is not the one the compliance count
 points at. Agent outputs vary by a factor of 36 where summary varies by 3. A
 shape-stratified threshold has little to hold on to there.
 
-**Agent mode costs 3.5x what summary costs** — 202 seconds against 57 for the
+**The agent format costs 3.5x what summary costs** — 202 seconds against 57 for the
 same 12 invocations, 51 tool calls against 19. At full corpus size that is the
 dominant term in the GPU budget, and it is not yet costed.
 
@@ -179,9 +188,16 @@ question. The cell now echoes it.
 - Only one model has ever driven a cell. Everything measured here, and the
   reasoning leak in particular, may be specific to `granite4.2:8b`. The captured
   fixtures come from that model too, so they record one server's shapes.
-- `mode` names two unrelated things across the codebase: a cell's output format
-  here, and an output cluster in `clustering.py`. The collision has already
-  confused a reader once.
+- Runs recorded before 2026-09-30 carry `mode` where these now say `format`.
+  `check_shape_distinctness.py` reads either.
+- **Input ids changed shape on 2026-09-30.** Passing `output_format` stamps it
+  into the id, so `banking-lookup-000` is now `banking-extraction-lookup-000`.
+  Two consequences. Extraction and summary get identical request text under
+  different ids, which is intended, because an input id identifies a request
+  within one cell's corpus and cross-cell pooling by id was never meant to work.
+  And a recorder checkpoint written before the change will not match ids written
+  after it, so a resumed run would redo the work rather than corrupt it. No cell
+  has been through the recorder yet, so nothing is affected today.
 - The stale view shifts a principal's prior records but not their figures,
   because the packs hold no history of the figures to shift. A knowledge-base
   staleness fault therefore has a narrower surface than it should.

@@ -30,6 +30,31 @@ Adapter exceptions are captured as samples with an `error` field rather than
 aborting the run. A partial recording with visible failures is more useful than
 no recording, and the clouds exclude errored samples.
 
+## The decoy arm has to be able to vary
+
+`decoy_independence_warnings(arms)` warns when A and A-prime are configured with
+the same pinned seed. A-prime is the second baseline run and it **is** the null
+distribution that target-decoy FDR calibrates against. Under a pinned seed,
+eight repeats of one identical request produced **2 distinct outputs**, against
+**8** with the seed unset (MTH-023). A null supported on two points calibrates a
+tail quantile no better than one supported on a single point, and the failure is
+entirely silent: all three arms record cleanly and the FDR column fills with
+confident numbers.
+
+The rule is **mirror the deployment**, not force a difference. A deployment that
+genuinely pins its seed genuinely has near-zero self-variance, and for that one
+an exact diff answers the question better than this tool does.
+
+Two deliberate limits:
+
+- **It warns, it does not refuse.** The check cannot see every system's
+  configuration, so refusing on it would block runs it is not able to judge.
+- **It is duck-typed and often silent.** The adapter Protocol carries no sampling
+  configuration and must not start to, so this looks for a `seed` on the system,
+  on a transport the system holds, or in a `sampling` dict, and says nothing when
+  it finds none. **Silence is not approval.** See ENG-006 for why the boundary
+  was left alone.
+
 ## Deduplication
 
 Near-duplicate inputs corrupt two things: they inflate the apparent number of

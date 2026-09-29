@@ -112,7 +112,10 @@ silently invalidate the result rather than failing loudly:
 - **No threshold chosen outside a fold** — every cutoff and hyperparameter
   selected inside nested leave-one-system-out.
 - **Pinned instruments** — embedding and NLI model versions locked. Bumping one
-  invalidates prior results rather than silently changing them.
+  invalidates prior results rather than silently changing them. **The sampling
+  seed is deliberately outside this rail**: pinning it collapses the decoy arm,
+  which is the null. Arms mirror the deployment's seed policy and record it
+  (MTH-023).
 - **Dedup before counting** — near-duplicates corrupt both the FDR estimate and
   the clustering.
 - **Provenance** — every number traces to a run id and a config hash.

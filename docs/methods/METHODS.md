@@ -18,6 +18,13 @@ These silently invalidate a result rather than failing loudly.
    systems, a handful of free knobs overfits trivially.
 4. **Pinned instruments.** Embedding and NLI model versions locked in
    `STATE.md`. A bump invalidates prior results.
+   **The sampling seed is explicitly not covered by this rail.** Pinning it
+   makes the two baseline arms land on the same handful of outputs, and the
+   decoy arm is the null distribution, so pinning it for reproducibility
+   destroys the thing being reproduced. The arms mirror the seed policy of the
+   deployment under audit, the policy used is recorded in provenance, and a run
+   is reproducible because the seeds are known rather than because they are
+   equal. Ratified 2026-09-30, MTH-023.
 5. **Provenance.** Every number traces to a run id and a config hash. See
    `docs/knowledge/provenance.md` when it exists.
 

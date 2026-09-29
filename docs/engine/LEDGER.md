@@ -185,3 +185,34 @@ decoy prune, and the contribution should be described accordingly.
 **Lesson recorded against process, not the finding:** ENG-005 asserted a
 false-positive claim without running the one-line check that would have refuted
 it. The check took thirty seconds.
+
+
+## ENG-006 — First recorded pressure on the adapter boundary, not acted on
+**Date:** 2026-09-30
+**Finding:** MTH-023 requires the recorder to warn when both baseline arms are
+configured with the same pinned seed, because that configuration silently
+produces confident meaningless FDR numbers. Doing that properly would mean the
+recorder can see a system's sampling configuration, and the adapter Protocol
+deliberately carries no such thing: a detector that needs to inspect a
+stranger's sampling options is not the detector being sold. The boundary's own
+docstring says to record the pressure rather than concede to it.
+
+**Not conceded.** `decoy_independence_warnings` duck-types for a `seed`
+attribute on the system, on a transport the system holds, or in a `sampling`
+dict, and stays silent when it finds none. Systems built in this repo are
+checked; a stranger's system is not, and cannot be. The Protocol is unchanged.
+
+**What this costs.** The guard is a courtesy, not a guarantee, and its silence
+does not mean a run is sound. That is the honest position and it is why the
+check warns rather than certifying. Anyone reading a clean run as verified has
+misread it.
+
+**The pressure is real and will recur.** Every downstream check that wants to
+validate a run's configuration rather than its outputs will want this same
+access. Three such requests should prompt a design conversation about a separate
+optional capability interface, deliberately not part of `SystemUnderTest`, rather
+than three more duck-typed probes.
+**Evidence:** `src/aprime/recorder.py`, `decoy_independence_warnings`; MTH-023
+and its correction; tests in `tests/test_resume.py`.
+**Reopen if:** a second such check is wanted. The count matters more than any
+one instance.

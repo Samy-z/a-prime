@@ -22,7 +22,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from aprime.adapter import Invocation  # noqa: E402
-from aprime.cells.cell import MODES, Cell, build_inputs  # noqa: E402
+from aprime.cells.cell import FORMATS, Cell, build_inputs  # noqa: E402
 from aprime.cells.packs import DOMAINS, all_packs, build_pack  # noqa: E402
 from aprime.cells.tools import NAMES, SHAPES, ToolSet  # noqa: E402
 
@@ -407,13 +407,13 @@ def test_output_without_a_leak_is_untouched():
     assert "think_leak" not in r.trace.extra
 
 
-def test_agent_mode_inputs_ask_for_a_decision():
-    """Agent mode demands a line beginning APPROVE, DECLINE or ESCALATE. A
+def test_the_agent_format_asks_for_a_decision():
+    """The agent format demands a line beginning APPROVE, DECLINE or ESCALATE. A
     corpus of plain questions makes that instruction incoherent, which is how
-    the mode scored zero on output shape while answering every input."""
+    the format scored zero on output shape while answering every input."""
     p = build_pack("banking", 18)
     plain = build_inputs(p, n=9, seed=1)
-    decide = build_inputs(p, n=9, seed=1, mode="agent")
+    decide = build_inputs(p, n=9, seed=1, output_format="agent")
     assert all("decid" in i.text.lower() for i in decide)
     assert not any("decid" in i.text.lower() for i in plain)
 
@@ -427,16 +427,16 @@ def test_every_agent_request_names_the_records_it_needs():
     for domain in ("banking", "logistics", "hospitality"):
         p = build_pack(domain, 18)
         real = set(p.entity_ids()) | set(p.principal_ids()) |             set(p.document_ids()) | set(p.case_ids())
-        for inv in build_inputs(p, n=9, seed=1, mode="agent"):
+        for inv in build_inputs(p, n=9, seed=1, output_format="agent"):
             named = set(ids.findall(inv.text))
             assert named, f"no record named in {inv.input_id}: {inv.text}"
             assert named <= real, f"{inv.input_id} names a record that does not exist"
 
 
-def test_each_mode_gets_a_step_budget_that_suits_it():
-    """Agent mode chains by design and exhausted a shared budget of six."""
+def test_each_format_gets_a_step_budget_that_suits_it():
+    """The agent format chains by design and exhausted a shared budget of six."""
     p = build_pack("banking", 10)
-    budgets = {m: Cell(p, m, _scripted(), "A").max_steps for m in MODES}
+    budgets = {m: Cell(p, m, _scripted(), "A").max_steps for m in FORMATS}
     assert budgets["agent"] > budgets["summary"]
     assert Cell(p, "agent", _scripted(), "A", max_steps=3).max_steps == 3
 
@@ -461,7 +461,7 @@ def test_the_forced_answer_restates_the_format_rule():
     assert "APPROVE" in final["content"], "the format rule must be restated"
 
 
-def test_mode_specific_corpora_line_up_record_for_record():
+def test_format_specific_corpora_line_up_record_for_record():
     """Only the wording may move, and a record may be added but never swapped.
 
     The decision form of the policy request has to name the case it is deciding
@@ -474,19 +474,19 @@ def test_mode_specific_corpora_line_up_record_for_record():
     BS = chr(92)
     p = build_pack("logistics", 18)
     plain = build_inputs(p, n=9, seed=1)
-    decide = build_inputs(p, n=9, seed=1, mode="agent")
+    decide = build_inputs(p, n=9, seed=1, output_format="agent")
     ids = _re.compile("[A-Z]{2,3}-" + BS + "d+")
     for a, b in zip(plain, decide):
         assert a.text != b.text
         assert set(ids.findall(a.text)) <= set(ids.findall(b.text))
 
 
-def test_a_mode_specific_corpus_gets_its_own_input_ids():
+def test_a_format_specific_corpus_gets_its_own_input_ids():
     """The recorder groups by input id. Two different request texts sharing one
     id would silently pair unlike requests across arms."""
     p = build_pack("banking", 18)
     plain = {i.input_id for i in build_inputs(p, n=9, seed=1)}
-    decide = {i.input_id for i in build_inputs(p, n=9, seed=1, mode="agent")}
+    decide = {i.input_id for i in build_inputs(p, n=9, seed=1, output_format="agent")}
     assert not (plain & decide)
     assert all("-agent-" in i for i in decide)
 
@@ -500,18 +500,18 @@ def test_a_transport_failure_becomes_an_errored_response():
     assert r.output == "" and "connection reset" in r.trace.error
 
 
-def test_each_mode_asks_for_a_different_output_shape():
+def test_each_format_asks_for_a_different_output_shape():
     p = build_pack("banking", 10)
     prompts = {m: Cell(p, m, _scripted(), "A").system_prompt(Invocation("i", "q"))
-               for m in MODES}
+               for m in FORMATS}
     assert "JSON object" in prompts["extraction"]
     assert "sentences of plain prose" in prompts["summary"]
     assert "APPROVE" in prompts["agent"]
     assert len(set(prompts.values())) == 3
 
 
-def test_an_invalid_mode_is_refused():
-    with pytest.raises(ValueError, match="mode must be"):
+def test_an_invalid_format_is_refused():
+    with pytest.raises(ValueError, match="output_format must be"):
         Cell(build_pack("banking", 10), "chatty", _scripted(), "A")
 
 

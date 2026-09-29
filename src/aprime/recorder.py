@@ -67,6 +67,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import warnings
+
 from .adapter import ARMS, Invocation, SystemUnderTest
 
 
@@ -196,6 +198,66 @@ def load_checkpoint(path: str | Path) -> tuple[list[Sample], set[tuple[str, int]
     return kept, complete, next_session
 
 
+# ---------------------------------------------------------------------------
+# decoy independence
+# ---------------------------------------------------------------------------
+
+# Where a system keeps its sampling seed, if it exposes one at all. Checked by
+# duck typing on purpose: the adapter Protocol does not carry sampling
+# configuration and must not start to, because a detector that needs to see a
+# stranger's sampling options is not the detector we are selling. So this is a
+# best-effort courtesy for systems built in this repo, silent for anything else,
+# and never a guarantee. The pressure this puts on the boundary is recorded in
+# docs/engine/LEDGER.md rather than resolved by widening it.
+_SEED_PATHS = (("seed",), ("chat", "seed"), ("sampling", "seed"))
+
+
+def _visible_seed(system: object) -> object | None:
+    for path in _SEED_PATHS:
+        cur: object | None = system
+        for step in path:
+            cur = getattr(cur, step, None) if not isinstance(cur, dict)                 else cur.get(step)
+            if cur is None:
+                break
+        if cur is not None:
+            return cur
+    return None
+
+
+def decoy_independence_warnings(arms: dict[str, SystemUnderTest]) -> list[str]:
+    """Reasons to doubt that A_prime can act as a null, where they are visible.
+
+    A_prime is the second baseline run and it IS the null distribution that
+    target-decoy FDR calibrates against. If both baseline arms are configured
+    with the same pinned seed they land on the same handful of outputs: eight
+    repeats of one request under a pinned seed produced 2 distinct outputs,
+    against 8 with the seed unset (MTH-023). A null supported on two points
+    calibrates a tail quantile no better than one supported on a single point,
+    and nothing about that failure is loud. Every arm records cleanly and the
+    FDR column fills with confident meaningless numbers.
+
+    The rule is to mirror the deployment being audited rather than to force a
+    difference. A deployment that really does pin its seed really does have
+    near-zero self-variance, and for that one an exact diff answers the question
+    and this tool is the wrong instrument.
+    """
+    out: list[str] = []
+    a, ap = _visible_seed(arms.get("A")), _visible_seed(arms.get("A_prime"))
+    if a is not None and ap is not None and a == ap:
+        out.append(
+            f"A and A_prime are both configured with seed {a!r}. The decoy arm "
+            f"is the null distribution, and two arms sharing a pinned seed "
+            f"collapse onto the same few outputs, so the false-alarm rate will "
+            f"be estimated from a null of almost no width and every q will be "
+            f"confidently wrong. Leave the seed unset on both if the deployment "
+            f"leaves it unset, which is the ordinary case. If the deployment "
+            f"really does pin its seed, its self-variance is genuinely near "
+            f"zero and an exact diff answers the question better than this "
+            f"tool does. See MTH-023."
+        )
+    return out
+
+
 def record(
     invocations: Sequence[Invocation],
     arms: dict[str, SystemUnderTest],
@@ -228,6 +290,11 @@ def record(
     for name, sys_ in arms.items():
         if sys_.arm != name:
             raise ValueError(f"arm {name!r} holds a system labelled {sys_.arm!r}")
+    # A warning rather than an error: the check is best-effort and cannot see
+    # every system's configuration, so refusing on it would refuse runs it
+    # cannot actually judge. Loud, because the failure it describes is silent.
+    for msg in decoy_independence_warnings(arms):
+        warnings.warn(msg, RuntimeWarning, stacklevel=2)
 
     samples, done, session = [], set(), 0
     if checkpoint is not None:
