@@ -1,253 +1,327 @@
-# Probe suite — current state
+# What each check can and cannot see
 
-What each detection channel can and cannot resolve. Read before changing any
-channel, threshold, or stratification rule.
+This document reports, for each of a-prime's checks, which kinds of change it
+notices and which it is blind to. Read it before changing any check or any
+threshold.
 
-Run: `python scripts/run_probes.py` (`--dry-run` builds pairs without models).
-Results land in `results/probes_<run_id>_<config_hash>.json`.
+To run the measurements yourself:
 
-## What the suite is
+```bash
+python scripts/run_probes.py            # the full measurement, downloads 4 models
+python scripts/run_probes.py --dry-run  # build the test pairs only, no models
+```
 
-896 pairs: 16 seeds x 4 subject domains x 4 output shapes x 14 perturbation
-categories. 256 preserving, 512 breaking, 128 register. 30-152 words per arm.
+Results are written to `results/probes_<run_id>_<config_hash>.json`.
 
-Both arms of every pair come from the same renderer and the same seed, so the
-only difference is the intended one. **Preserving perturbations change the
-rendering and hold the facts fixed; breaking perturbations change the facts and
-hold the rendering fixed.** That asymmetry is not a stacked deck — it is the
-production situation, where a model swap rewrites the surface of every output
-and changes the substance of a few.
+## How the measurement works
 
-| Preserving (facts and stance fixed) | Breaking (a fact changed) | Register (stance changed) |
+a-prime compares two versions of a system and reports which inputs changed
+behaviour. To find out whether it is any good at that, we need cases where we
+already know the answer. So the suite contains 896 **pairs of texts**, built by
+hand, where we decided in advance what the relationship between the two texts is.
+
+Each pair is generated from a template, and both halves come from the same
+template with one deliberate difference. That means nothing varies except the
+thing we intended to vary. There are three kinds of pair.
+
+| Kind | What differs | What a good check should do |
 |---|---|---|
-| paraphrase (full template rewrite) | polarity (verdict word inverted) | hedging (qualifier added) |
-| reorder (independent facts swapped) | negation (syntactic, per-seed) | overconfidence (certainty added) |
-| format (prose to bullets, JSON compacted) | number, unit, temporal, entity | |
-| synonym (exactly one phrase) | quantifier, omission | |
+| Preserving (256 pairs) | only the wording | ignore it |
+| Breaking (512 pairs) | a fact | flag it |
+| Register (128 pairs) | how confident the text sounds | reported separately, see below |
 
-### Why register is a third class rather than a verdict
+Concretely, a preserving pair might render the same facts as prose in one half and
+as a bulleted list in the other. A breaking pair keeps the wording and changes
+"42,000" to "47,000", or flips "approved" to "declined", or deletes a sentence
+stating a condition. A register pair adds a hedge such as "based on the
+information available at the time of review", which changes no fact but changes
+how committed the text sounds.
 
-Hedging changes no fact, so labelling it BREAKING makes that bucket
-inhomogeneous — every other member is "a fact changed". But labelling it
-PRESERVING would call a documented fault class a non-event: **F9 in the frozen
-taxonomy is persona and sycophancy drift**, and GPT-4o's case was exactly this,
-a register change with no accuracy change where every labelled eval passed.
+The eight kinds of breaking change are: a flipped decision, an inserted
+negation, a changed number, a changed unit, a changed date, a swapped name, a
+changed quantifier such as "all" becoming "some", and a deleted condition. The
+last of those is called omission, meaning content that was present in the old
+output and is missing from the new one, and it turns out to be the hard case.
 
-So it is excluded from both the 5% false-alarm budget and the detection rate,
-and reported on its own. Two directions are included, because stance drifts both
-ways and the dangerous one is the confident direction.
+Pairs span 16 source templates, four subject areas (banking, logistics,
+hospitality, technical operations) and four output shapes (a short answer, a JSON
+object, a multi-sentence summary, a numbered list of reasoning steps). Text length
+runs from 30 to 152 words.
 
-An earlier version labelled hedging as preserving. The NLI predicate refused to
-merge those pairs 80% of the time, which was the first sign the label was doing
-work it could not support (MTH-021).
+### The asymmetry is deliberate
 
-## Why the suite has its own test file
+Preserving pairs change a lot of wording and no facts. Breaking pairs change one
+fact and no wording. That is not a stacked deck in either direction: it is what
+actually happens when you swap a model. The new model rewrites the surface of
+every output and changes the substance of a few, and the whole difficulty is
+telling those apart.
 
-`tests/test_pairs.py` verifies probe construction independently of any channel.
-This is not ceremony. On first assembly it caught four construction bugs, three
-of them silent:
+### Why register is a third category rather than a verdict
 
-- the synonym perturbation was a no-op on JSON (its targets only existed in
-  prose templates)
-- the quantifier perturbation was a no-op on short answers (that template never
-  rendered the field)
-- the format perturbation was a no-op on all prose (whitespace collapse does
-  nothing to single-line text)
+Adding a hedge changes no fact, so calling it "breaking" would make that group
+inconsistent, since every other member of it is a changed fact. But calling it
+"preserving" would be worse. A change in how confident a model sounds, with no
+change in accuracy, is a documented real-world failure: when GPT-4o became
+noticeably sycophantic in April 2025, every labelled test its developers ran
+passed, and it was rolled back four days later after users complained.
 
-Each would have produced a clean, plausible "this channel detects 0% of
-quantifier changes in short answers", and it would have gone into the
-blind-spot map as a finding. **A broken probe and a blind channel are
-indistinguishable in the results table.** Any new perturbation needs a test
-that it actually perturbs, before its numbers are read.
+So register pairs are measured and reported on their own, excluded from both the
+false-alarm budget and the detection rate. Both directions are included, adding
+hedging and adding unwarranted confidence, because confidence drift is the more
+dangerous one.
 
-A fourth test rejected the original shape design: the shapes spanned only 1.7x
-in length, too narrow to separate "blind to meaning" from "diluted by length".
-Widened to ~5x (32 to 148 median words) by giving summaries realistic framing
-prose that is identical in both arms.
+An earlier version of the suite labelled hedging as preserving. The model we use
+to judge text equivalence refused to treat those pairs as equivalent 80% of the
+time, which was the first hint the label was wrong.
 
-## Findings
+## Why the pairs have their own tests
 
-Embedding channels: run `20260924T022150Z`, config `eb95f0b802c4660a`.
-NLI channels: run `20260924T031004Z`, config `592763f4f2a8c4d7`.
+`tests/test_pairs.py` checks that the pairs are built correctly, without
+involving any of the detection machinery. This is not ceremony. On first assembly
+it found four construction bugs, three of them silent:
 
-Detection rate is measured at the threshold where the channel false-alarms on
-5% of meaning-preserving pairs. AUC is against the pooled preserving
-distribution; below 0.5 means the channel scores meaning changes as *more
-similar* than rewordings.
+- **The synonym substitution did nothing to JSON output.** Its target phrases only
+  existed in the prose templates, so for JSON the two halves of the pair were
+  identical.
+- **The quantifier change did nothing to short answers.** That template never
+  rendered the quantifier field at all, so there was nothing to change.
+- **The formatting change did nothing to any prose.** It collapsed whitespace,
+  which has no effect on text that was already on one line.
 
-### Embedding displacement is anti-correlated with meaning change
+Any of those would have produced a clean, plausible result such as "this check
+detects 0% of quantifier changes in short answers", and it would have been
+recorded as a finding about the check. **A broken test pair and a blind check are
+indistinguishable in the results table**, which is why the pairs are verified
+separately. Every new kind of pair needs a test that it actually differs, before
+any number derived from it is read.
 
-Pooled separability AUC: MiniLM-L6 **0.391**, BGE-base **0.440**, E5-base
-**0.532**. At or below chance, across three models from three families.
+A fourth test rejected the original design outright. The four output shapes
+originally spanned only 1.7 times in length, which is too narrow to separate "the
+check cannot see meaning" from "the check works but the change was diluted in a
+long output". The shapes were widened to about 5 times, from 32 to 148 median
+words, by giving summaries realistic filler that is identical in both halves.
 
-Per category, the worst cases are the ones that matter most (AUC, MiniLM /
-BGE / E5): temporal 0.069 / 0.187 / 0.506, quantifier 0.144 / 0.104 / 0.209,
-number 0.157 / 0.266 / 0.584, negation 0.228 / 0.304 / 0.375.
+## How to read the numbers below
 
-The mechanism, in medians (MiniLM): a paraphrase moves the embedding 0.0303; a
-changed number, date or negation moves it 0.0018. **Rewording moves the vector
-roughly twenty times further than changing the fact.** Only `entity` (59%
-detection) and `omission` (33%) clear the noise, and omission only because
-deleting a sentence changes length.
+Two figures recur.
 
-### ...but the failure is conditional on surface stability, and that is usable
+**Detection rate** is measured at a fixed false-alarm budget. We set the
+threshold at the point where the check wrongly flags 5% of preserving pairs, then
+ask what share of breaking pairs it catches at that same threshold. This matters
+because a check is deployed at a false-alarm budget, not at an operating point
+chosen after seeing the answers.
 
-Scored against a *minimal* preserving baseline — the synonym perturbation,
-exactly one phrase changed — the same channels recover:
+AUC, area under the curve, is the probability that a randomly chosen breaking
+pair scores higher than a randomly chosen preserving pair. 1.0 is perfect, 0.5 is
+a coin flip, and **below 0.5 means the check scores meaning changes as more
+similar than rewordings**, which is worse than useless.
 
-| channel | AUC vs pooled preserving | AUC vs synonym-only |
+Measurements come from two runs: embedding results from run `20260924T022150Z`,
+and results from the text-inference models from run `20260924T031004Z`.
+
+## Finding 1: comparing embeddings performs worse than chance
+
+An embedding turns a piece of text into a list of numbers, positioned so that
+texts with similar meaning sit close together. Comparing the distance between two
+outputs is the obvious way to ask whether they differ, so it was the design's
+original primary check.
+
+Pooled AUC across all categories: 0.391 for MiniLM-L6, 0.440 for
+BGE-base, 0.532 for E5-base. Three models from three different families, all
+at or below a coin flip.
+
+The worst categories are the ones that matter most. AUC per category, for the
+three models in the same order:
+
+| Change | MiniLM | BGE | E5 |
+|---|---|---|---|
+| changed date | 0.069 | 0.187 | 0.506 |
+| changed quantifier | 0.144 | 0.104 | 0.209 |
+| changed number | 0.157 | 0.266 | 0.584 |
+| inserted negation | 0.228 | 0.304 | 0.375 |
+
+The mechanism is mundane. Measured as median distances with MiniLM, rewording a
+sentence moves it 0.0303, while changing a number, a date or a negation inside it
+moves it 0.0018. Rewording moves the text roughly **twenty times further than
+changing the fact**. Only two categories clear the noise: a swapped name at 59%
+detection, and a deleted condition at 33%, and the latter only because deleting a
+sentence changes the length.
+
+### It recovers when the wording is stable, which makes it salvageable
+
+The measurements above compare breaking pairs against all preserving pairs,
+including full rewrites. If instead we compare them against only the mildest
+preserving change, a single substituted phrase, the same models recover:
+
+| Model | AUC against all preserving pairs | AUC against single-phrase changes only |
 |---|---|---|
 | MiniLM-L6 | 0.243 | 0.540 |
 | BGE-base | 0.306 | 0.614 |
-| E5-base | 0.449 | **0.818** |
+| E5-base | 0.449 | 0.818 |
 
-So the honest statement is not "embeddings are useless". It is: **embedding
-displacement separates meaning from surface only when the candidate system's
-surface style is stable, and is worse than useless when it is not.** That is a
-measurable precondition, not a matter of judgement, and the engine should gate
-the channel on it rather than always running it. See ENG gate requirement in
-`docs/engine/METHODS.md`.
+So the honest conclusion is not that embeddings are useless. It is that comparing
+embeddings separates meaning from wording only when the new system phrases things
+much like the old one, and is worse than useless when it does not. That condition
+is measurable rather than a matter of judgement, so the check now runs behind a
+gate that measures it and switches the check off when it fails. The gate is
+described in `docs/engine/METHODS.md`.
 
-### NLI contradiction is the primary channel
+## Finding 2: contradiction detection carries seven of the eight fact changes
 
-DeBERTa-v3-base-MNLI: pooled separability AUC **0.938**. At a 5% false-alarm
-budget it detects seven of the eight breaking categories at 84-100%:
+The replacement primary check uses a model trained on **natural language
+inference**, the task of deciding whether one piece of text follows from,
+contradicts, or is unrelated to another. We ask it whether the old output and the
+new output contradict each other.
 
-entity 100%, negation 100%, number 100%, temporal 100%, polarity 98.4%,
-quantifier 92.2%, unit 84.4% (n=64 each, Wilson intervals in the results file).
+Using DeBERTa-v3-base-MNLI, pooled AUC is 0.938. At the 5% false-alarm
+budget it detects seven of the eight breaking categories, 64 pairs each:
 
-It holds across output length — 100% / 99.1% / 95.5% / 100% for short_answer /
-json / reasoning / summary — and across subject domain: 96.4% banking, 96.4%
-hospitality, 98.2% logistics, 96.4% technical (n=112 each). That domain
-stability is the first evidence bearing on the transfer question, though it is
-one system type and four domains, and carries no weight for STD-005 on its own.
+| Change | Detected |
+|---|---|
+| swapped name, inserted negation, changed number, changed date | 100% |
+| flipped decision | 98.4% |
+| changed quantifier | 92.2% |
+| changed unit | 84.4% |
 
-**Thresholds must be stratified by shape.** The 5%-FPR threshold ranges from
-0.011 (summary) to 0.888 (reasoning) — a factor of eighty. A single global
-threshold would be badly wrong for at least two shapes.
+It holds up across output length, detecting 100%, 99.1%, 95.5% and 100% for short
+answers, JSON, reasoning lists and summaries respectively. It also holds across
+subject area: 96.4% for banking, 96.4% for hospitality, 98.2% for logistics and
+96.4% for technical operations, 112 pairs each. That stability across subject
+matter is the first evidence bearing on the project's central question, though it
+covers one kind of system and four subjects, so on its own it settles nothing.
 
-### Directional entailment closes the omission gap
+**Thresholds have to be set per output shape.** The threshold that produces a 5%
+false-alarm rate ranges from 0.011 for summaries to 0.888 for reasoning lists, a
+factor of eighty. A single threshold applied to everything would be badly wrong
+for at least two of the four shapes.
 
-Run 20260924T031004Z added a second NLI direction and a second checkpoint.
+## Finding 3: the eighth category needs a different question
 
-Entailment asymmetry — P(A entails B) minus P(B entails A) — detects dropped
-material conditions at **95.3%** [0.87, 0.98], **AUC 0.995**, and is highly
-*specific*: 0-3% on every other breaking category. Contradiction and directional
-entailment are complementary rather than overlapping. Contradiction carries
-seven of eight categories and misses omission completely; directional carries
-omission and almost nothing else. **The union covers all eight.**
+Contradiction detection catches 0% of deleted conditions, at an AUC of 0.535,
+which is chance. The reason is structural rather than a weakness of the model: a
+text with a condition removed does not contradict the original, it simply says
+less. Asking "do these contradict?" gets a truthful "no".
 
-Both come from one pair of forward passes, so the second channel is
-computationally free.
+Asking a different question fixes it. Instead of contradiction, measure
+**asymmetry in entailment**: how much more the old output implies the new one than
+the reverse. On deleted conditions this detects 95.3%, with a 95% confidence
+interval of 0.87 to 0.98 and an AUC of 0.995. It is also highly specific,
+scoring 0 to 3% on every other breaking category.
 
-**Signed, not absolute.** The unsigned variant drops omission to 78.1% and picks
-up a 25% false-alarm rate on `verbosity` — adding a hedge is also an information
-change, in the benign direction. We care about loss, so the sign carries meaning.
+The two questions are complementary rather than overlapping. Contradiction covers
+seven categories and misses deletion entirely; entailment asymmetry covers
+deletion and almost nothing else. Together they cover all eight. Both come from
+the same pair of model calls, so the second question costs nothing extra.
 
-### The NLI result is a property of the checkpoint, not of NLI
+**Use the signed value, not its magnitude.** Taking the absolute value drops
+deletion detection to 78.1% and introduces a 25% false-alarm rate on added
+hedging, because adding a hedge is also a change in information content, in the
+opposite direction. The direction is the informative part.
 
-RoBERTa-large-MNLI reproduced the *direction* of every finding and **none of the
-magnitudes**:
+### Read at both ends, one number names two different faults
+
+Setting thresholds from the preserving pairs at 2.5% in each tail gives a lower
+bound of −0.055 and an upper bound of +0.096:
+
+| Group | Pairs | Median | Above upper | Below lower |
+|---|---|---|---|---|
+| preserving | 256 | 0.000 | 2.7% | 2.7% |
+| breaking, excluding deletion | 448 | 0.000 | 1.8% | 4.0% |
+| deleted condition | 64 | +0.957 | 98.4% | 0% |
+| added hedging | 64 | −0.758 | 0% | 100% |
+| added confidence | 64 | −0.848 | 0% | 100% |
+
+A strongly positive value means information was removed. A strongly negative
+value means it was added. The sign identifies which happened, which is exactly
+what taking the absolute value destroyed.
+
+One caveat has to travel with this result: it is not a detector for
+confidence or tone. Both register directions score negative because both add a
+clause, so what is being measured is the direction of information volume. Whether
+it can separate an added hedge from an added fact is untested.
+
+## Finding 4: these numbers describe a model, not a method
+
+Substituting RoBERTa-large-MNLI, a different model trained for the same task,
+reproduced the direction of every finding above and none of the magnitudes:
 
 | | DeBERTa-v3-base | RoBERTa-large |
 |---|---|---|
 | contradiction, pooled AUC | 0.938 | 0.897 |
-| unit | 84% | **36%** |
-| quantifier | 92% | **55%** |
-| polarity | 98% | 77% |
-| number / temporal | 100% | 84% |
-| paraphrase false alarms | 0% | **12%** |
-| directional, omission | 95.3% | 65.6% |
+| changed unit | 84% | 36% |
+| changed quantifier | 92% | 55% |
+| flipped decision | 98% | 77% |
+| changed number and date | 100% | 84% |
+| false alarms on rewording | 0% | 12% |
+| deletion, via entailment asymmetry | 95.3% | 65.6% |
 
-Per-category gaps run to 48 points. **The pinned checkpoint is a first-order
-design variable**, and this opens a sibling question the study is not built to
-answer: the headline claim is that detection transfers across *domains*, and we
-now have evidence that it degrades measurably across *instrument checkpoints*.
-Say so rather than letting a reader assume otherwise.
+Individual categories differ by as much as 48 percentage points. The judging
+model is therefore a first-order design choice rather than an implementation
+detail, and every figure in this document should be read as describing that
+model.
 
-### Omission and contradiction — the original finding, now corrected
+It also raises a question the study is not designed to answer. The project's
+central claim is about whether detection survives a change of subject domain, and
+we now have direct evidence that it degrades measurably across a change of
+judging model. That should be stated rather than left for a reader to notice.
 
-DeBERTa's contradiction channel detects **0%** of dropped caveats (AUC 0.535,
-chance). The structural reason holds: a text with a condition removed is
-*entailed* by the original, not contradicted by it.
+One correction belongs here. An earlier version of this document claimed no model
+of this type could ever detect deleted conditions via contradiction. RoBERTa
+detects 28.1%, confidence interval 0.19 to 0.40, AUC 0.687. Weak, but above
+chance, so the original claim generalised a single measurement into a property of
+the technique. For comparison, embeddings catch 33% of deletions, and only by
+noticing the change in length.
 
-**But "no NLI model will fix this" was too strong and is now falsified in part.**
-RoBERTa detects 28.1% [0.19, 0.40], AUC 0.687 — weak, but above chance. The
-original claim generalised a single-checkpoint result into a property of
-entailment. Embeddings catch 33%, and only via length.
+## Finding 5: known sources of false alarms
 
-**The consequence runs against an argument we liked.** This section previously
-concluded that structural conformance must carry the omission class alone, and
-noted with some satisfaction that the one unoccupied mechanism in the landscape
-was also the one the blind-spot map said was load-bearing. Directional
-entailment removes that justification. Structural conformance keeps its other
-coverage — schema violations, field cardinality, enum domain, language drift,
-parse failure, the F7 charset signature — and remains unoccupied per STD-003.
-It is no longer the only thing standing between us and a whole fault class, and
-the contribution narrative should stop saying it is.
+- **Reformatting prose as a bulleted list** trips contradiction detection on
+  18.8% of preserving pairs. This is the most important one, because changing
+  formatting is among the most common things a new model does.
+- Rewording trips embedding comparison with MiniLM on 20.3% of preserving
+  pairs, which is consistent with Finding 1.
+- **Reordering two independent sentences** trips embedding comparison with
+  BGE-base on 17.2% of preserving pairs.
 
-### False alarms worth knowing
+## What these findings changed in the design
 
-Reformatting prose as bullets trips NLI on **18.8%** of pairs — and format
-changes are among the most common consequences of a model swap. Paraphrase
-trips MiniLM on 20.3%, reorder trips BGE on 17.2%.
+1. **The order of the checks inverted.** Text inference became the primary check
+   and embedding comparison a conditional extra, which is the reverse of the
+   original design.
+2. **Embedding comparison only runs behind a gate** that measures whether the two
+   systems phrase things similarly.
+3. **Thresholds are set per output shape**, because the correct threshold varies
+   by a factor of eighty across shapes.
+4. **Two questions are asked of one pair of model calls**, contradiction and
+   entailment asymmetry, because their union covers all eight fact changes and
+   neither does alone.
+5. **Rules inferred from output structure are no longer the only cover for
+   deleted conditions**, which they were believed to be before entailment
+   asymmetry was measured.
+6. **The judging model is reported as a design variable**, not buried as a
+   detail.
+7. **Text is normalised before scoring**, since formatting differences were the
+   largest shared source of false alarms.
+8. **Cost rose.** A model that reads two texts together is far more expensive per
+   comparison than one that encodes each separately, which strengthens the case
+   for eventually training a smaller, cheaper stand-in.
 
-### The signed directional channel is two-tailed (MTH-022)
+Relabelling register pairs had an unplanned benefit. The false alarms previously
+blamed on hedging were never false alarms: the check was correctly detecting a
+change the suite had mislabelled as a non-change. Relabelling also improved the
+fitted threshold for judging text equivalence, moving the best value from 0.05 to
+0.65 and raising accuracy from 0.909 to 0.956, which converged on a value that
+had previously been chosen by argument alone.
 
-Thresholds from the preserving distribution at 2.5% per tail (lower -0.055,
-upper +0.096):
+## Limits of this measurement
 
-| group | n | median | above upper | below lower |
-|---|---|---|---|---|
-| preserving | 256 | 0.000 | 2.7% | 2.7% |
-| breaking excl. omission | 448 | 0.000 | 1.8% | 4.0% |
-| omission | 64 | +0.957 | **98.4%** | 0% |
-| hedging | 64 | -0.758 | 0% | **100%** |
-| overconfidence | 64 | -0.848 | 0% | **100%** |
-
-One statistic, two tails, two fault classes, and the sign says which: positive
-means information was removed, negative means it was added.
-
-`directional_abs` is therefore redundant *and worse* — the absolute value
-conflates the tails, fires on both, and distinguishes neither. Dropped.
-
-Caveat that must travel with this: it is **not** a stance detector. Both
-register directions go negative because both add a clause, so what is measured
-is directional information volume. Whether it separates stance addition from
-factual addition is untested.
-
-### Relabelling register recovered a signal
-
-The false alarms previously attributed to `verbosity` were never false alarms —
-the channel was correctly detecting a change the suite had mislabelled as a
-non-change. Relabelling also fixed the clustering fit: the argmax moved from
-0.05 to 0.65 and peak balanced accuracy rose from 0.909 to 0.956, converging on
-the threshold that had been chosen by argument alone (MTH-020 append).
-
-## Consequences for the design
-
-1. Channel ordering inverts. NLI is the workhorse; embedding displacement is a
-   conditional add-on, not the primary triage. Recorded in HANDOFF §5.
-2. The embedding channel needs a style-stability gate before it may contribute.
-3. Shape-stratified thresholds are mandatory, not an optimisation.
-4. Two NLI channels, one pair of forward passes. Their union covers all eight
-   breaking categories; neither does alone.
-5. Structural conformance is no longer the sole cover for omission, and the
-   contribution narrative must stop claiming it is.
-6. The pinned checkpoint is a reportable design variable, not a detail.
-7. Format normalisation before scoring is the obvious next engineering step —
-   it is the shared 19% false-alarm source across both NLI channels.
-8. Cost rises: a bidirectional cross-encoder is far more expensive per
-   comparison than a bi-encoder, which strengthens the case for distilling the
-   NLI-based mode clustering once it is the demonstrated bottleneck.
-
-## Known limits of the suite itself
-
-- Perturbations are synthetic and single-fact. Real regressions are messier and
-  often combine several.
-- Two NLI checkpoints, and they disagree by up to 48 points per category. The
-  embedding result is the more robust of the two, replicating across three
-  families.
-- The 5% budget is a convention, not a derived operating point.
-- Seeds are English and template-generated. Nothing here speaks to other
-  languages or to free-form generation.
+- **The changes are synthetic and each alters one thing.** Real regressions are
+  messier and usually combine several changes at once, so these figures are
+  probably optimistic.
+- **Only two judging models were tested, and they disagree by up to 48 points per
+  category.** The embedding finding is the more trustworthy of the two, because
+  it replicated across three model families rather than one.
+- **The 5% false-alarm budget is a convention, not a derived figure.** A
+  different budget would move every detection rate in this document.
+- **Everything is English and generated from templates.** Nothing here says
+  anything about other languages, or about free-form text that no template
+  produced.

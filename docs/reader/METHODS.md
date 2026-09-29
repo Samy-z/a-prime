@@ -35,6 +35,14 @@ a ledger is wrong in a README.
 dense and identifier-heavy. Someone grepping `MTH-018` at midnight wants the
 finding, not an on-ramp.
 
+**Linking a document from an outward-facing artifact changes its audience.** A
+file under `docs/knowledge/` is normally written for someone who already has
+project context. The moment the README points a stranger at it as a suggested
+entry point, it inherits the README's contract and has to define its own terms.
+Either rewrite it for that reader or stop linking it. This was missed when the
+contract was first written: `probes.md` and `detector.md` were classed as
+maintainer documents while the README sent newcomers straight to them (RDR-003).
+
 ## Rules for outward-facing artifacts
 
 1. **Expand on first use, every artifact, no exceptions.** Not "FDR" but "false
@@ -50,6 +58,10 @@ finding, not an on-ramp.
    output beats any amount of description, and belongs before the tables.
 5. **Numbers need their question.** A table of figures before the reader knows
    what question the figures answer is decoration.
+6. **Bullet points must stand alone.** Lists are what people read first, and
+   often all they read. A bullet that only makes sense after the paragraph above
+   it has failed at the job bullets are for. Each one states its point, gives the
+   number, and says why it matters, without depending on its neighbours.
 
 ## Style, with the specific habits to avoid
 

@@ -55,3 +55,59 @@ you have seen it return non-zero on something you know is bad.
 `git show <commit>:README.md` piped through the current checker.
 **Reopen if:** the term list grows enough that maintaining it by hand stops being
 worthwhile, at which point extract it from the docs automatically.
+
+## RDR-003 — Linking a document from the README changes its audience
+**Date:** 2026-09-29
+**Finding:** The audience contract classed `docs/knowledge/*.md` as documents for
+someone who already has project context. But the README points newcomers at
+`probes.md` and `detector.md` as suggested entry points, so in practice their
+reader has read one page and nothing else. Measured before rewriting:
+
+| | probes.md | detector.md |
+|---|---|---|
+| terms used with no explanation nearby | 6 | 6 |
+| internal identifiers used as references | 7 | 4 |
+| em dashes per 1000 words | 10.7 | 6.7 |
+| bold spans per 1000 words | 17.6 | 20.0 |
+
+**Consequence:** the contract now says a document linked from an outward-facing
+artifact inherits that artifact's audience. Either rewrite it for that reader or
+stop linking it. Both files were rewritten; all four signals now pass on both.
+**Also added to the style rules:** bullet points must stand alone. Lists are read
+first and often read alone, so a bullet that only makes sense after the paragraph
+above it has failed at the job bullets are for. Owner observation.
+**Evidence:** `scripts/check_prose.py` on both files, before and after.
+**Reopen if:** a ledger is ever linked from the README, which would force a
+choice between linking it and keeping it terse.
+
+## RDR-004 — The prose checker gave a false pass three times before it worked
+**Date:** 2026-09-29
+**Finding:** Four separate defects, all of which made the checker report a clean
+document when it was not:
+
+1. The first gloss test accepted `is`, `:` or `(` anywhere within 240 characters,
+   which matches almost any prose. It reported 0 undefined terms in a document
+   with 11.
+2. An escaping layer turned `\b` in one pattern into a literal backspace
+   character, silently disabling a rule. Visible only under `cat -A`.
+3. Emphasis markers were not stripped, so `**AUC**, area under the curve` read as
+   a term followed by an asterisk rather than by a comma, and flagged as
+   undefined.
+4. Terms matched as substrings, so `NLI` matched inside `DeBERTa-v3-base-MNLI`
+   and was reported undefined in a document that never used the acronym.
+
+A fifth suspected defect was not real. Accepting an em dash as a gloss marker was
+removed on the theory that it caused a false pass, and it plausibly could have,
+but the false pass being investigated came from a wrong control: `git show
+HEAD:README.md` was the already-rewritten file, so the old and new versions were
+being compared against each other. The dash rule is still gone, on the narrower
+grounds that dashes mark asides at least as often as definitions.
+**Consequence:** the checker errs toward flagging by design. A false alarm costs
+a reader thirty seconds; a false pass ships a cryptic document. Any change to the
+gloss test is validated by confirming it still flags 11 terms on the pre-rewrite
+README and 0 on the current one.
+**Lesson recorded against process:** a tool that reports zero is uninformative
+until you have watched it report non-zero on something you know is bad, and the
+control has to be the document you think it is.
+**Evidence:** pre-rewrite README recoverable via the parent of the commit whose
+message begins "Rewrite the README".

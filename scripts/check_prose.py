@@ -49,6 +49,7 @@ _LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
 _TABLE = re.compile(r"^\s*\|.*$", re.MULTILINE)
 _HEADING = re.compile(r"^#{1,6}\s.*$", re.MULTILINE)
 _BOLD = re.compile(r"\*\*[^*]+\*\*")
+_EMPH = re.compile(r"\*{1,2}")
 _SENT = re.compile(r"(?<=[.!?])\s+")
 _ID = re.compile(r"\b(?:MTH|BCH|STD|ENG|RDR)-\d+\b|\bF\d{1,2}\b")
 
@@ -60,7 +61,23 @@ def prose_only(text: str) -> str:
     t = _HEADING.sub(" ", t)
     t = _LINK.sub(r"\1", t)
     t = _INLINE.sub(" ", t)
+    # Emphasis markers sit between a term and its gloss, so they defeat the
+    # adjacency test in defined_nearby: "**AUC**, area under the curve" looks
+    # like it is followed by an asterisk rather than a comma. Stripped here for
+    # analysis; bold is counted separately, from the raw text.
+    t = _EMPH.sub("", t)
     return t
+
+
+def _boundary(term: str) -> str:
+    """Match a term as a whole word.
+
+    Without this, "NLI" matches inside "DeBERTa-v3-base-MNLI" and the term is
+    reported as undefined in a document that never uses the acronym at all.
+    """
+    lead = r"(?<![\w-])" if term[:1].isalnum() else ""
+    trail = r"(?![\w-])" if term[-1:].isalnum() else ""
+    return lead + re.escape(term) + trail
 
 
 def defined_nearby(text: str, term: str) -> bool:
@@ -78,15 +95,30 @@ def defined_nearby(text: str, term: str) -> bool:
         term is/means explanation
     Plus a parenthetical expansion before an acronym: explanation (TERM).
     """
-    m = re.search(re.escape(term), text, re.IGNORECASE)
+    m = re.search(_boundary(term), text, re.IGNORECASE)
     if not m:
         return True
     tail = text[m.end() : m.end() + 90]
     if re.match(r"\s*[\(\[]", tail):
         return True
-    if re.match(r"\s*(?:—|--|,\s+(?:the|which|meaning|a|an)\b)", tail):
+    # "term, the explanation" / "term, which means ..." -- a determiner or
+    # relative pronoun after the comma marks a gloss rather than a list.
+    if re.match(r",\s+(?:the|which|meaning|a|an)\b", tail):
         return True
+    # Appositive: "AUC, area under the curve, is ..." -- a short phrase fenced
+    # by commas immediately after the term.
+    if re.match(r",\s+[^,.;:]{3,60},", tail):
+        return True
+    # Deliberately NOT accepted: a dash. "null distribution -- measured on your
+    # corpus" is an aside, not a definition, and dashes are used for asides
+    # constantly. Accepting them made this function pass a document with eleven
+    # undefined terms. This check errs toward flagging on purpose: a false alarm
+    # costs a reader thirty seconds, a false pass ships a cryptic document.
     if re.match(r"\s+(?:is|are|means|stands for|refers to)\s+\w", tail):
+        return True
+    # "term: the explanation" -- a colon introduces a gloss as readably as a
+    # comma does, and leaving it out flagged correctly-defined terms.
+    if re.match(r"\s*:\s+\w", tail):
         return True
     # "natural language inference (NLI)" -- expansion precedes the acronym.
     head = text[max(0, m.start() - 70) : m.start()]
@@ -143,7 +175,7 @@ def main() -> int:
     print("\nterms used without an explanation nearby:")
     missing = []
     for term, gloss in sorted(JARGON.items()):
-        if re.search(re.escape(term), prose, re.IGNORECASE) and not defined_nearby(prose, term):
+        if re.search(_boundary(term), prose, re.IGNORECASE) and not defined_nearby(prose, term):
             missing.append((term, gloss))
     if not missing:
         print("  none found")

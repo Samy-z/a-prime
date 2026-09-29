@@ -154,23 +154,42 @@ cases into one and threw away the only part that identified the fault.
 
 ## Honest limits
 
-- **Twelve samples per input is not enough.** Against a moderate change, ten
-  samples per system detected 8% of them. Twenty samples reached 73%. The real
-  operating point is therefore 60 model calls per input, not 30.
-- **There is a floor below which nothing is visible.** A change that shifts the
-  mix of answers by about 30% was undetectable at every sample size we tried.
-- **The results depend on which judge model you use.** A second model of the same
-  type reproduced the direction of every finding and none of the magnitudes, with
-  differences of up to 48 percentage points on individual categories. Numbers
-  here describe the model we pinned, not the technique.
-- **Duplicate inputs are only removed when the text matches after normalising.**
-  Two ways of asking the same question are not caught, and that inflates the
-  apparent amount of independent evidence.
-- **One threshold is still a guess**, the one that decides when to trust the
-  embedding check. It is labelled as a guess in the code.
-- **This has never been run against a production system.** Every number above
-  comes from a synthetic system or from hand-built text pairs. That is research
-  in progress, not a product.
+- **Twenty samples from each system is the real minimum, which works out to 60
+  model calls for every input you test.** Distinguishing a genuine change from
+  random variation needs several samples from each of the three runs: the old
+  system, the old system again, and the new one. At ten samples per run the tool
+  detected only 8% of moderate changes. At twenty it reached 73%. Budget for
+  twenty, which is sixty calls per input across the three runs.
+
+- **Small changes are invisible, and we can say roughly how small.** If the new
+  system still produces the same set of possible answers but shifts how often it
+  picks each one by around 30%, nothing we tried detected it at any sample size.
+  A tool that cannot see a change should say where its floor is rather than imply
+  complete coverage.
+
+- **The figures describe our setup, not the technique.** Most checks depend on a
+  model trained to judge whether one piece of text follows from another.
+  Substituting a different model of the same kind reproduced the direction of
+  every finding and none of the magnitudes, with gaps of up to 48 percentage
+  points on individual categories. Anyone reusing this should re-measure with
+  their own judge.
+
+- **Duplicate inputs are only removed when the wording matches.** After
+  normalising case and formatting, identical text collapses to a single entry;
+  two different phrasings of the same question do not. This matters because the
+  false alarm guarantee is computed by counting inputs, so undetected duplicates
+  make the evidence look more independent than it is and the guarantee slightly
+  optimistic.
+
+- **One threshold was set by judgement rather than measurement**: the one
+  deciding whether the embedding comparison is trustworthy for a given pair of
+  systems. It is marked as a guess in the code. Set too loosely it admits a
+  measure known to perform below chance; set too tightly it contributes nothing.
+
+- **Nothing here has run against a production system.** Every figure comes from
+  a synthetic system whose correct answers we control, or from hand-built text
+  pairs where we know the intended relationship. This is research in progress
+  rather than a tool with a track record.
 
 ## Prior art
 
