@@ -68,9 +68,17 @@ the caller changed — that is the thing under test.
 
 ## Known limits
 
-- **Tested against a fake transport only.** Whether a real server behaves as the
-  fake does is unverified. That is the next thing to check, and it needs a live
-  server and therefore the GPU.
+- **Verified against a live server 2026-09-29** (BCH-012): 29 checks, 4 models,
+  93 seconds of GPU. The template injection is confirmed at ~533 tokens on both
+  Ministral variants and absent on the other two; seed reproducibility holds on
+  all four. The pass found two bugs in our own test doubles and none in the
+  adapter, which is the point of running it.
+- **`think` is not universal.** Both Ministral models reject `think=True` with
+  HTTP 400. Setting it uniformly across the pool would fail every call on half of
+  it. Recorded as an errored sample, correctly — an error is not an empty
+  response.
+- These are statements about server **0.34.4** and its bundled templates. A
+  version change invalidates them and the pass must be re-run.
 - Context size is explicit but **not yet calibrated**. D11 settled the sequence:
   build the cells, measure each one's peak token demand, then fix the cap.
   Guessing it first is how the agent cell spills to CPU.

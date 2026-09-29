@@ -27,7 +27,7 @@ from aprime.systems.ollama import (  # noqa: E402
 class FakeTransport:
     """Scriptable stand-in. `reply` is what /api/chat returns."""
 
-    def __init__(self, version="0.34.4", digest="sha256:aaaa1111", reply=None):
+    def __init__(self, version="0.34.4", digest="f586c02fdecdf151b65", reply=None):
         self.version, self.digest = version, digest
         self.reply = reply or {
             "message": {"content": "The claim was approved."},
@@ -101,7 +101,10 @@ def test_pin_captures_version_digest_and_request_shape():
     s = OllamaSystem(_cfg(), "A", FakeTransport())
     p = s.pin()
     assert p["server_version"] == "0.34.4"
-    assert p["model_digest"] == "sha256:aaaa1111"
+    # Bare hex, no "sha256:" prefix -- what a live 0.34.4 server actually
+    # returns. The first version of this fake invented the prefix and the
+    # live pass caught it.
+    assert p["model_digest"] == "f586c02fdecdf151b65"
     assert "granite4.2:8b" in p["request_fingerprint"]
 
 
@@ -126,7 +129,7 @@ def test_a_model_digest_change_is_refused():
     t = FakeTransport()
     s = OllamaSystem(_cfg(), "A", t)
     s.verify_pin()
-    t.digest = "sha256:bbbb2222"
+    t.digest = "1922accd5827ebe6829"
     with pytest.raises(PinMismatch, match="model_digest"):
         s.verify_pin()
 
@@ -152,13 +155,24 @@ def test_empty_content_with_tokens_spent_is_flagged():
     })
     r = OllamaSystem(_cfg(), "A", t).invoke(Invocation("i0", "q"))
     assert r.output == ""
+    assert r.trace.extra["empty_output"] is True
     assert r.trace.extra["empty_with_tokens"] is True
     assert r.trace.extra["thinking_chars"] > 0
 
 
+def test_empty_content_with_no_tokens_is_still_flagged():
+    """Found on a live server: Ministral 3 under think=True returns an empty
+    message with zero tokens and no thinking. An earlier version only flagged
+    empty-with-tokens and let this through as a short answer."""
+    t = FakeTransport(reply={"message": {"content": ""}, "eval_count": 0})
+    r = OllamaSystem(_cfg(), "A", t).invoke(Invocation("i0", "q"))
+    assert r.trace.extra["empty_output"] is True
+    assert r.trace.extra["empty_with_tokens"] is False
+
+
 def test_a_normal_short_answer_is_not_flagged():
     r = OllamaSystem(_cfg(), "A", FakeTransport()).invoke(Invocation("i0", "q"))
-    assert "empty_with_tokens" not in r.trace.extra
+    assert "empty_output" not in r.trace.extra
     assert r.output == "The claim was approved."
     assert r.trace.finish_reason == "stop"
 

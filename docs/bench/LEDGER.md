@@ -268,3 +268,48 @@ count is not.
 **Owner ratification recorded 2026-09-29:** model pool approved as proposed in
 BCH-007 — granite4.2:8b, ministral-3:8b, qwen3.5:9b, plus a 3B as a deliberate
 weak system. Hermes dropped at 14B.
+
+## BCH-012 — Adapter verified against a live server; BCH-009 confirmed independently
+**Date:** 2026-09-29
+**Finding:** 29 checks, 4 models, **93 seconds of GPU time**, all passing. Server
+0.34.4 on an isolated port; models unloaded per call via `keep_alive: 0`.
+
+**The template injection is real and measured.** Prompt tokens for an identical
+user message:
+
+| Model | with explicit system | without | injected |
+|---|---|---|---|
+| ministral-3:8b | 21 | **554** | **~533** |
+| ministral-3:3b | 21 | **554** | **~533** |
+| granite4.2:8b | 30 | 16 | none |
+| qwen3.5:9b | 30 | 11 | none |
+
+BCH-009 was found by a survey agent; this confirms it independently on a live
+server, and confirms the mitigation works — a mandatory explicit system message
+takes the prompt from 554 tokens to 21. Both Ministral variants inject; neither
+of the other two does.
+
+**New: `think` is not a universal parameter.** Both Ministral models reject
+`think=True` with **HTTP 400** rather than ignoring it. A study that set `think`
+uniformly across the pool would fail every call on half of it. The adapter
+records this as an errored sample, which is correct — an error is not an empty
+response.
+
+**Granite supports thinking**, which the survey had listed as unchecked: 57
+characters of thinking with an empty content field at a 12-token budget. Qwen
+likewise, 44 characters. Both are now flagged by `empty_output`.
+
+**Seed reproducibility holds on all four models** — same seed, byte-identical
+output. That is the evidence that the explicit sampling options actually take
+effect rather than being ignored.
+
+**Digests come back as bare hex**, not `sha256:`-prefixed.
+**Two bugs found, both in our test doubles rather than the adapter.** The fake
+transport invented a `sha256:` digest prefix that a live server does not use, and
+a verification check conflated "empty response" with "errored response". The
+adapter was correct in both cases. This is the argument for verifying against
+reality: *tested against a fake* and *verified* are different claims, and the gap
+between them was two wrong assumptions about what a real server returns.
+**Evidence:** `scripts/verify_ollama.py`, run 2026-09-29.
+**Reopen if:** the pinned server version changes — the pass must be re-run,
+because these are statements about 0.34.4 and its bundled templates.

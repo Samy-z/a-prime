@@ -84,6 +84,10 @@ class OllamaConfig:
     num_predict: int = 256
     think: bool = False
     host: str = "http://127.0.0.1:11434"
+    # "0" unloads the model the instant a call finishes. Ollama's default idle
+    # keep-alive is five minutes, which parks 6 GB of someone's VRAM doing
+    # nothing. Long runs want a warm model; short checks do not.
+    keep_alive: str | int = "5m"
 
     def options(self) -> dict[str, Any]:
         opts = {
@@ -192,6 +196,7 @@ class OllamaSystem:
             ],
             "stream": False,
             "think": self.config.think,
+            "keep_alive": self.config.keep_alive,
             "options": self.config.options(),
         }
         import time
@@ -217,10 +222,16 @@ class OllamaSystem:
             "eval_count": eval_count,
             "prompt_eval_count": body.get("prompt_eval_count"),
         }
-        # The Qwen trap: tokens spent, nothing returned. Indistinguishable from
-        # injected F12 truncation unless it is named here.
-        if not content.strip() and eval_count > 0:
-            extra["empty_with_tokens"] = True
+        # An empty output is suspicious however it arose, so it is always named.
+        # Two distinct causes, both seen on a live server:
+        #   tokens spent, nothing returned  -- the Qwen thinking trap
+        #   nothing at all                  -- a model that does not honour
+        #                                      `think` and returns an empty
+        #                                      message rather than ignoring it
+        # Either is indistinguishable from injected F12 truncation unless named.
+        if not content.strip():
+            extra["empty_output"] = True
+            extra["empty_with_tokens"] = eval_count > 0
         if msg.get("thinking"):
             extra["thinking_chars"] = len(msg["thinking"])
 
