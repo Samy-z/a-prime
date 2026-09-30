@@ -1,0 +1,108 @@
+{
+  "run_id": "20260930T001738Z",
+  "config_hash": "12dc8a339ed51f2b",
+  "git_commit": "2594e3cee1ed7bfbf79b1724a466f07f8d3a3b31",
+  "git_dirty": true,
+  "params": {
+    "domain": "banking",
+    "output_format": "summary",
+    "n": 40,
+    "k": 6,
+    "q": 0.1,
+    "fault": "stale:history,lookup,search,verify",
+    "seed_policy": "unset"
+  },
+  "instruments": {
+    "system": "granite4.2:8b",
+    "system_digest": "unresolved",
+    "nli": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    "nli_revision": "6f5cf0a2b59cabb106aca4c287eed12e357e90eb",
+    "threshold": 0.7
+  },
+  "timing_s": {
+    "record_this_session": 0.0,
+    "detect": 2.7,
+    "total_this_session": 20.9
+  },
+  "samples": 720,
+  "sessions": 1,
+  "activation": {
+    "banking-summary-act-007": false,
+    "banking-summary-act-016": false,
+    "banking-summary-act-025": false,
+    "banking-summary-act-034": false,
+    "banking-summary-compute-003": false,
+    "banking-summary-compute-012": false,
+    "banking-summary-compute-021": false,
+    "banking-summary-compute-030": false,
+    "banking-summary-compute-039": false,
+    "banking-summary-evaluate-004": false,
+    "banking-summary-evaluate-013": false,
+    "banking-summary-evaluate-022": false,
+    "banking-summary-evaluate-031": false,
+    "banking-summary-history-005": false,
+    "banking-summary-history-014": false,
+    "banking-summary-history-023": false,
+    "banking-summary-history-032": false,
+    "banking-summary-lookup-000": true,
+    "banking-summary-lookup-009": false,
+    "banking-summary-lookup-018": false,
+    "banking-summary-lookup-027": false,
+    "banking-summary-lookup-036": false,
+    "banking-summary-mixed-008": false,
+    "banking-summary-mixed-017": false,
+    "banking-summary-mixed-026": false,
+    "banking-summary-mixed-035": false,
+    "banking-summary-policy-002": false,
+    "banking-summary-policy-011": false,
+    "banking-summary-policy-020": false,
+    "banking-summary-policy-029": false,
+    "banking-summary-policy-038": false,
+    "banking-summary-search-001": true,
+    "banking-summary-search-010": false,
+    "banking-summary-search-019": false,
+    "banking-summary-search-028": false,
+    "banking-summary-search-037": false,
+    "banking-summary-verify-006": false,
+    "banking-summary-verify-015": false,
+    "banking-summary-verify-024": false,
+    "banking-summary-verify-033": false
+  },
+  "cost": {
+    "predicate_calls": 7,
+    "clusterings": 4,
+    "samples_clustered": 29,
+    "distinct_after_normalisation": 9
+  },
+  "channels": {
+    "mode_share": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "dispersion": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "novel_mode": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "embedding": {
+      "flagged": 0,
+      "skipped": "no embedder supplied"
+    },
+    "nli_contradiction": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "nli_directional": {
+      "flagged": 0,
+      "skipped": null
+    }
+  },
+  "findings": [],
+  "notes": [
+    "38 of 40 inputs dropped: an arm returned nothing usable. Dropped, not imputed \u2014 a missing arm has no decoy and therefore no calibrated threshold.",
+    "this recording crosses midnight UTC. At least one common chat template interpolates the date into a hidden system prompt, so the arms may differ by a prompt edit nobody made (BCH-009)."
+  ]
+}

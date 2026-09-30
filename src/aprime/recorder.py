@@ -167,13 +167,25 @@ class Recording:
                 fh.write(json.dumps(asdict(s)) + "\n")
 
 
-def load_checkpoint(path: str | Path) -> tuple[list[Sample], set[tuple[str, int]], int]:
+def load_checkpoint(
+    path: str | Path,
+    retry_dead_triples: bool = True,
+) -> tuple[list[Sample], set[tuple[str, int]], int]:
     """Read a checkpoint, keeping only complete triples.
 
     Returns usable samples, the set of finished (input_id, sample_idx) triples,
     and the next session number. A triple missing any arm is dropped entirely
     and will be redone, because a partial triple is exactly the split-load-regime
     case MTH-015 forbids.
+
+    **A triple where every arm errored is not finished either.** It holds three
+    error strings and no outputs, so counting it as done means a resume skips it
+    forever and the recording stays permanently short. This is not hypothetical:
+    a server that stopped listening 90 seconds into a run produced 698
+    consecutive connection failures, every one written as a complete triple, and
+    the checkpoint then reported itself 100% recorded (ENG-008). With
+    `retry_dead_triples` those are left out of `done`, so rerunning collects them
+    properly. Pass false to inspect a checkpoint exactly as written.
     """
     p = Path(path)
     if not p.exists():
@@ -189,13 +201,56 @@ def load_checkpoint(path: str | Path) -> tuple[list[Sample], set[tuple[str, int]
             except (ValueError, TypeError):
                 # A truncated final line is expected after a hard kill.
                 continue
-    seen: dict[tuple[str, int], set[str]] = {}
+    # The file is append-only, so one (triple, arm) can appear more than once:
+    # a triple that failed and was later redone has both attempts on disk. The
+    # last write is the live one. Without this, a retried triple is judged on the
+    # errors it used to have and stays dead forever, which makes the whole
+    # recovery path a no-op.
+    latest: dict[tuple[tuple[str, int], str], Sample] = {}
     for s in rows:
+        latest[(s.triple, s.arm)] = s
+    live = list(latest.values())
+
+    seen: dict[tuple[str, int], set[str]] = {}
+    for s in live:
         seen.setdefault(s.triple, set()).add(s.arm)
     complete = {t for t, got in seen.items() if set(ARMS) <= got}
-    kept = [s for s in rows if s.triple in complete]
+    if retry_dead_triples:
+        errored: dict[tuple[str, int], int] = {}
+        for s in live:
+            if s.triple in complete and s.error:
+                errored[s.triple] = errored.get(s.triple, 0) + 1
+        complete -= {t for t, n in errored.items() if n >= len(ARMS)}
+    kept = [s for s in live if s.triple in complete]
+    kept.sort(key=lambda x: x.order)
     next_session = max((s.session for s in kept), default=-1) + 1
     return kept, complete, next_session
+
+
+def checkpoint_health(path: str | Path) -> dict:
+    """What is actually in a checkpoint, errors included.
+
+    `load_checkpoint` hides dead triples so that a resume redoes them, which is
+    right for recording and wrong for judging a file. A run whose system under
+    test died looks identical to a finished one from the outside, and this is
+    what tells them apart.
+    """
+    p = Path(path)
+    if not p.exists():
+        return {"exists": False, "samples": 0, "errored": 0, "empty": 0,
+                "triples": 0, "dead_triples": 0, "error_rate": 0.0,
+                "messages": []}
+    rows, _, _ = load_checkpoint(p, retry_dead_triples=False)
+    by_triple: dict[tuple[str, int], list[Sample]] = {}
+    for s in rows:
+        by_triple.setdefault(s.triple, []).append(s)
+    dead = sum(1 for g in by_triple.values() if all(x.error for x in g))
+    errored = sum(1 for s in rows if s.error)
+    return {"exists": True, "samples": len(rows), "errored": errored,
+            "empty": sum(1 for s in rows if not s.output.strip()),
+            "triples": len(by_triple), "dead_triples": dead,
+            "error_rate": errored / max(1, len(rows)),
+            "messages": sorted({str(s.error)[:80] for s in rows if s.error})[:5]}
 
 
 # ---------------------------------------------------------------------------
@@ -263,6 +318,32 @@ def decoy_independence_warnings(arms: dict[str, SystemUnderTest]) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
+class RecordingFailed(Exception):
+    """Every arm has been failing long enough that the run is pointless.
+
+    Raised rather than pressed on with. A recorder that keeps going while nothing
+    answers will fill a checkpoint with error strings, report steady progress the
+    whole time, and leave an artifact that looks like a finished run: 698
+    consecutive connection failures over 24 minutes, and a checkpoint calling
+    itself 100% complete (ENG-008). Wall clock is the cheapest thing lost there.
+
+    Whatever is already on disk stays, and the dead triples are redone next
+    attempt because `load_checkpoint` does not count them as finished.
+    """
+
+    def __init__(self, consecutive: int, completed: int, last_error: str):
+        self.consecutive = consecutive
+        self.completed = completed
+        self.last_error = last_error
+        super().__init__(
+            f"every arm failed on {consecutive} triples in a row, after "
+            f"{completed} that did not. Last error: {last_error}. Nothing is "
+            f"being recorded that any analysis could use, so the run stopped "
+            f"rather than filling the checkpoint with errors. Check the system "
+            f"under test is up, then rerun: the failed triples are not counted "
+            f"as done.")
+
+
 class RunPaused(Exception):
     """A recording stopped at a triple boundary before finishing.
 
@@ -322,11 +403,18 @@ def recording_progress(
                 "fraction": 0.0, "sessions": 0}
     samples, done, next_session = load_checkpoint(checkpoint)
     have = done & want
+    health = checkpoint_health(checkpoint)
     return {"planned": len(want), "done": len(have),
             "remaining": len(want - have),
             "fraction": len(have) / max(1, len(want)),
             "sessions": next_session, "samples_on_disk": len(samples),
-            "stale_triples": len(done - want)}
+            "stale_triples": len(done - want),
+            # Surfaced, because a checkpoint whose system under test died
+            # otherwise reports itself complete, and a caller reading only
+            # `fraction` cannot tell a finished run from a failed one (ENG-008).
+            "errored_samples": health["errored"],
+            "dead_triples": health["dead_triples"],
+            "error_rate": round(health["error_rate"], 3)}
 
 
 def record(
@@ -337,6 +425,7 @@ def record(
     progress_every: int = 0,
     group_by_input: bool = True,
     should_stop: Callable[[], bool] | None = None,
+    abort_after_dead: int = 3,
 ) -> Recording:
     """Collect k samples per input per arm, interleaved across arms.
 
@@ -352,6 +441,11 @@ def record(
     partial recording, because a partial recording is indistinguishable from a
     complete one once it reaches the detector. Everything already collected is
     on disk if `checkpoint` was given, and a rerun continues from there.
+
+    `abort_after_dead` stops the run once that many consecutive triples have
+    had every arm fail, raising `RecordingFailed`. Setting it to 0 disables the
+    check, which is almost never right: the alternative is a checkpoint full of
+    error strings that reports itself complete.
 
     `group_by_input` (default true) runs all k samples of one input before
     moving on, so a prompt-caching server pays prefill once per input rather
@@ -391,6 +485,7 @@ def record(
 
     order = max((s.order for s in samples), default=-1) + 1
     n_new = 0
+    dead_run = 0
     # Grouped: every sample of one input, then the next input. Ungrouped: one
     # sample of every input, then the next sample index.
     if group_by_input:
@@ -451,8 +546,19 @@ def record(
                     fh.write(json.dumps(asdict(s)) + "\n")
                 fh.flush()
             n_new += 1
+            # A triple where every arm failed carries no output at all. One is
+            # noise; a run of them means nothing is answering.
+            if all(x.error for x in triple):
+                dead_run += 1
+                if abort_after_dead and dead_run >= abort_after_dead:
+                    raise RecordingFailed(dead_run, n_new - dead_run,
+                                          str(triple[-1].error))
+            else:
+                dead_run = 0
             if progress_every and n_new % progress_every == 0:
-                print(f"  {n_new} triples this session, {len(samples)} samples total")
+                failing = f" ({dead_run} failing)" if dead_run else ""
+                print(f"  {n_new} triples this session, {len(samples)} samples "
+                      f"total{failing}")
     finally:
         if fh is not None:
             fh.close()

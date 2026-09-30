@@ -22,7 +22,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from aprime.adapter import ARMS  # noqa: E402
 from aprime.recorder import (  # noqa: E402
+    RecordingFailed,
     RunPaused,
+    checkpoint_health,
     decoy_independence_warnings,
     iter_invocations,
     load_checkpoint,
@@ -421,3 +423,126 @@ def test_progress_notices_triples_that_no_longer_belong(tmp_path):
     assert prog["done"] == 2
     assert prog["remaining"] == 1
     assert prog["stale_triples"] == 2
+
+
+# ------------------------------------------- a dead system under test (ENG-008)
+
+
+class _Dead:
+    """A system that cannot be reached, like a server that stopped listening."""
+
+    def __init__(self, arm, fail_from=0):
+        self.arm = arm
+        self.fail_from = fail_from
+        self.calls = 0
+
+    def invoke(self, inv):
+        self.calls += 1
+        if self.calls > self.fail_from:
+            raise OSError("[WinError 10061] target machine actively refused it")
+        from aprime.adapter import Response, Trace
+        return Response(output="fine", trace=Trace(latency_ms=1.0))
+
+
+def _dead_arms(fail_from=0):
+    return {a: _Dead(a, fail_from) for a in ARMS}
+
+
+def test_a_run_where_nothing_answers_aborts_instead_of_filling_the_checkpoint():
+    """A server stopped listening 90 seconds into a 50 minute run. The recorder
+    wrote 698 connection failures as complete triples, reported steady progress
+    throughout, and the checkpoint then called itself 100% recorded."""
+    ids = [f"i{n}" for n in range(50)]
+    with pytest.raises(RecordingFailed) as caught:
+        record(iter_invocations(ids), _dead_arms(), k=1, abort_after_dead=3)
+    exc = caught.value
+    assert exc.consecutive == 3
+    assert "refused" in exc.last_error
+    assert "not counted as done" in str(exc)
+
+
+def test_one_failed_triple_is_noise_and_does_not_abort():
+    """Transient failures happen. Only a run of them means nothing is answering."""
+    ids = [f"i{n}" for n in range(6)]
+    arms = _dead_arms(fail_from=1)   # first call each succeeds, rest fail
+    with pytest.raises(RecordingFailed):
+        record(iter_invocations(ids), arms, k=1, abort_after_dead=3)
+    # The first triple succeeded, so the abort counted from the second.
+    assert all(a.calls >= 2 for a in arms.values())
+
+
+def test_the_abort_can_be_switched_off(tmp_path):
+    ids = ["i0", "i1"]
+    cp = tmp_path / "run.jsonl"
+    rec = record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
+                 abort_after_dead=0)
+    assert len(rec.samples) == len(ids) * len(ARMS)
+    assert all(s.error for s in rec.samples)
+
+
+def test_a_triple_where_every_arm_failed_is_not_counted_as_done(tmp_path):
+    """Otherwise a resume skips it forever and the recording stays short."""
+    cp = tmp_path / "run.jsonl"
+    ids = ["i0", "i1"]
+    record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
+           abort_after_dead=0)
+    kept, done, _ = load_checkpoint(cp)
+    assert done == set(), "all-error triples must not count as finished"
+    assert kept == []
+    raw, raw_done, _ = load_checkpoint(cp, retry_dead_triples=False)
+    assert len(raw_done) == 2, "the file itself still holds them"
+    assert len(raw) == 2 * len(ARMS)
+
+
+def test_a_dead_run_is_redone_on_the_next_attempt(tmp_path):
+    """The recovery path: server dies, comes back, rerun completes."""
+    cp = tmp_path / "run.jsonl"
+    ids = ["i0", "i1", "i2"]
+    record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
+           abort_after_dead=0)
+    assert recording_progress(cp, iter_invocations(ids), 1)["done"] == 0
+
+    rec = record(iter_invocations(ids), _arms(ids), k=1, checkpoint=cp)
+    assert len(rec.samples) == 3 * len(ARMS)
+    prog = recording_progress(cp, iter_invocations(ids), 1)
+    assert prog["done"] == 3 and prog["remaining"] == 0
+
+
+def test_a_partly_failed_triple_is_kept_because_other_samples_cover_it(tmp_path):
+    """Only an all-arms failure is pure waste. A triple with one bad arm still
+    carries two real outputs, and at k>1 the input survives on its other
+    samples, so retrying it risks looping on an arm that always fails."""
+    cp = tmp_path / "run.jsonl"
+    ids = ["i0"]
+    arms = _arms(ids)
+    arms["B"] = _Dead("B", fail_from=0)
+    record(iter_invocations(ids), arms, k=1, checkpoint=cp, abort_after_dead=0)
+    _, done, _ = load_checkpoint(cp)
+    assert done == {("i0", 0)}
+
+
+def test_checkpoint_health_tells_a_failed_run_from_a_finished_one(tmp_path):
+    good, bad = tmp_path / "good.jsonl", tmp_path / "bad.jsonl"
+    ids = ["i0", "i1"]
+    record(iter_invocations(ids), _arms(ids), k=2, checkpoint=good)
+    record(iter_invocations(ids), _dead_arms(), k=2, checkpoint=bad,
+           abort_after_dead=0)
+
+    g, b = checkpoint_health(good), checkpoint_health(bad)
+    assert g["error_rate"] == 0.0 and g["dead_triples"] == 0
+    assert b["error_rate"] == 1.0 and b["dead_triples"] == 4
+    assert b["messages"] and "refused" in b["messages"][0]
+    assert checkpoint_health(tmp_path / "nope.jsonl")["exists"] is False
+
+
+def test_progress_surfaces_the_error_rate(tmp_path):
+    """A caller reading only `fraction` could not tell the two apart, which is
+    how a 97%-failed run was reported as complete."""
+    cp = tmp_path / "run.jsonl"
+    ids = ["i0", "i1"]
+    record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
+           abort_after_dead=0)
+    p = recording_progress(cp, iter_invocations(ids), 1)
+    assert p["error_rate"] == 1.0
+    assert p["dead_triples"] == 2
+    assert p["fraction"] == 0.0, "a failed run is not progress"

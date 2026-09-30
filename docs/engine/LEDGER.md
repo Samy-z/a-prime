@@ -270,3 +270,60 @@ recording, `scripts/diagnose_channels.py`.
 **Reopen if:** anything about the clustering predicate changes, since mode_share
 and novel_mode both read the partition it produces and both of their numbers
 here are statements about it.
+
+## ENG-008 — A dead system under test produced a checkpoint that called itself complete
+**Date:** 2026-09-30
+**Finding:** The Ollama server stopped listening **90 seconds into a 50 minute
+run**. The recorder then wrote 698 connection failures as complete triples over
+the following 24 minutes, printed steady progress the whole time, and left a
+checkpoint that `recording_progress` reported as **240/240 triples, 100%**.
+
+| | as recorded | actually |
+|---|---|---|
+| samples | 720 | 22 usable |
+| triples reported done | 240 | 8 |
+| error rate | not reported | **96.9%** |
+
+Nothing errored. Nothing warned. The detector then ran, dropped 38 of 40 inputs
+for having an unusable arm, and reported `0 of 2 inputs flagged`, which is the
+same sentence it prints for a clean run that found nothing.
+
+**Three separate failures, in three places.**
+
+*The recorder pressed on.* It treats a failed invocation as a recorded sample,
+which is right for one transient failure and wrong for a run of them. It now
+aborts after `abort_after_dead` consecutive triples in which every arm failed,
+raising `RecordingFailed`. Wall clock is the cheapest thing lost in that state.
+
+*The checkpoint counted errors as work.* `load_checkpoint` marked a triple
+complete once all three arms were present, whether or not they held outputs. So
+a resume would skip 232 dead triples permanently and the recording would never
+be more than 3% real. A triple whose every arm errored is no longer counted as
+finished, so a rerun collects it.
+
+*Progress could not tell the two apart.* `recording_progress` returned a
+fraction and nothing else, so 97% failed looked exactly like finished. It now
+reports `errored_samples`, `dead_triples` and `error_rate`, and
+`checkpoint_health` answers the question directly.
+
+**A fourth bug surfaced while testing the fix, and it mattered more than it
+looked.** The checkpoint is append-only, so a retried triple has both attempts
+on disk. Counting errors across both meant a triple that had since been redone
+successfully was still judged on the errors it used to have, and stayed dead
+forever. That made the entire recovery path a no-op while appearing to work.
+`load_checkpoint` now keeps the last write per `(triple, arm)`.
+
+**Not caused by the concurrent run.** A second recording was started by mistake
+at 02:02 while this one was going, which is its own error, but the server had
+already been down since 01:53. Cause of the server's death unknown from here.
+
+**What this says about the class of bug.** Every part of this behaved exactly as
+written and the composition was still worthless, because no component's contract
+said anything about the system under test being alive. The recorder's job is to
+record what happens, so recording failures is correct; the checkpoint's job is to
+remember what was done, and it did. The missing idea was that **a sample with no
+output is not evidence**, and nothing owned it.
+**Evidence:** `results/recordings/12dc8a339ed51f2b.jsonl` (kept as the artifact),
+`checkpoint_health` on it, tests in `tests/test_resume.py`.
+**Reopen if:** a system under test is added whose legitimate behaviour includes
+erroring on most inputs, where the abort would fire on correct operation.

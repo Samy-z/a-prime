@@ -327,7 +327,7 @@ def main() -> int:
     per = rec_s / max(1, len(rec.samples))
     print(f"recorded {len(rec.samples)} samples, {rec_s:.0f}s this session "
           f"({per:.1f}s each), interleaving gap {rec.interleaving_gap()}, "
-          f"{rec.sessions()} session(s)")
+          f"{rec.sessions} session(s)")
     print()
 
     activated = {i for i, fired in b.fired.items() if fired}
@@ -388,7 +388,7 @@ def main() -> int:
                      "detect": round(det_s, 1),
                      "total_this_session": round(time.perf_counter() - t0, 1)},
         "samples": len(rec.samples),
-        "sessions": rec.sessions(),
+        "sessions": rec.sessions,
         "activation": {i: bool(v) for i, v in sorted(b.fired.items())},
         "cost": rep.cost,
         "channels": {n: {"flagged": c.n_flagged, "skipped": c.skipped}

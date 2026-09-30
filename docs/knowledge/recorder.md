@@ -76,6 +76,33 @@ saved next to the checkpoint after every invocation, and the run reports how
 many inputs carry no label so that an activation rate computed from a resumed
 run is read as a lower bound rather than a measurement.
 
+## A sample with no output is not evidence
+
+A server that stops listening does not stop the recorder. Failed invocations are
+recorded as samples, which is right for one transient failure and was wrong for
+the 698 consecutive ones a dead server produced over 24 minutes (ENG-008).
+
+Three guards now, because it failed in three places:
+
+- **`record(..., abort_after_dead=3)`** raises `RecordingFailed` after that many
+  consecutive triples in which every arm failed. One failed triple is noise; a
+  run of them means nothing is answering.
+- **`load_checkpoint` does not count an all-error triple as finished**, so a
+  rerun collects it. It previously did, which meant a resume would skip the dead
+  triples permanently and the recording could never exceed 3% real.
+- **`recording_progress` reports `error_rate` and `dead_triples`**, and
+  `checkpoint_health` answers directly. A fraction alone cannot tell a finished
+  run from a failed one, which is how a 97%-failed recording was reported as
+  100% complete.
+
+A triple where only *some* arms failed is kept. It still carries real outputs,
+and at k>1 the input survives on its other samples, so retrying it risks looping
+on an arm that always fails.
+
+**The checkpoint is append-only, so the last write per `(triple, arm)` wins.** A
+retried triple has both attempts on disk. Judging it on the errors it used to
+have leaves it dead forever, which silently makes the recovery path a no-op.
+
 ## The decoy arm has to be able to vary
 
 `decoy_independence_warnings(arms)` warns when A and A-prime are configured with
