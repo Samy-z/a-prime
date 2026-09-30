@@ -48,8 +48,10 @@ fault that fired on nothing.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from ..adapter import Invocation, Response
 from ..faults import ActivationLog, FaultSpec
@@ -91,6 +93,12 @@ class RetrievalFault:
     clean: ToolSet
     faulty: ToolSet
     baseline_shapes: Mapping[str, frozenset[str]] | None = None
+    # Where to persist the labels. A resumed run never re-invokes the triples it
+    # skips, so activation learned in an earlier session is lost unless it is
+    # written down, and the loss is silent: the fault simply appears to have
+    # fired on less of the corpus than it did. Written after every invocation,
+    # because the alternative is losing it to whatever stops the run.
+    store: Path | None = None
     log: ActivationLog = field(init=False)
     calls_seen: int = 0
     _counter: dict[str, int] = field(default_factory=dict, repr=False)
@@ -116,10 +124,31 @@ class RetrievalFault:
                 "logged as unaffected and the fault would appear to have fired "
                 "on nothing, which is worse than refusing.")
         self.log = ActivationLog(self.spec)
+        if self.store is not None and self.store.exists():
+            try:
+                loaded = json.loads(self.store.read_text(encoding="utf-8"))
+                for key, hit in loaded.items():
+                    iid, _, idx = key.rpartition("#")
+                    self.log.record(iid or key, int(idx or 0), bool(hit))
+            except (ValueError, OSError):
+                pass
 
     @property
     def arm(self) -> str:
         return self.inner.arm
+
+    def _persist(self) -> None:
+        if self.store is None:
+            return
+        try:
+            self.store.parent.mkdir(parents=True, exist_ok=True)
+            payload = {f"{iid}#{idx}": hit
+                       for (iid, idx), hit in self.log.fired.items()}
+            tmp = self.store.with_suffix(".tmp")
+            tmp.write_text(json.dumps(payload), encoding="utf-8")
+            tmp.replace(self.store)
+        except OSError:
+            pass
 
     @property
     def name(self) -> str:
@@ -156,6 +185,7 @@ class RetrievalFault:
                     activated = True
 
         self.log.record(inv.input_id, idx, activated and in_blast)
+        self._persist()
         return resp
 
 
@@ -268,6 +298,36 @@ class UsageRecorder:
         return {k: frozenset(v) for k, v in self.shapes_by_input.items()}
 
 
+def activation_warnings(
+    touched: Iterable[str],
+    input_ids: Iterable[str],
+    q: float = 0.10,
+    label: str = "fault",
+) -> list[str]:
+    """The gradability check, over a plain set of input ids.
+
+    Separate from `check_activation_is_usable` so that labels reloaded from disk
+    can be checked without rebuilding an `ActivationLog` around them, which an
+    earlier version of the study runner did by constructing a fake one.
+    """
+    ids = set(input_ids)
+    if not ids:
+        return []
+    floor = int(round(1 / q))
+    hit = len(set(touched) & ids)
+    if hit >= floor:
+        return []
+    rate = hit / len(ids)
+    advice = (f"Raise the corpus to about {int(floor / rate)} inputs at this "
+              f"activation rate" if rate > 0 else
+              "The fault never fired, so no corpus size helps")
+    return [f"{label}: fired on {hit} of {len(ids)} inputs, below the {floor} "
+            f"findings the estimator can report at q={q} (MTH-024). Nothing can "
+            f"be flagged at this size whatever the detector does, so an empty "
+            f"report will carry no information. {advice}, or choose a fault with "
+            f"a higher activation rate."]
+
+
 def check_activation_is_usable(
     log: ActivationLog,
     input_ids: Iterable[str],
@@ -281,27 +341,10 @@ def check_activation_is_usable(
     the GPU time is spent is much cheaper than saying so after, which is how the
     first two end-to-end runs were spent.
     """
-    ids = set(input_ids)
-    out: list[str] = []
-    floor = int(round(1 / q))
-    touched = len(log.touched & ids)
-    if not ids:
-        return out
-    if touched < floor:
-        rate = touched / len(ids)
-        need = int(floor / rate) if rate > 0 else None
-        advice = (f"Raise the corpus to about {need} inputs at this activation "
-                  f"rate" if need else
-                  "The fault never fired, so no corpus size helps")
-        out.append(
-            f"{log.spec.cell_id}: fired on {touched} of {len(ids)} inputs, below "
-            f"the {floor} findings the estimator can report at q={q} (MTH-024). "
-            f"Nothing can be flagged at this size whatever the detector does, so "
-            f"an empty report will carry no information. {advice}, or choose a "
-            f"fault with a higher activation rate.")
-    return out
+    return activation_warnings(log.touched, input_ids, q=q,
+                               label=log.spec.cell_id)
 
 
 __all__ = ["RETRIEVAL_FAULTS", "CellFactory", "RetrievalFault",
-           "UsageRecorder", "check_activation_is_usable", "stale_view",
-           "tool_withdrawn"]
+           "UsageRecorder", "activation_warnings",
+           "check_activation_is_usable", "stale_view", "tool_withdrawn"]
