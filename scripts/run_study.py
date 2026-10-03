@@ -190,7 +190,21 @@ def select(args, digest: str, nli_rev: str) -> list[CellJob]:
     bad = set(formats) - set(FORMATS)
     if bad:
         raise SystemExit(f"unknown format(s) {sorted(bad)}; have {list(FORMATS)}")
-    return [make_job(d, f, digest, nli_rev) for d in domains for f in formats]
+    # Format-major, cheapest format first, because this run gets stopped partway
+    # by design.
+    #
+    # The study question is whether detection transfers ACROSS DOMAINS. One
+    # format finished across all three domains answers that question for that
+    # format: it is a complete row of the transfer matrix. One domain finished
+    # across all three formats answers nothing about transfer, because there is
+    # nothing to compare it against.
+    #
+    # Domain-major ordering was the original, and it would have spent the first
+    # five hours producing a result that cannot be read. Cheapest first for the
+    # same reason: summary is 2.9 h for all three domains, extraction 4.3 h,
+    # agent 10.1 h, so the early hours buy whole rows rather than fractions.
+    ordered = sorted(formats, key=lambda f: SECONDS_PER_INVOCATION[f])
+    return [make_job(d, f, digest, nli_rev) for f in ordered for d in domains]
 
 
 def chat() -> OllamaChat:
@@ -237,6 +251,11 @@ def main() -> int:
     ap_.add_argument("--status", action="store_true")
     ap_.add_argument("--stop", action="store_true")
     ap_.add_argument("--clear-stop", action="store_true")
+    ap_.add_argument("--stop-after-hours", type=float, default=0.0,
+                     help="stop cleanly after this many hours of recording. 0 "
+                          "means run until the work is done or --stop is used. "
+                          "A safety net for an unattended overnight run, not a "
+                          "substitute for --stop.")
     ap_.add_argument("--go", action="store_true",
                      help="actually record; without it this prints the plan and "
                           "exits, because starting hours of GPU work should "
@@ -278,6 +297,20 @@ def main() -> int:
                         * SECONDS_PER_INVOCATION[job.output_format] / 3600)
     print(f"{len(jobs)} cell(s), n={N} k={K}, model {MODEL} @ {digest[:12]}")
     print(f"estimated {remaining_h:.1f} h of GPU still to record")
+    if args.stop_after_hours:
+        print(f"will stop itself after {args.stop_after_hours:.1f} h")
+    # The schedule, cumulative, so stopping at any point is an informed choice
+    # rather than a guess about what survived.
+    print()
+    print("order, and what is complete by when:")
+    cum = 0.0
+    for job in jobs:
+        p_ = recording_progress(job.paths()["checkpoint"], job.inputs, K)
+        left = (p_["remaining"] * 3
+                * SECONDS_PER_INVOCATION[job.output_format] / 3600)
+        cum += left
+        done = " (already done)" if p_["remaining"] == 0 else ""
+        print(f"  {cum:>5.1f} h  {job.name}{done}")
     # Dry run by default. An earlier version only gated on --max-hours, and a
     # scope whose estimate fell just under the default started recording on a
     # machine that was already busy. Hours of someone else's GPU is not a
@@ -298,7 +331,17 @@ def main() -> int:
     print()
 
     # ---------------------------------------------------------------- phase 1
-    should_stop = stop_requested(STOP_FLAG)
+    # Two reasons to stop: somebody asked, or the clock ran out. Both checked at
+    # triple boundaries, so either way the recording stops between triples and
+    # loses at most one.
+    flag_set = stop_requested(STOP_FLAG)
+    deadline = (time.time() + args.stop_after_hours * 3600
+                if args.stop_after_hours else None)
+
+    def should_stop() -> bool:
+        if flag_set():
+            return True
+        return deadline is not None and time.time() >= deadline
     recorded: dict[str, CellJob] = {}
     faults: dict[str, object] = {}
     for job in jobs:

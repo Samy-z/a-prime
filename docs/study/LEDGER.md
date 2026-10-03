@@ -153,3 +153,49 @@ claiming it as a result.
 **Reopen if:** the transfer result lands and the project wants a second
 contribution, or a provider ships a fingerprint reliable enough to replace
 step 2.
+
+## STD-008 — APPEND (2026-10-04): is claiming drift detection cheap behaviour?
+
+The owner asked directly: can we brand this as an extra feature for no extra
+work, "or do you find it to be cheap behavior".
+
+**It depends entirely on what is claimed, and the line is sharp.**
+
+Honest: *the same construction also detects provider drift, and here is the
+argument.* That is a derivation, offered as an extension. It costs nothing
+because the derivation really is free.
+
+Not honest: *a-prime detects model drift*, as a capability, with no measurement
+behind it.
+
+**Why the distinction matters more here than it would elsewhere.** This
+project's credibility rests on everything being measured. ENG-002 reported a
+saturated instrument rather than claiming 100% recall. BCH-013 measured tool
+selection instead of assuming it. MTH-011 inverted the planned channel ordering
+because the measurement contradicted the design. An unmeasured capability claim
+would be the **first assertion in a document otherwise built entirely on
+measurement**, and a reviewer who spots it is entitled to wonder what else was
+asserted. The cost is not the claim. It is the precedent.
+
+### It is about two hours of GPU away from being measured
+
+**Negative control, roughly one hour.** `granite4.2:8b` sits on disk as a file
+with a digest. It provably does not change between one week and the next. So:
+record a cell now, record the same cell again in a week, and score the two
+periods with the threshold taken from the first period's internal decoy spread.
+The correct answer is that nothing is flagged. If anything is flagged, the drift
+method is broken and we have learned that for one hour.
+
+**Positive control, roughly one more hour.** The pool already holds four models
+on disk (BCH-007). Run the same cell on a second model and the drift check
+should flag it, because the system genuinely did change. A known change it fails
+to see is as informative as a false alarm.
+
+Together that is a two-sided measurement for about two hours on hardware and
+weights we already have, and the first half rides along on data being recorded
+anyway. After that the claim is a result rather than a derivation, and it can be
+stated without hedging.
+
+**Recommendation:** make the claim only after the negative control runs. Until
+then the paper says it in one sentence as an extension, in the register STD-001
+and STD-006 already use for things that are constructed but not measured.

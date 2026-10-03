@@ -643,3 +643,26 @@ not a reason to refuse.
 **The method was never the problem.** Had the budget allowed it without cutting
 the agent format, a hosted arm would have been sound with a stated caveat. The
 decision stands on the owner's reasons, not mine.
+
+## §15 — SECOND AMENDMENT (dated append, 2026-10-04)
+
+**D22 is deferred, not refused.** This decision has now been recorded three ways
+in two days: a costed probe, then a refusal, now a deferral. The churn is worth
+noting, because two of the three records were driven by my reasoning rather than
+the owner's, and only this one reflects what they actually want.
+
+**The stable version.** The owner is sceptical about spending anything while the
+project has no reportable result and no paper. They put a figure on it: **$50
+for a one-time run across all nine cells is acceptable if it adds meaningful
+nuance.** That matches the measured arithmetic, which put nine cells between $11
+and $44 depending on the price tier, so the budget is realistic rather than
+hopeful. The decision comes back when there are results to judge it against,
+which is the right order: you cannot tell whether a comparison adds nuance
+before you know what it would be nuancing.
+
+Nothing to build now. When the go comes, the work is one provider adapter behind
+the existing boundary, and the boundary already takes a host.
+
+**What changed in the reasoning, for the record.** The first version of this
+section said a hosted model could not be a study arm at all. That was wrong, and
+the first amendment corrected it. The deferral rests only on money and timing.
