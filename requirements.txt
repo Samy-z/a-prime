@@ -1,0 +1,42 @@
+# Direct dependencies only. Everything else in the working venv is pulled in by
+# these, and pinning a full freeze would pin a resolver's choices rather than
+# this project's requirements.
+#
+# Versions are the ones the recorded results were produced with. The study's
+# pinned-instruments rail is about the MODELS, not these libraries, but a
+# transformers or torch bump can change tokenisation or numerics, so a rerun
+# that disagrees with a committed result should check here first.
+#
+# Rebuild with:
+#     python -m venv .venv
+#     .venv/Scripts/python.exe -m pip install -r requirements.txt   # Windows
+#     .venv/bin/python -m pip install -r requirements.txt           # Linux
+#
+# NOTE ON torch. The machine these results came from has torch 2.14.0+cu126, a
+# CUDA build that comes from PyTorch's own index and not from PyPI. It is pinned
+# here WITHOUT the +cu126 local version, so a plain install gets whatever build
+# suits the machine: the CUDA wheel where there is a GPU, the CPU wheel where
+# there is not. That is deliberate. Pinning +cu126 makes this file unusable on
+# any box without that exact CUDA, and a CPU box is a perfectly good place to
+# run the tests, read a recording or write the paper. It cannot drive the system
+# under test or the NLI channel at a useful speed, which is a hardware fact
+# rather than a dependency one.
+#
+# To reproduce the GPU environment exactly:
+#     pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cu126
+
+numpy==2.5.3
+torch==2.14.0
+transformers==5.17.0
+sentence-transformers==6.1.0
+huggingface_hub==1.32.0
+
+# HTTPS behind this machine's TLS interception. Imported and injected by
+# src/aprime/net.py before anything opens a connection, or every model download
+# fails. Harmless where there is no interception: it installs an SSL context
+# factory that defers to the OS certificate store, which is the right answer
+# either way.
+truststore==0.10.4
+
+# Tests only. 218 of them, no models, no GPU, about six seconds.
+pytest==9.1.1
