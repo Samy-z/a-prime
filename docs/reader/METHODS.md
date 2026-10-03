@@ -25,12 +25,20 @@ a ledger is wrong in a README.
 | Artifact | Reader | May assume | Must define |
 |---|---|---|---|
 | `README.md` | a stranger who found the repo | general software literacy | **everything else** |
-| the paper | a researcher in a neighbouring field | statistics, ML vocabulary | project terms, fault classes, the method |
+| the paper (PROVISIONAL, unratified) | a researcher in a neighbouring field | statistics, ML vocabulary | project terms, fault classes, the method |
 | dataset cards | someone deciding whether to use the data | the domain | provenance, licence, known gaps |
 | `docs/knowledge/*.md` | someone about to change that subsystem | project context | the subsystem's own internals |
 | `docs/*/LEDGER.md` | a maintainer with full context | everything | nothing — terseness and grep-ability win |
 | `HANDOFF.md` | future maintainers, the owner | project context | the reasoning, not the terms |
 | a report or review for the owner | the owner, catching up, reading once start to finish | the project's goals and shape | **every finding, in plain words, before any identifier** |
+
+**The paper's row is provisional and has never been ratified.** It was written
+on 2026-09-29, in the same commit that created this seat, as a first guess, and
+has sat unexamined since. `STATE.md` meanwhile said the paper still "needs its
+own contract row", which stopped being true the moment the row was added.
+Choosing the paper's reader decides how much of the statistics has to be
+explained, which changes the length of the paper substantially. It is the
+owner's call, not a detail (RDR-007).
 
 A report written for the owner is a read-through document, and it had no row
 here until 2026-10-03. Rule 2 below already covered what went wrong when one was
