@@ -97,6 +97,11 @@ class Cell:
     max_steps: int = 0
     identity_aware: bool = False
     name: str = ""
+    # Fault class F2, prompt regression: an edit applied to the prompt's lines
+    # before they are joined. Part of the cell's configuration, like a faulty
+    # toolset, so the candidate arm is built with it and the baseline arms are
+    # not. See `prompt_faults.py`; the cell itself never decides activation.
+    prompt_edit: "Callable[[list[str], Cell], list[str]] | None" = None
 
     def __post_init__(self) -> None:
         check_arm(self.arm)
@@ -114,7 +119,13 @@ class Cell:
 
     # ------------------------------------------------------------------ prompt
 
-    def system_prompt(self, inv: Invocation) -> str:
+    def prompt_lines(self, inv: Invocation) -> list[str]:
+        """The clean prompt, one instruction per line, before any edit.
+
+        Lines are what the F2 severity ladder counts, so the prompt is built
+        as lines and joined afterwards. The joined text is unchanged from
+        before this method existed.
+        """
         v = self.pack.vocab
         parts = [
             f"You are a {v.principal_kind} case handler working with "
@@ -128,7 +139,16 @@ class Cell:
                 f"The request comes from {who}. Tailor the level of detail to "
                 f"them and mention them by name in your answer."
             )
-        return " ".join(parts)
+        return parts
+
+    def clean_system_prompt(self, inv: Invocation) -> str:
+        return " ".join(self.prompt_lines(inv))
+
+    def system_prompt(self, inv: Invocation) -> str:
+        lines = self.prompt_lines(inv)
+        if self.prompt_edit is not None:
+            lines = self.prompt_edit(list(lines), self)
+        return " ".join(lines)
 
     # ------------------------------------------------------------------ calling
 

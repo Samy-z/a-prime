@@ -10,6 +10,8 @@ Maintainer doc, not linked from the README (D20).
 | `packs.py` | knowledge packs — data only, generated deterministically from a seed |
 | `tools.py` | the eight tool shapes, instantiated per domain, plus fault hooks |
 | `cell.py` | `Cell` (a `SystemUnderTest`) and `build_inputs` |
+| `retrieval_faults.py` | F3 and F5 as degraded tool layers, with per-input activation |
+| `prompt_faults.py` | F2 as an edit to the prompt's lines, on the frozen ladder, with per-input activation |
 
 **A cell's three output formats are `extraction`, `summary` and `agent`, and
 `agent` names what the cell must OUTPUT** -- a short decision line -- not a kind
@@ -79,6 +81,14 @@ All three formats call tools and differ in required output:
 An earlier sketch gave tools only to `agent`, which would have confined F5 and
 F11 to three of nine cells. Real extraction and summarisation agents retrieve
 before they write.
+
+The system prompt is built as lines by `prompt_lines()` and joined with a
+space, so the text is what it always was while the F2 ladder, which counts
+lines, has a unit to count. `prompt_edit` applies a fault class F2 edit to
+those lines before joining; it is part of the cell's configuration, like a
+faulty toolset, so the candidate arm is built with it and the baseline arms are
+not. `clean_system_prompt()` gives the unedited text for the activation
+decision. See `docs/knowledge/faults.md`.
 
 `identity_aware=True` puts the requester in the system prompt. This is the
 **control** for F8b: an identity-aware system produces per-user clustering with

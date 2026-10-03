@@ -152,7 +152,8 @@ interception. Entry points already do it.
     probes/         the probe suite: what each channel can and cannot resolve.
     cells/          nine systems under test: 3 domains x 3 output formats, with
                     eight tools each. `retrieval_faults.py` degrades what they
-                    know rather than rewriting what they say.
+                    know and `prompt_faults.py` edits what they are told,
+                    rather than rewriting what they say.
 
 Pipeline: record three arms -> dedup -> normalise -> cluster jointly -> score
 (mode-share, dispersion, NLI contradiction, NLI directional both tails,
@@ -183,5 +184,6 @@ runs are pausable, see `docs/knowledge/recorder.md`.
 
 Not built: embedding style-stability gate, shape-stratified thresholds in anger
 (every run so far pooled to one stratum), Palworld adapter, the nine-cell
-factorial, F11, F2. The agent output format is distinct but 4/12 compliant,
-kept deliberately (HANDOFF §13).
+factorial, F11. F2 is built for cells and unit-tested, never run live. The
+agent output format is distinct but 4/12 compliant, kept deliberately
+(HANDOFF §13).

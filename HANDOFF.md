@@ -838,3 +838,30 @@ stays so a line can be grepped against the ledgers.
 calling `Report.to_dict()`; left alone because `run_study.py` was about to
 start a long run on the owner's machine, and a runner change should land when
 it can be exercised. `to_dict()` exists for when it is.
+
+## §20 — F2, and what activation can honestly mean for a prompt edit (2026-10-04)
+
+Fourth item on the cloud list. The task file had recorded F2 as blocked on a
+system with an editable prompt, then corrected itself: `Cell.system_prompt()`
+exists. It did, as one joined string, and the F2 ladder counts lines, so the
+first change was to build the prompt as lines and join them, with a test that
+the joined text did not move by a byte.
+
+**The ladder was the easy part**, because it is frozen and small. Six edits,
+each after a documented incident, each declaring its line counts, each
+measured against its rung. The one judgement call was rung 3: the taxonomy
+calls it remediation-shaped and the ceiling, and it is implemented as the
+ceiling rather than left out, because a frozen ladder the harness cannot
+express at the top is a ladder the study cannot report against.
+
+**Activation was the hard part**, and the decision is recorded in BCH-016 so
+the reasoning is not lost. The taxonomy demands per-input activation for F2
+and defines it by purchase. Purchase is the detector's question. Measuring it
+in the harness means a paired clean call per input, and recording is the
+binding constraint. So activation is exposure plus a purchase predicate where
+one exists, and the entry says which way that errs: it understates the
+detector and never flatters it. That is the direction every other floor in
+this project leans, and the one a reviewer can live with.
+
+Persistence of activation moved from the retrieval wrapper onto
+`ActivationLog` itself, so the three mechanisms write one on-disk shape.

@@ -39,7 +39,7 @@ this file listed choosing that reader as task one.
 **not until the paper exists**, and the honest-limits headlines stay in the
 README regardless. See HANDOFF §17 for what moves and what does not.
 
-### 1. The blind-spot map
+### 1. The blind-spot map — DONE 2026-10-04 (STD-009)
 
 Highest value on this list. It is a declared figure for the paper, and **the
 data is already in the repository**: four probe runs totalling 1.3 MB under
@@ -53,7 +53,7 @@ compute, and it would regenerate data that is already committed. On a machine
 with no GPU it will either fail or grind for hours producing what is already
 sitting in `results/`. Read those files.
 
-### 2. The provenance knowledge doc
+### 2. The provenance knowledge doc — DONE 2026-10-04
 
 `src/aprime/provenance.py` exists and works. `docs/knowledge/provenance.md` does
 not exist, and `docs/study/STATE.md` still lists run provenance as a GAP with
@@ -62,12 +62,12 @@ the note that no number enters the paper before it exists.
 That is a same-commit-rule violation from earlier work: code landed without its
 layer-2 doc. Cheap to fix, and it clears a stated blocker on the paper.
 
-### 3. The detector's report format
+### 3. The detector's report format — DONE 2026-10-04 (HANDOFF §19)
 
 Marked GAP in `docs/engine/STATE.md`. The detector currently prints whatever
 `Report.text()` produces. It needs a format a reader can act on.
 
-### 4. F2, prompt regression
+### 4. F2, prompt regression — DONE 2026-10-04 (BCH-016)
 
 I previously recorded this as blocked on needing a system with an editable
 prompt. That was wrong: `Cell.system_prompt()` exists, so the cells have one.

@@ -49,6 +49,7 @@ import json
 import random
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, Literal, Sequence
 
 from .adapter import Invocation, Response, SystemUnderTest, Trace
@@ -213,6 +214,35 @@ class ActivationLog:
             f"{self.spec.cell_id}: fired on {len(self.touched)} inputs "
             f"({self.activation_rate(input_ids):.1%} of corpus)"
         )
+
+    # Persistence. A resumed run never re-invokes the triples it skips, so
+    # activation learned in an earlier session is lost unless written down,
+    # and the loss is silent: the fault simply appears to have fired on less
+    # of the corpus than it did. Shared by every fault mechanism so there is
+    # one on-disk shape for the labels.
+
+    def load_from(self, store: "Path | None") -> None:
+        if store is None or not store.exists():
+            return
+        try:
+            loaded = json.loads(store.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            return
+        for key, hit in loaded.items():
+            iid, _, idx = key.rpartition("#")
+            self.record(iid or key, int(idx or 0), bool(hit))
+
+    def persist_to(self, store: "Path | None") -> None:
+        if store is None:
+            return
+        try:
+            store.parent.mkdir(parents=True, exist_ok=True)
+            payload = {f"{iid}#{idx}": hit for (iid, idx), hit in self.fired.items()}
+            tmp = store.with_suffix(".tmp")
+            tmp.write_text(json.dumps(payload), encoding="utf-8")
+            tmp.replace(store)
+        except OSError:
+            pass
 
 
 # --------------------------------------------------------------------------

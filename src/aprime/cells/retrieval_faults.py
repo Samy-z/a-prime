@@ -48,7 +48,6 @@ fault that fired on nothing.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -124,31 +123,14 @@ class RetrievalFault:
                 "logged as unaffected and the fault would appear to have fired "
                 "on nothing, which is worse than refusing.")
         self.log = ActivationLog(self.spec)
-        if self.store is not None and self.store.exists():
-            try:
-                loaded = json.loads(self.store.read_text(encoding="utf-8"))
-                for key, hit in loaded.items():
-                    iid, _, idx = key.rpartition("#")
-                    self.log.record(iid or key, int(idx or 0), bool(hit))
-            except (ValueError, OSError):
-                pass
+        self.log.load_from(self.store)
 
     @property
     def arm(self) -> str:
         return self.inner.arm
 
     def _persist(self) -> None:
-        if self.store is None:
-            return
-        try:
-            self.store.parent.mkdir(parents=True, exist_ok=True)
-            payload = {f"{iid}#{idx}": hit
-                       for (iid, idx), hit in self.log.fired.items()}
-            tmp = self.store.with_suffix(".tmp")
-            tmp.write_text(json.dumps(payload), encoding="utf-8")
-            tmp.replace(self.store)
-        except OSError:
-            pass
+        self.log.persist_to(self.store)
 
     @property
     def name(self) -> str:
