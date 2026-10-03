@@ -157,3 +157,66 @@ def test_threshold_respects_the_fpr_budget():
     pres = rng.normal(size=2000)
     thr = analysis.threshold_at_fpr(pres, 0.05)
     assert (pres > thr).mean() == pytest.approx(0.05, abs=0.01)
+
+
+# ------------------------------------------- result-row provenance (2026-10-04)
+
+
+def test_a_row_carries_everything_needed_to_trace_it():
+    """The rail says every number traces to a run id and a config hash. A config
+    hash alone identifies the configuration and says nothing about which run
+    produced the number or what code was in the tree."""
+    from aprime.provenance import (
+        REQUIRED_ROW_PROVENANCE,
+        capture,
+        check_row_provenance,
+        row_provenance,
+    )
+
+    prov = capture(instruments={"x": "y"}, params={"k": 1}, warn_if_dirty=False)
+    row = {"cell": "banking-summary", **row_provenance(prov)}
+    assert check_row_provenance([row]) == []
+    assert set(REQUIRED_ROW_PROVENANCE) <= set(row)
+
+
+def test_a_row_with_only_a_config_hash_is_refused():
+    """This is the shape run_study.py actually wrote until 2026-10-04, found
+    before the factorial ran. Had it run first, the headline result would have
+    been the least traceable file in the repository."""
+    from aprime.provenance import capture, check_row_provenance
+
+    prov = capture(instruments={"x": "y"}, params={"k": 1}, warn_if_dirty=False)
+    bad = [{"cell": "banking-summary", "config_hash": prov.config_hash}]
+    problems = check_row_provenance(bad)
+    assert len(problems) == 1
+    assert "banking-summary" in problems[0]
+    for field in ("run_id", "git_commit"):
+        assert field in problems[0]
+
+
+def test_the_complaint_names_the_row_even_without_a_cell_name():
+    from aprime.provenance import check_row_provenance
+
+    problems = check_row_provenance([{}, {"input_id": "i7"}])
+    assert "row 0" in problems[0]
+    assert "i7" in problems[1]
+
+
+def test_extra_fields_ride_along_without_displacing_the_required_ones():
+    from aprime.provenance import capture, check_row_provenance, row_provenance
+
+    prov = capture(instruments={"x": "y"}, params={"k": 1}, warn_if_dirty=False)
+    row = row_provenance(prov, system="granite4.2:8b", sessions=3)
+    assert row["system"] == "granite4.2:8b" and row["sessions"] == 3
+    assert check_row_provenance([row]) == []
+
+
+def test_a_dirty_tree_is_recorded_rather_than_blocking_the_row():
+    """git_dirty False is a real value and must not read as missing. A run from
+    a dirty tree is still traceable; it just traces to a commit that does not
+    describe the code."""
+    from aprime.provenance import check_row_provenance
+
+    row = {"cell": "c", "run_id": "r", "config_hash": "h",
+           "git_commit": "abc123", "git_dirty": False}
+    assert check_row_provenance([row]) == []

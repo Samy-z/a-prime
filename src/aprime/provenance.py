@@ -90,6 +90,59 @@ def corpus_fingerprint(input_ids: list[str], texts: dict[str, str] | None = None
     return h.hexdigest()[:16]
 
 
+# ---------------------------------------------------------------------------
+# what a result row has to carry
+# ---------------------------------------------------------------------------
+#
+# The rail says every number traces to a run id and a config hash. A config
+# hash alone does not satisfy it: it identifies the configuration and says
+# nothing about which run produced the number or what code was in the tree at
+# the time.
+#
+# This exists because `run_study.py` computed full provenance and then wrote
+# only `config_hash` into each cell row, which was found by the cloud session on
+# 2026-10-04 before the factorial had run. Had it run first, the headline result
+# would have been the least traceable file in the repository.
+#
+# Checked at write time rather than left to review, because a missing field in a
+# results file is invisible until somebody tries to reproduce it, and by then
+# the run is weeks old.
+REQUIRED_ROW_PROVENANCE = ("run_id", "config_hash", "git_commit", "git_dirty")
+
+
+def row_provenance(prov: "RunProvenance", **extra) -> dict:
+    """The provenance fields every result row carries, ready to splat into one.
+
+    One helper so the two runners cannot drift apart on what they record, which
+    is how this gap appeared: `run_cell_detection.py` wrote four fields and
+    `run_study.py` wrote one, and nothing compared them.
+    """
+    out = {
+        "run_id": prov.run_id,
+        "config_hash": prov.config_hash,
+        "git_commit": prov.git_commit,
+        "git_dirty": prov.git_dirty,
+    }
+    out.update(extra)
+    return out
+
+
+def check_row_provenance(rows) -> list[str]:
+    """Rows that cannot be traced back, named with what they are missing.
+
+    Returns a list of complaints, empty when every row is traceable. A caller
+    writing results should refuse rather than warn: an untraceable number in a
+    committed file is worse than no number, because it looks usable.
+    """
+    problems: list[str] = []
+    for i, row in enumerate(rows):
+        label = row.get("cell") or row.get("input_id") or f"row {i}"
+        missing = [k for k in REQUIRED_ROW_PROVENANCE if row.get(k) is None]
+        if missing:
+            problems.append(f"{label}: missing {', '.join(missing)}")
+    return problems
+
+
 @dataclass
 class RunProvenance:
     run_id: str

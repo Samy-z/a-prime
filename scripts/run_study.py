@@ -80,7 +80,12 @@ from aprime.probes.channels import (  # noqa: E402
     NLIChannel,
     _resolve_revision,
 )
-from aprime.provenance import capture, corpus_fingerprint  # noqa: E402
+from aprime.provenance import (  # noqa: E402
+    capture,
+    check_row_provenance,
+    corpus_fingerprint,
+    row_provenance,
+)
 from aprime.recorder import (  # noqa: E402
     PreflightFailed,
     Recording,
@@ -408,7 +413,13 @@ def main() -> int:
         row = {
             "cell": job.name, "domain": job.domain,
             "output_format": job.output_format,
-            "config_hash": job.prov.config_hash,
+            # Full provenance, not just the config hash. See
+            # provenance.row_provenance for why one helper rather than two
+            # hand-written dicts.
+            **row_provenance(job.prov, system=MODEL, system_digest=digest,
+                             sessions=rec.sessions,
+                             analysed_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                                        time.gmtime())),
             "n_inputs": len(ids), "k": K, "q": Q,
             "activated": len(fired), "flagged": len(flagged),
             "true_positives": tp,
@@ -426,6 +437,18 @@ def main() -> int:
         print(f"  {job.name:<24} activated {len(fired):>3}/{len(ids):<3} "
               f"flagged {len(flagged):>3}  {secs:.0f}s"
               f"{'' if row['gradable'] else '  NOT GRADABLE at this size'}")
+
+    # Refuse rather than warn. An untraceable number in a committed results file
+    # is worse than no number, because it looks usable.
+    problems = check_row_provenance(matrix)
+    if problems:
+        print()
+        print("REFUSING to write the matrix: rows cannot be traced back.")
+        for msg in problems:
+            print(f"  {msg}")
+        print("  The recordings are on disk and nothing is lost. Fix the row "
+              "construction and rerun the analysis.")
+        return 4
 
     out = RUNS / "matrix.json"
     out.write_text(json.dumps({"model": MODEL, "digest": digest, "n": N, "k": K,
