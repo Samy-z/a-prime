@@ -123,6 +123,7 @@ Windows.
     python scripts/run_probes.py            # full blind-spot map (downloads 4 models)
     python scripts/run_probes.py --only deberta_mnli --normalise
     python scripts/fit_clustering.py        # refit the equivalence threshold
+    python scripts/draw_blind_spot_map.py   # redraw the figure from stored probe runs, no models
     python scripts/run_cell_detection.py --status   # progress of a paused run
     python scripts/run_cell_detection.py --stop     # stop one at the next triple
     python scripts/run_study.py --status            # the nine-cell factorial

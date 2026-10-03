@@ -101,6 +101,14 @@ weights nobody could audit.
 | structural rules | broken JSON, wrong alphabets, answers cut mid-sentence, refusals | anything about meaning |
 | embedding distance | **less than nothing, if used naively** | see below |
 
+The same results as a picture. Each cell is how often a check fired on one kind
+of change, out of 64 test pairs, at a false-alarm budget of 5%. Dark cells on
+the left are coverage; dark cells on the right are false alarms; a light cell
+on the left is a blind spot. The bottom block lists the changes that were too
+small for anything to see.
+
+![How often each check fired, by kind of change, with the floors below which nothing fired](docs/figures/blind_spot_map.svg)
+
 The first three use a model trained to judge whether one piece of text follows
 from another. The fourth reads no meaning at all, which is exactly why it covers
 failures the others cannot see: a corrupted character is not a claim, so no

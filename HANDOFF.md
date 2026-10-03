@@ -758,3 +758,36 @@ technique, and that nothing has run against a production system. The paper
 carries the full version with the numbers behind each one.
 
 A front door that omits the lock is not a front door.
+
+## §18 — The blind-spot map, drawn from data already on disk (2026-10-04)
+
+First deliverable of the cloud session, which has no GPU and cannot record. The
+figure was always meant to be analysis of the week-0 probe runs rather than a
+new measurement, and that is what it is: `scripts/draw_blind_spot_map.py` reads
+three committed result files and writes the SVG, the JSON behind it, and a
+markdown table. The check that it reproduces `probes.md` before anything was
+drawn is in the test file, not in a sentence here.
+
+**No plotting library was added.** The figure is a grid of rectangles and
+text, and a dependency for that would be a dependency for nothing. The cost is
+about two hundred lines of layout code; the benefit is that the figure
+regenerates on any machine that can run the tests.
+
+**The floors are on the figure, not beside it.** MTH-018 said the mode-share
+severity floor belonged on the map next to BCH-004's retrieval floor, and
+MTH-024 and ENG-004 each added one since. A map of what is seen is misleading
+without the line under which nothing is, so the five floors are drawn as a
+block under the grid, each naming the entry that measured it.
+
+Two design choices are recorded in STD-009 so a reader of the older tables can
+reconcile them: relabelling hedging in the two early runs, and mixing the
+normalised run with the raw ones across rows. Both are stated on the figure
+itself.
+
+A side finding, fixed in the same commit: the knowledge index had marked
+`provenance.md` as done since 2026-09-25 and the file did not exist. The
+same-commit rule was broken twice there, once by the code landing alone and
+once by the index claiming otherwise. The doc now exists, and it records the
+one runner that sits outside `capture()`: the probe runner, whose four result
+files feed both `probes.md` and the map, traces to its pair set and its weights
+but not to the code that scored them.

@@ -199,3 +199,35 @@ stated without hedging.
 **Recommendation:** make the claim only after the negative control runs. Until
 then the paper says it in one sentence as an extension, in the register STD-001
 and STD-006 already use for things that are constructed but not measured.
+
+## STD-009 — The blind-spot map is a recomputation, and two of its rows disagree with probes.md by design
+**Date:** 2026-10-04
+**Finding:** The declared figure exists: nine checks by fourteen kinds of change,
+each cell the firing rate out of 64 pairs at the stated false-alarm budget, plus
+five floors below which nothing fired. It is built by
+`scripts/draw_blind_spot_map.py` from the `scores` arrays in three committed
+probe runs (`20260925T041059Z` normalised, `20260924T031004Z` and
+`20260924T022150Z` raw) and runs no model. `tests/test_blind_spot_map.py` pins
+it to MTH-019, MTH-021 and MTH-022: 11/64 omission on contradiction, cuts at
+-0.055/+0.096, 63/64 omission on the upper tail, 64/64 both register directions
+on the lower.
+
+**Two choices a reader of `probes.md` will notice.** First, the two raw runs
+predate MTH-021 and labelled hedging as `verbosity` under PRESERVING; the map
+relabels them so every row sets its threshold over the same 256 preserving
+pairs. That moves a few RoBERTa and embedding cells by two to four points from
+the stored `results_global` (quantifier 55% to 58%, name swap 59% to 56%; unit
+36% holds). Second, the shipped rows come from the normalised run and the
+replication and embedding rows from the raw ones, because that is where each was
+measured; each row prints its run id. Mixed provenance in one figure is a cost,
+accepted over dropping the rows that show checkpoint dependence (MTH-017) and
+the rejected channel (MTH-011).
+
+**Consequence:** the figure is quotable in the paper and the README now carries
+it. A regenerated figure that disagrees with the test is a changed input file or
+a drifted recomputation, never a new finding.
+**Evidence:** `results/blind_spot_map.json` (every cell with its denominator,
+interval, threshold and source run); `docs/figures/blind_spot_map.svg`.
+**Reopen if:** the probe suite is re-run on the normalised pair set with the
+second checkpoint and the embeddings, which would remove the mixed provenance
+and should replace the raw rows rather than sit beside them.

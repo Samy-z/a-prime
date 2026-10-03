@@ -1,0 +1,1118 @@
+{
+  "sources": [
+    {
+      "key": "nli_norm",
+      "file": "probes_20260925T041059Z_norm-e984a64fd95bf2ad.json",
+      "run_id": "20260925T041059Z",
+      "config_hash": "norm-e984a64fd95bf2ad",
+      "n_pairs": 896,
+      "normalised": true,
+      "relabelled_verbosity_as_hedging": false
+    },
+    {
+      "key": "nli_raw",
+      "file": "probes_20260924T031004Z_592763f4f2a8c4d7.json",
+      "run_id": "20260924T031004Z",
+      "config_hash": "592763f4f2a8c4d7",
+      "n_pairs": 832,
+      "normalised": false,
+      "relabelled_verbosity_as_hedging": true
+    },
+    {
+      "key": "emb_raw",
+      "file": "probes_20260924T022150Z_eb95f0b802c4660a.json",
+      "run_id": "20260924T022150Z",
+      "config_hash": "eb95f0b802c4660a",
+      "n_pairs": 832,
+      "normalised": false,
+      "relabelled_verbosity_as_hedging": true
+    }
+  ],
+  "budget": {
+    "one_tailed": 0.05,
+    "per_tail": 0.025,
+    "threshold_source": "quantile of the preserving pairs, pooled over the four output shapes"
+  },
+  "columns": [
+    {
+      "group": "breaking",
+      "title": "a fact changed: should fire",
+      "keys": [
+        "entity",
+        "number",
+        "temporal",
+        "negation",
+        "polarity",
+        "quantifier",
+        "unit",
+        "omission"
+      ],
+      "labels": [
+        "name swapped",
+        "number changed",
+        "date changed",
+        "negation inserted",
+        "decision flipped",
+        "quantifier changed",
+        "unit changed",
+        "condition deleted"
+      ]
+    },
+    {
+      "group": "register",
+      "title": "only the tone changed",
+      "keys": [
+        "hedging",
+        "overconfidence"
+      ],
+      "labels": [
+        "hedge added",
+        "confidence added"
+      ]
+    },
+    {
+      "group": "preserving",
+      "title": "only the wording changed: should not fire",
+      "keys": [
+        "paraphrase",
+        "synonym",
+        "reorder",
+        "format"
+      ],
+      "labels": [
+        "reworded",
+        "synonym swapped",
+        "sentences reordered",
+        "reformatted"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "label": "contradiction",
+      "detail": "DeBERTa-v3-base, normalised. As shipped.",
+      "group": "shipped",
+      "run_id": "20260925T041059Z",
+      "config_hash": "norm-e984a64fd95bf2ad",
+      "channel": "deberta_mnli:contradiction",
+      "hub_id": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+      "revision": "6f5cf0a2b59cabb106aca4c287eed12e357e90eb",
+      "tail": "upper",
+      "budget": 0.05,
+      "threshold": 0.0453948974609375,
+      "threshold_lower": null,
+      "threshold_upper": null,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "number": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "negation": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "unit": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "omission": {
+          "n": 64,
+          "fired": 11,
+          "rate": 0.171875,
+          "lo": 0.0987764126731623,
+          "hi": 0.2821344149016591
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "overconfidence": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "paraphrase": {
+          "n": 64,
+          "fired": 4,
+          "rate": 0.0625,
+          "lo": 0.024570803674792932,
+          "hi": 0.14997696642496888
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 9,
+          "rate": 0.140625,
+          "lo": 0.07578487006414436,
+          "hi": 0.24616508394637426
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    },
+    {
+      "label": "information loss",
+      "detail": "same model, signed entailment, upper tail",
+      "group": "shipped",
+      "run_id": "20260925T041059Z",
+      "config_hash": "norm-e984a64fd95bf2ad",
+      "channel": "deberta_mnli:directional",
+      "hub_id": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+      "revision": "6f5cf0a2b59cabb106aca4c287eed12e357e90eb",
+      "tail": "upper",
+      "budget": 0.025,
+      "threshold": 0.0955047607421875,
+      "threshold_lower": -0.05535888671875,
+      "threshold_upper": 0.0955047607421875,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "number": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "negation": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "unit": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "omission": {
+          "n": 64,
+          "fired": 63,
+          "rate": 0.984375,
+          "lo": 0.9166570109970937,
+          "hi": 0.9972365292495986
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "overconfidence": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "paraphrase": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    },
+    {
+      "label": "information gain",
+      "detail": "same model, signed entailment, lower tail",
+      "group": "shipped",
+      "run_id": "20260925T041059Z",
+      "config_hash": "norm-e984a64fd95bf2ad",
+      "channel": "deberta_mnli:directional",
+      "hub_id": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+      "revision": "6f5cf0a2b59cabb106aca4c287eed12e357e90eb",
+      "tail": "lower",
+      "budget": 0.025,
+      "threshold": -0.05535888671875,
+      "threshold_lower": -0.05535888671875,
+      "threshold_upper": 0.0955047607421875,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "number": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "negation": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 8,
+          "rate": 0.125,
+          "lo": 0.064721653926208,
+          "hi": 0.22774786330215924
+        },
+        "unit": {
+          "n": 64,
+          "fired": 8,
+          "rate": 0.125,
+          "lo": 0.064721653926208,
+          "hi": 0.22774786330215924
+        },
+        "omission": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "overconfidence": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "paraphrase": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 7,
+          "rate": 0.109375,
+          "lo": 0.054000447526830544,
+          "hi": 0.20898863291938535
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    },
+    {
+      "label": "contradiction",
+      "detail": "RoBERTa-large, before normalisation. Replication.",
+      "group": "replication",
+      "run_id": "20260924T031004Z",
+      "config_hash": "592763f4f2a8c4d7",
+      "channel": "roberta_mnli:contradiction",
+      "hub_id": "FacebookAI/roberta-large-mnli",
+      "revision": "2a8f12d27941090092df78e4ba6f0928eb5eac98",
+      "tail": "upper",
+      "budget": 0.05,
+      "threshold": 0.12329227291047573,
+      "threshold_lower": null,
+      "threshold_upper": null,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 59,
+          "rate": 0.921875,
+          "lo": 0.8298024712135222,
+          "hi": 0.9661693219045645
+        },
+        "number": {
+          "n": 64,
+          "fired": 56,
+          "rate": 0.875,
+          "lo": 0.7722521366978408,
+          "hi": 0.9352783460737919
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 55,
+          "rate": 0.859375,
+          "lo": 0.7538349160536257,
+          "hi": 0.9242151299358556
+        },
+        "negation": {
+          "n": 64,
+          "fired": 64,
+          "rate": 1.0,
+          "lo": 0.9433739770288436,
+          "hi": 1.0
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 49,
+          "rate": 0.765625,
+          "lo": 0.6486650974929234,
+          "hi": 0.8525023278036498
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 37,
+          "rate": 0.578125,
+          "lo": 0.4560981205252726,
+          "hi": 0.6913040633854843
+        },
+        "unit": {
+          "n": 64,
+          "fired": 23,
+          "rate": 0.359375,
+          "lo": 0.2528823053221461,
+          "hi": 0.48179376363849163
+        },
+        "omission": {
+          "n": 64,
+          "fired": 18,
+          "rate": 0.28125,
+          "lo": 0.18593226105484584,
+          "hi": 0.40134162399503504
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 9,
+          "rate": 0.140625,
+          "lo": 0.07578487006414436,
+          "hi": 0.24616508394637426
+        },
+        "overconfidence": null,
+        "paraphrase": {
+          "n": 64,
+          "fired": 9,
+          "rate": 0.140625,
+          "lo": 0.07578487006414436,
+          "hi": 0.24616508394637426
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    },
+    {
+      "label": "information loss",
+      "detail": "RoBERTa-large, upper tail",
+      "group": "replication",
+      "run_id": "20260924T031004Z",
+      "config_hash": "592763f4f2a8c4d7",
+      "channel": "roberta_mnli:directional",
+      "hub_id": "FacebookAI/roberta-large-mnli",
+      "revision": "2a8f12d27941090092df78e4ba6f0928eb5eac98",
+      "tail": "upper",
+      "budget": 0.025,
+      "threshold": 0.212936133146286,
+      "threshold_lower": -0.061593830585479736,
+      "threshold_upper": 0.212936133146286,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "number": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "negation": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 11,
+          "rate": 0.171875,
+          "lo": 0.0987764126731623,
+          "hi": 0.2821344149016591
+        },
+        "unit": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "omission": {
+          "n": 64,
+          "fired": 38,
+          "rate": 0.59375,
+          "lo": 0.471449865045497,
+          "hi": 0.7054327556474111
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "overconfidence": null,
+        "paraphrase": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "format": {
+          "n": 64,
+          "fired": 5,
+          "rate": 0.078125,
+          "lo": 0.03383067809543547,
+          "hi": 0.1701975287864777
+        }
+      }
+    },
+    {
+      "label": "information gain",
+      "detail": "RoBERTa-large, lower tail",
+      "group": "replication",
+      "run_id": "20260924T031004Z",
+      "config_hash": "592763f4f2a8c4d7",
+      "channel": "roberta_mnli:directional",
+      "hub_id": "FacebookAI/roberta-large-mnli",
+      "revision": "2a8f12d27941090092df78e4ba6f0928eb5eac98",
+      "tail": "lower",
+      "budget": 0.025,
+      "threshold": -0.061593830585479736,
+      "threshold_lower": -0.061593830585479736,
+      "threshold_upper": 0.212936133146286,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 9,
+          "rate": 0.140625,
+          "lo": 0.07578487006414436,
+          "hi": 0.24616508394637426
+        },
+        "number": {
+          "n": 64,
+          "fired": 11,
+          "rate": 0.171875,
+          "lo": 0.0987764126731623,
+          "hi": 0.2821344149016591
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 16,
+          "rate": 0.25,
+          "lo": 0.16014791974174092,
+          "hi": 0.36816509174383727
+        },
+        "negation": {
+          "n": 64,
+          "fired": 16,
+          "rate": 0.25,
+          "lo": 0.16014791974174092,
+          "hi": 0.36816509174383727
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 7,
+          "rate": 0.109375,
+          "lo": 0.054000447526830544,
+          "hi": 0.20898863291938535
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 6,
+          "rate": 0.09375,
+          "lo": 0.04367765783128784,
+          "hi": 0.1898309858327767
+        },
+        "unit": {
+          "n": 64,
+          "fired": 15,
+          "rate": 0.234375,
+          "lo": 0.1474976721963502,
+          "hi": 0.35133490250707655
+        },
+        "omission": {
+          "n": 64,
+          "fired": 11,
+          "rate": 0.171875,
+          "lo": 0.0987764126731623,
+          "hi": 0.2821344149016591
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 58,
+          "rate": 0.90625,
+          "lo": 0.8101690141672233,
+          "hi": 0.9563223421687121
+        },
+        "overconfidence": null,
+        "paraphrase": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "format": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        }
+      }
+    },
+    {
+      "label": "embedding distance",
+      "detail": "MiniLM-L6, ungated. Rejected.",
+      "group": "rejected",
+      "run_id": "20260924T022150Z",
+      "config_hash": "eb95f0b802c4660a",
+      "channel": "minilm",
+      "hub_id": "sentence-transformers/all-MiniLM-L6-v2",
+      "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "tail": "upper",
+      "budget": 0.05,
+      "threshold": 0.05413861572742462,
+      "threshold_lower": null,
+      "threshold_upper": null,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 36,
+          "rate": 0.5625,
+          "lo": 0.4408599177828787,
+          "hi": 0.6770618293457267
+        },
+        "number": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "negation": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "unit": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "omission": {
+          "n": 64,
+          "fired": 20,
+          "rate": 0.3125,
+          "lo": 0.21230909502265743,
+          "hi": 0.43392566359152623
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "overconfidence": null,
+        "paraphrase": {
+          "n": 64,
+          "fired": 10,
+          "rate": 0.15625,
+          "lo": 0.08714748876961673,
+          "hi": 0.26428290202305327
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    },
+    {
+      "label": "embedding distance",
+      "detail": "BGE-base, ungated. Rejected.",
+      "group": "rejected",
+      "run_id": "20260924T022150Z",
+      "config_hash": "eb95f0b802c4660a",
+      "channel": "bge_base",
+      "hub_id": "BAAI/bge-base-en-v1.5",
+      "revision": "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a",
+      "tail": "upper",
+      "budget": 0.05,
+      "threshold": 0.03700524568557739,
+      "threshold_lower": null,
+      "threshold_upper": null,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 36,
+          "rate": 0.5625,
+          "lo": 0.4408599177828787,
+          "hi": 0.6770618293457267
+        },
+        "number": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "negation": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "unit": {
+          "n": 64,
+          "fired": 2,
+          "rate": 0.03125,
+          "lo": 0.00861195771251659,
+          "hi": 0.10697493882294247
+        },
+        "omission": {
+          "n": 64,
+          "fired": 18,
+          "rate": 0.28125,
+          "lo": 0.18593226105484584,
+          "hi": 0.40134162399503504
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "overconfidence": null,
+        "paraphrase": {
+          "n": 64,
+          "fired": 3,
+          "rate": 0.046875,
+          "lo": 0.016068725432185196,
+          "hi": 0.12899860788542522
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 10,
+          "rate": 0.15625,
+          "lo": 0.08714748876961673,
+          "hi": 0.26428290202305327
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    },
+    {
+      "label": "embedding distance",
+      "detail": "E5-base, ungated. Rejected.",
+      "group": "rejected",
+      "run_id": "20260924T022150Z",
+      "config_hash": "eb95f0b802c4660a",
+      "channel": "e5_base",
+      "hub_id": "intfloat/e5-base-v2",
+      "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+      "tail": "upper",
+      "budget": 0.05,
+      "threshold": 0.025222286581993103,
+      "threshold_lower": null,
+      "threshold_upper": null,
+      "cells": {
+        "entity": {
+          "n": 64,
+          "fired": 22,
+          "rate": 0.34375,
+          "lo": 0.2392297503546903,
+          "hi": 0.46596588182379606
+        },
+        "number": {
+          "n": 64,
+          "fired": 1,
+          "rate": 0.015625,
+          "lo": 0.0027634707504014047,
+          "hi": 0.08334298900290629
+        },
+        "temporal": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "negation": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "polarity": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "quantifier": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "unit": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "omission": {
+          "n": 64,
+          "fired": 4,
+          "rate": 0.0625,
+          "lo": 0.024570803674792932,
+          "hi": 0.14997696642496888
+        },
+        "hedging": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "overconfidence": null,
+        "paraphrase": {
+          "n": 64,
+          "fired": 9,
+          "rate": 0.140625,
+          "lo": 0.07578487006414436,
+          "hi": 0.24616508394637426
+        },
+        "synonym": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        },
+        "reorder": {
+          "n": 64,
+          "fired": 4,
+          "rate": 0.0625,
+          "lo": 0.024570803674792932,
+          "hi": 0.14997696642496888
+        },
+        "format": {
+          "n": 64,
+          "fired": 0,
+          "rate": 0.0,
+          "lo": 0.0,
+          "hi": 0.056626022971156334
+        }
+      }
+    }
+  ],
+  "floors": [
+    {
+      "what": "a shift in how often the system picks each answer, below about 0.5 of the share, at 20 samples per arm",
+      "seen_by": "nothing: 0% at every sample size tested for a 0.3 shift",
+      "ref": "MTH-018"
+    },
+    {
+      "what": "fewer than ten changed inputs in the test set, at a 10% false discovery budget",
+      "seen_by": "nothing can be reported, by arithmetic, however clean the separation",
+      "ref": "MTH-024"
+    },
+    {
+      "what": "a twelve-word hedge inside a 150-word output",
+      "seen_by": "no meaning check; a length rule caught it incidentally",
+      "ref": "ENG-004"
+    },
+    {
+      "what": "corrupted characters appended to an otherwise correct output",
+      "seen_by": "no meaning check; only the structural rules",
+      "ref": "ENG-004"
+    },
+    {
+      "what": "10% of retrieved rows corrupted",
+      "seen_by": "no downstream metric in published work; a miss is not scored against the detector",
+      "ref": "BCH-004"
+    }
+  ]
+}
