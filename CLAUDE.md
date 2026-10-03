@@ -184,6 +184,6 @@ runs are pausable, see `docs/knowledge/recorder.md`.
 
 Not built: embedding style-stability gate, shape-stratified thresholds in anger
 (every run so far pooled to one stratum), Palworld adapter, the nine-cell
-factorial, F11. F2 is built for cells and unit-tested, never run live. The
-agent output format is distinct but 4/12 compliant, kept deliberately
+factorial. F2 and F11 are built for cells and unit-tested, never run live.
+The agent output format is distinct but 4/12 compliant, kept deliberately
 (HANDOFF §13).

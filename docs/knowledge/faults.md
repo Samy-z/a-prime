@@ -67,7 +67,7 @@ interchangeable.
 | changes | the output text | what the tools return | the instruction lines |
 | works on | any system under test | cells only | cells only |
 | fingerprints | ours, in wording we chose | the model's own | the model's own |
-| classes | F4, F7, F10, F12, F14 | F3, F5 | F2 |
+| classes | F4, F7, F10, F12, F14 | F3, F5, F11 | F2 |
 
 The distinction matters for validity. An output we rewrote carries our
 vocabulary and sentence shape, so a channel could in principle learn to spot
@@ -134,6 +134,30 @@ each entry, so usage cannot be attributed after the fact. Pooling shapes across
 the corpus would mark every input as affected and inflate the apparent activation
 rate to 1.0.
 
+### Degraded retrieval returns the wrong rows, and that is a different fault from stale
+
+`degraded_retrieval` (F11) makes a `noise` fraction of what a read returns
+belong to another record: a different entity under a lookup, somebody else's
+events in a search, another principal's figures under an evaluation, another
+topic's policy. The rows are well-formed and carry the right keys, so the
+structural checks do not catch them for free. `stale_view` (F5) serves older
+rows of the right record. A stale index is behind; a degraded one is confused;
+the two disagree with each other and with the clean read on the same call, and
+a test asserts it.
+
+Severity is `noise`, on the published ladder `F11_LADDER = (0.10, 0.20, 0.30)`
+from the controlled study the taxonomy cites. **At 0.10 that study measured no
+downstream change at all**, so a miss at that rung is not a detector failure and
+is not scored as one (BCH-004). Here the floor shows up as true negatives: at
+10% noise most reads come back unchanged, and activation records them as
+unaffected.
+
+Degradation is seeded on the call (seed, shape, canonical arguments), so a
+replay of the same call on an identically built toolset returns the same wrong
+rows. That is what lets the clean-versus-faulty comparison that decides
+activation see exactly what the cell saw. `compute` and `act` do not read, so
+listing them as degraded changes nothing and fires on nothing.
+
 ### A stale knowledge base is stale for every read
 
 Staling one tool shape and calling it a stale knowledge base overstates how
@@ -173,10 +197,10 @@ checkable rather than promised.
 
 - **F5 is implemented for cells** as `stale_view`, and F3 as `tool_withdrawn`.
   Neither works on a system we did not build, because both need the tool layer.
-- F11, retrieval degradation returning the wrong rows rather than old ones, is
-  still not implemented. `_shift` serves older content of the same shape, which
-  is staleness; returning unrelated rows is a different fault and needs its own
-  handler.
+- F11 is built for cells and has never been run against a live model. Its
+  rows are drawn from the same pack, so a wrong row is always a plausible
+  record of the same domain; a retriever that returns rows from another
+  domain entirely is not modelled.
 - F2 is built for cells and has never been run against a live model. Its
   activation is exposure for five of six edits; whether a given instruction
   had purchase on a given input is measured by the detector, not known by the

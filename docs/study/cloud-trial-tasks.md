@@ -74,7 +74,7 @@ prompt. That was wrong: `Cell.system_prompt()` exists, so the cells have one.
 Buildable and unit-testable with no GPU, against the captured fixtures in
 `tests/fixtures/ollama_chat.json`.
 
-### 5. F11, retrieval degradation
+### 5. F11, retrieval degradation — DONE 2026-10-04 (BCH-017)
 
 Returning the wrong rows rather than older ones. The current `_shift` in
 `cells/tools.py` serves older content of the same shape, which is staleness and

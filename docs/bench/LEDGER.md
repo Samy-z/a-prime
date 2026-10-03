@@ -511,3 +511,42 @@ parametrised ladder check; `docs/knowledge/faults.md`.
 point purchase becomes measurable and the five exposure-based edits should be
 re-graded against it; or if a seventh edit is proposed, which must name its
 incident and sit inside a rung.
+
+## BCH-017 — F11 is built as wrong rows, seeded per call, on the published ladder
+**Date:** 2026-10-04
+**Finding:** Retrieval degradation is injectable in all nine cells
+(`ToolSet(degraded=..., noise=..., seed=...)`, `degraded_retrieval()` in
+`cells/retrieval_faults.py`). A `noise` fraction of what a read returns is
+replaced by a well-formed row belonging to another record of the same pack:
+another entity under a lookup, somebody else's events in a search, another
+principal's figures under an evaluation, another topic's policy, another
+document under a verification. Keys and lengths are preserved, so structural
+conformance cannot catch it for free, which is the same discipline `stale_view`
+follows.
+
+**This is not the fault `stale_view` already injects.** `_shift` serves older
+rows of the right record; the task file and `cells.md` had both described it as
+covering F5 and F11. A stale index is behind; a degraded one is confused. On the
+same history call the stale read returns the principal's own older records,
+the degraded read returns records that are not theirs, and the clean read
+returns neither; a test asserts all three disagree.
+
+**Severity is the noise fraction, on the ladder the taxonomy cites:** 0.10,
+0.20, 0.30 from arXiv 2606.28337. At 0.10 that study measured no downstream
+change, so a miss there is not a detector failure (BCH-004). In the harness the
+floor shows as true negatives rather than as a flag: at 10% noise most reads
+come back unchanged, and activation, decided by replaying each call against a
+clean and a degraded toolset, records them as unaffected. The replay works
+because degradation is seeded on (seed, shape, canonical arguments), so an
+identically built toolset returns the same wrong rows.
+
+**Limit stated now rather than found later.** Wrong rows come from the same
+pack, so they are always plausible records of the same domain. A retriever that
+returns rows from an unrelated corpus is a different, louder fault and is not
+modelled.
+**Evidence:** `tests/test_degraded_retrieval.py`, 18 tests;
+`docs/knowledge/faults.md`.
+**Reopen if:** a live run at 0.20 or 0.30 fires on fewer inputs than the
+estimator can report (MTH-024), which would mean the seeded replacement is too
+gentle for the pack's record sizes and the ladder needs re-anchoring against
+measured activation.

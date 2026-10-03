@@ -61,12 +61,19 @@ agent, and models do get argument names wrong.
 - `disabled={shape}` withdraws a tool. Fault class **F3**, an upstream tool
   renamed or removed while the agent still expects it.
 - `stale={shape}` answers from a shifted view: same length, same keys, older
-  content. Fault classes **F5** and **F11**. Deliberately structure-preserving,
-  because staleness that broke the JSON would be caught for free by structural
-  conformance, which is not what these faults look like in the wild.
+  content of the right record. Fault class **F5**. Deliberately
+  structure-preserving, because staleness that broke the JSON would be caught
+  for free by structural conformance, which is not what it looks like in the
+  wild.
+- `degraded={shape}, noise=f, seed=s` answers with the wrong rows: a fraction
+  `f` of what a read returns belongs to another record, well-formed and with
+  the right keys. Fault class **F11**. Seeded on the call so a replay
+  reproduces it. The published ladder is 0.10, 0.20, 0.30, and 0.10 is a floor
+  below which a miss is not scored (BCH-004).
 
-Both were listed as "not implemented" in BCH-011 for want of a system that
-retrieves. They are now implementable in all nine cells.
+All three were listed as "not implemented" in BCH-011 for want of a system
+that retrieves. They are now injectable in all nine cells, through
+`retrieval_faults.py`, which decides activation per input and per sample.
 
 ## Cells
 

@@ -24,13 +24,22 @@ prompt tokens rather than the 1,200 to 2,000 the design had assumed (BCH-013).
 
 `disabled` removes a tool from the advertised set, which is fault class F3: an
 upstream tool renamed or withdrawn while the agent still expects it. `stale`
-makes a tool answer from a shifted view of the pack, which is F5 and F11:
-knowledge-base staleness and retrieval degradation. Both were listed as not
-implemented, because they need a system that actually retrieves.
+makes a tool answer from a shifted view of the pack, which is F5, knowledge-base
+staleness: older content of the same shape. `degraded` makes a tool return the
+wrong rows, which is F11, retrieval degradation: a `noise` fraction of what a
+read returns is replaced by well-formed rows belonging to another record. The
+two are different faults. A stale index is behind; a degraded one is confused.
+
+Degradation is seeded on the call, so the same call on two toolsets built the
+same way returns the same wrong rows. That is what lets the activation decision
+replay a call against a clean and a degraded toolset and compare the two.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
+import random
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -97,8 +106,20 @@ class ToolDef:
 class ToolSet:
     pack: Pack
     disabled: frozenset[str] = frozenset()   # shapes withdrawn: fault class F3
-    stale: frozenset[str] = frozenset()      # shapes answering from a shifted view
+    stale: frozenset[str] = frozenset()      # shapes answering from a shifted view: F5
+    degraded: frozenset[str] = frozenset()   # shapes returning wrong rows: F11
+    noise: float = 0.0                       # fraction of rows replaced, for `degraded`
+    seed: int = 0
     calls: list[tuple[str, dict]] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.noise <= 1.0:
+            raise ValueError(f"noise is a fraction of rows, got {self.noise}")
+        if self.degraded and self.noise == 0.0:
+            raise ValueError(
+                "a degraded shape with noise=0 returns the right rows, which is "
+                "no fault. Give the fraction of rows to replace; the published "
+                "ladder is 0.10, 0.20, 0.30 (BCH-004).")
 
     # -------------------------------------------------------------- definitions
 
@@ -188,6 +209,32 @@ class ToolSet:
                     return args[key]
         return None
 
+    def _rng(self, shape: str, args: dict) -> random.Random:
+        """One generator per call, seeded on what was asked, so a replay of
+        the same call on an identically built toolset degrades identically."""
+        canon = json.dumps(args, sort_keys=True, default=str)
+        h = hashlib.sha256(f"{self.seed}|{shape}|{canon}".encode()).digest()
+        return random.Random(int.from_bytes(h[:8], "big"))
+
+    def _wrong(self, shape: str, args: dict, candidates: list, own: Any) -> Any:
+        """For a single-row read: the right row, or with probability `noise`
+        a well-formed row belonging to something else."""
+        if shape not in self.degraded or not candidates:
+            return own
+        rng = self._rng(shape, args)
+        if rng.random() >= self.noise:
+            return own
+        return rng.choice(candidates)
+
+    def _mix(self, shape: str, args: dict, rows: list, foreign: list) -> list:
+        """For a list read: each row kept or, with probability `noise`,
+        replaced by a row from another record. Length and shape preserved."""
+        if shape not in self.degraded or not rows or not foreign:
+            return rows
+        rng = self._rng(shape, args)
+        return [rng.choice(foreign) if rng.random() < self.noise else r
+                for r in rows]
+
     def _shift(self, seq: list, on: bool) -> list:
         """A stale view: drop the most recent item and repeat the oldest.
 
@@ -207,7 +254,8 @@ def _h_lookup(ts: ToolSet, args: dict) -> dict:
         return {"error": f"no such {ts.pack.vocab.entity_kind}: {eid}"}
     if "lookup" in ts.stale:
         rec = {**rec, "status": ts.pack.vocab.statuses[0]}
-    return rec
+    others = [r for k, r in ts.pack.entities.items() if k != str(eid)]
+    return ts._wrong("lookup", args, others, rec)
 
 
 def _h_search(ts: ToolSet, args: dict) -> dict:
@@ -217,7 +265,10 @@ def _h_search(ts: ToolSet, args: dict) -> dict:
         return {"error": f"no such {ts.pack.vocab.entity_kind}: {eid}"}
     lo = args.get("min_amount")
     hi = args.get("max_amount")
-    hits = [e for e in ts._shift(events, "search" in ts.stale)
+    rows = ts._shift(events, "search" in ts.stale)
+    foreign = [e for k, evs in ts.pack.events.items() if k != eid for e in evs]
+    rows = ts._mix("search", args, rows, foreign)
+    hits = [e for e in rows
             if (lo is None or e["amount"] >= lo) and (hi is None or e["amount"] <= hi)]
     return {"count": len(hits), "total": sum(e["amount"] for e in hits),
             "items": hits}
@@ -227,6 +278,8 @@ def _h_policy(ts: ToolSet, args: dict) -> dict:
     topic = str(args.get("topic", "")).strip().lower()
     for name, pol in ts.pack.policies.items():
         if topic and (topic in name.lower() or name.lower() in topic):
+            others = [p for n, p in ts.pack.policies.items() if n != name]
+            pol = ts._wrong("policy", args, others, pol)
             text = pol["text"].format(min_years=pol["min_years_on_record"],
                                       max_ratio=pol["max_ratio"],
                                       doc=pol["requires_document"])
@@ -254,6 +307,9 @@ def _h_evaluate(ts: ToolSet, args: dict) -> dict:
         return {"error": f"no such {pri}: {pid}"}
     product = str(args.get("product", ""))
     pol = next(iter(ts.pack.policies.values()))
+    # A degraded read fetches another principal's figures under this id.
+    others = [w for k, w in ts.pack.principals.items() if k != pid]
+    who = ts._wrong("evaluate", args, others, who)
     income = who["annual_income"] or 1
     ratio = round(who["existing_debt"] / income, 4)
     ok = (who["years_on_record"] >= pol["min_years_on_record"]
@@ -270,6 +326,8 @@ def _h_history(ts: ToolSet, args: dict) -> dict:
         return {"error": f"no such {pri}: {pid}"}
     owned = [e for e in ts.pack.entities.values() if e.get(f"{pri}_id") == pid]
     owned = ts._shift(owned, "history" in ts.stale)
+    foreign = [e for e in ts.pack.entities.values() if e.get(f"{pri}_id") != pid]
+    owned = ts._mix("history", args, owned, foreign)
     who = ts.pack.principals[pid]
     # The figures live here because this is the only principal-keyed read in the
     # set. Without them the compute shape is unreachable: on the first live run
@@ -290,7 +348,8 @@ def _h_verify(ts: ToolSet, args: dict) -> dict:
         return {"error": f"no such document: {did}"}
     if "verify" in ts.stale:
         doc = {**doc, "valid": True}
-    return doc
+    others = [d for k, d in ts.pack.documents.items() if k != did]
+    return ts._wrong("verify", args, others, doc)
 
 
 def _h_act(ts: ToolSet, args: dict) -> dict:
