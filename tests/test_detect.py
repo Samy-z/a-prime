@@ -105,7 +105,7 @@ def test_conformance_runs_over_the_pooled_corpus():
     rep = detect(rec, q=Q)
     assert rep.contract is not None
     assert rep.contract.n_candidates > 0
-    assert "conformance" in rep.text()
+    assert "rules inferred from the old system" in rep.text()
 
 
 def test_a_structural_break_in_the_candidate_is_caught():
@@ -149,7 +149,7 @@ def test_report_renders_without_findings():
     rec, _ = _rec(n_inputs=20, n_affected=0, strength=0.0, seed=9)
     rep = detect(rec, q=Q)
     txt = rep.text()
-    assert "a-prime report" in txt and "channels:" in txt
+    assert "a-prime report" in txt and "checks" in txt
 
 
 def test_a_tighter_budget_never_yields_more_findings():

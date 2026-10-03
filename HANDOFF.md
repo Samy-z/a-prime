@@ -806,3 +806,35 @@ Also corrected: an earlier message from this session said the local session had
 deleted the remote `main-ybkkmp`. It had not. The branch never existed on the
 remote until this session pushed it; what git reported as deleted was a stale
 remote-tracking ref in this container's clone. Work now goes to `main`.
+
+## §19 — The report says why it reported nothing (2026-10-04)
+
+Third item on the cloud list. The gap was recorded as "a format a reader can
+act on", and the thing a reader could not act on was the empty report: ENG-007
+produced `0 of 30 inputs flagged` from a run where three checks had separated
+the fault with zero decoys above the cut, and MTH-024's correction said in so
+many words that `0.111` against a budget of `0.100` and `0.867` print the same
+line. The diagnose script could tell them apart; the report could not.
+
+**What changed.** The number the diagnose script computed by hand, the lowest
+false-discovery estimate any cut achieves, now lives in `fdr.best_achievable`
+and is computed per stratum for every check inside `detect()`. The report
+turns it into one of three sentences per check: separated but under the floor,
+with how many more inputs would have cleared it; partly separated, with the
+counts; or no separation, which the report explicitly says it cannot tell
+from "nothing changed". A check that did not run says `skipped` and why.
+
+**What the report also states now, because nothing in the numbers would:**
+the samples per input and any input that had fewer, the floor itself when
+nothing is flagged, that the rules section is not subject to that floor, the
+sign of the directional check with its meaning, and the run id and config
+hash when the caller sets them.
+
+**The reader.** D19 applies: every check is labelled in plain words beside its
+code name, and every reading is a sentence rather than a number. The code name
+stays so a line can be grepped against the ledgers.
+
+**Not done.** The runners still build their own result dicts rather than
+calling `Report.to_dict()`; left alone because `run_study.py` was about to
+start a long run on the owner's machine, and a runner change should land when
+it can be exercised. `to_dict()` exists for when it is.

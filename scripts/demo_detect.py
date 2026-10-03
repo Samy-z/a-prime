@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from aprime.detect import detect                      # noqa: E402
-from aprime.provenance import capture, corpus_fingerprint  # noqa: E402
+from aprime.provenance import capture, corpus_fingerprint, row_provenance  # noqa: E402
 from aprime.recorder import iter_invocations, record   # noqa: E402
 from aprime.stub import build_arms                     # noqa: E402
 
@@ -37,6 +37,7 @@ print(f"recorded {len(rec.samples)} samples, interleaving gap "
       f"{rec.interleaving_gap()}, span {rec.wallclock_span_s():.1f}s\n")
 
 rep = detect(rec, q=Q)
+rep.provenance = row_provenance(prov)
 print(rep.text())
 
 flagged = {f.input_id for f in rep.findings}
