@@ -100,3 +100,56 @@ uninterpretable in either direction.
 > several other rows rest on changelogs and third-party comparisons. Before any
 > hard novelty claim against a specific named tool reaches the paper, verify it
 > by running that tool, not by reading it.
+
+## STD-008 — Detecting that a hosted model changed is the same statistic pointed at time
+**Date:** 2026-10-04
+**Finding:** Owner's question, raised while rejecting the hosted-model arm: we
+cannot know when a provider changed the weights under us, "or can we? maybe this
+could be an extra tool: version change detection?"
+
+Partly we can, and the machinery is already built.
+
+**Sometimes the provider tells you.** OpenAI returns a `system_fingerprint`
+which changes when the backend configuration changes, and exists for exactly
+this. It is not universal, and it signals a serving-configuration change rather
+than a weight change specifically.
+
+**Otherwise we can measure it, with no new statistics.** The method here is
+already "run the same system twice, measure the spread, that spread is the noise
+floor". Point it at time instead of at versions:
+
+1. Record arms A and A-prime now. Their spread is the within-period noise floor
+   for this corpus.
+2. Record the same system again a week later, as a third cloud.
+3. Score period one against period two through the same channels, with the
+   threshold set by the within-period decoy spread.
+4. Anything above that threshold is a change nobody announced.
+
+That is the existing detector with "the candidate system" replaced by "the same
+system, later". The decoy arm supplies the calibrated false-alarm rate, which is
+the part nobody else offers.
+
+**This is already fault class F6, provider drift**, documented in
+`.agents/bench-taxonomy-research.md` section 6. The taxonomy anticipated it. What
+is new is shipping it as a capability rather than only injecting it as a fault.
+
+**It reframes the product, which is why it is recorded and not built.** The tool
+today is a pre-deployment check: you changed something, here is what moved.
+Drift detection is continuous monitoring: nothing was announced, here is what
+moved anyway. Same code, different buyer, different claim.
+
+**Novelty: partly occupied, as with STD-001.** Whether a hosted model drifts
+over time has published work behind it, including the 2023 study of ChatGPT
+behaviour changing across versions. The question is not open. What looks
+unclaimed is the calibrated false-alarm rate, which is the same construction
+argument STD-001 and STD-006 make for the decoy arm generally.
+
+**Not being built.** The owner has said scope and consistency outrank new
+directions, and this is a new direction. Recorded so it is not rediscovered, and
+so the paper can offer it as an extension in one honest sentence rather than
+claiming it as a result.
+**Evidence:** owner exchange 2026-10-04; HANDOFF §15 amendment;
+`.agents/bench-taxonomy-research.md` section 6.
+**Reopen if:** the transfer result lands and the project wants a second
+contribution, or a provider ships a fingerprint reliable enough to replace
+step 2.

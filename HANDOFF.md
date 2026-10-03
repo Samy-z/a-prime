@@ -590,3 +590,56 @@ date, the exact model string, any version or fingerprint field the API returns,
 and the fact that none of it is a pin. A number from this probe is a
 measurement of one week in one provider's deployment, and the paper has to say
 so.
+
+## §15 — AMENDMENT (dated append, 2026-10-04)
+
+**D22 is reversed: no hosted model, not even as a probe.** The reasoning I gave
+for the original scoping was also wrong, which matters more than the decision.
+
+### Why it is a no
+
+Both of the owner's reasons are about scope, not method.
+
+**Price.** Ten dollars a month buys one domain on a cheap model and nothing
+close to the factorial.
+
+**What affording it would cost.** The agent format is three times the price of
+summary, so fitting the budget means dropping it. Agents are the most common
+shape of production LLM system, and this project chose eight tools over two
+precisely so the study would not be about toy systems (BCH-013). Buying a
+hosted comparison by deleting the agent format trades away the thing the study
+is for. Consistency and scope outrank a side observation.
+
+### Where my argument was wrong
+
+I said a hosted model cannot be a study arm because it cannot be pinned, and
+that this breaks the pinned-instruments rail. The owner pushed back: models
+changing under you is the problem this project exists to detect, and the README
+says so.
+
+They are right, and the rail's own words say so. It reads "Embedding and NLI
+model versions locked." **It protects the instruments, not the systems under
+test.** The NLI model and the embedder do the measuring, so if they change, old
+numbers stop being comparable. A system under test that changes is not a rail
+violation. It is the subject matter.
+
+### The real objection, which is much narrower
+
+Not reproducibility across months. **Stability inside one run.** A and A-prime
+have to be the same system, because their spread is the null. If the provider
+swaps weights between the A call and the A-prime call for one input, that
+triple's null contains a real change, and the decoy arm stops being a null for
+it.
+
+How bad: small and bounded. The recorder is triple-atomic and grouped by input
+(ENG-001), so the three arms for one sample are consecutive calls seconds
+apart. A deployment landing inside that window is unlikely, and across a
+six-hour run it would touch a handful of triples out of hundreds.
+
+What genuinely remains is a reproducibility caveat for the paper. A reader
+cannot re-run a hosted arm and get our numbers. That is a limitation to state,
+not a reason to refuse.
+
+**The method was never the problem.** Had the budget allowed it without cutting
+the agent format, a hosted arm would have been sound with a stated caveat. The
+decision stands on the owner's reasons, not mine.

@@ -25,12 +25,15 @@ These silently invalidate a result rather than failing loudly.
    deployment under audit, the policy used is recorded in provenance, and a run
    is reproducible because the seeds are known rather than because they are
    equal. Ratified 2026-09-30, MTH-023.
-   **A hosted model cannot satisfy this rail at all**, because the provider can
-   change the weights with no version string and no notice. A hosted system is
-   therefore usable as a one-off probe, never as a baseline the study re-runs
-   and compares. Anything measured on one records the date, the model string and
-   whatever fingerprint the API returns, and states plainly that none of it is a
-   pin. Decided 2026-10-03, HANDOFF §15, D22.
+   **This rail covers the instruments, not the systems under test.** The NLI
+   model and the embedder do the measuring, so a change in either makes old
+   numbers incomparable. A system under test that changes is not a violation of
+   this rail, it is the thing being detected. An earlier version of this note
+   claimed a hosted model breaks the rail. It does not, and the correction is in
+   HANDOFF §15. The real constraint on a changing system under test is narrower:
+   A and A-prime must be the same system, because their spread is the null. The
+   recorder keeps a triple to consecutive calls (ENG-001), which bounds that
+   exposure to a handful of triples across a long run.
 5. **Provenance.** Every number traces to a run id and a config hash. See
    `docs/knowledge/provenance.md` when it exists.
 
