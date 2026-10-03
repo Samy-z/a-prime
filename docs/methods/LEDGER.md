@@ -632,3 +632,61 @@ quantisation.
 `results/cell_detection_20260929T231931Z.jsonl`.
 **Reopen if:** a channel is added whose statistic is continuous rather than
 quantised by k, where `s` would behave differently.
+
+## MTH-017 — RECONCILIATION (dated append, 2026-10-04)
+
+The blind-spot map (STD-009, `docs/figures/blind_spot_map.svg`) recomputes
+every cell from the stored scores of the raw probe runs under one rule, and a
+few of its numbers differ from the ones published in MTH-011, MTH-013, MTH-016,
+MTH-017 and MTH-019. The published numbers are not wrong and are not edited.
+This append says why the two sets differ so that nobody reconciles them by
+hand or reads the gap as a new finding.
+
+**Two changes of rule, both deliberate.**
+
+1. **Threshold over 256 preserving pairs, not 320.** MTH-021 moved hedging
+   out of PRESERVING into REGISTER. The two raw runs predate it and still carry
+   hedging as `verbosity` under PRESERVING; the map relabels them so every row,
+   including the embeddings, sets its 5% threshold over the same 256 pairs. The
+   threshold moves (DeBERTa contradiction 0.646 to 0.738) and the counts move
+   with it.
+2. **The signed channel is read two-tailed at 2.5% per tail (MTH-022), not
+   one-tailed at 5%.** MTH-016 and MTH-017 quoted the one-tailed rate.
+
+**Every cell that moved by one pair or more, as counts out of 64:**
+
+| quantity | published | on the map | why |
+|---|---|---|---|
+| DeBERTa contradiction, unit (MTH-013) | 54, 84.4% | 53, 82.8% | rule 1 |
+| DeBERTa contradiction, quantifier (MTH-013, MTH-017) | 59, 92.2% | 57, 89.1% | rule 1 |
+| DeBERTa contradiction, false alarms on reformatting (MTH-019) | 12, 18.8% | 9, 14.1% | rule 1 |
+| DeBERTa directional, omission (MTH-016) | 61, 95.3% | 59, 92.2% | rule 2 (rule 1 adds nothing: 59 either way) |
+| RoBERTa contradiction, quantifier (MTH-017) | 35, 54.7% | 37, 57.8% | rule 1 |
+| RoBERTa contradiction, number | 54, 84.4% | 56, 87.5% | rule 1 |
+| RoBERTa contradiction, temporal | 54, 84.4% | 55, 85.9% | rule 1 |
+| RoBERTa contradiction, false alarms on paraphrase | 8, 12.5% | 9, 14.1% | rule 1 |
+| RoBERTa directional, omission (MTH-017) | 42, 65.6% | 38, 59.4% | both: 40 under rule 2 alone |
+| MiniLM, name swapped (MTH-011) | 38, 59.4% | 36, 56.2% | rule 1 |
+| MiniLM, omission | 21, 32.8% | 20, 31.2% | rule 1 |
+| MiniLM, false alarms on paraphrase | 13, 20.3% | 10, 15.6% | rule 1 |
+| BGE, name swapped | 38, 59.4% | 36, 56.2% | rule 1 |
+| BGE, omission | 22, 34.4% | 18, 28.1% | rule 1 |
+| BGE, false alarms on reordering (probes.md Finding 5) | 11, 17.2% | 10, 15.6% | rule 1 |
+| E5, paraphrase false alarms | 11, 17.2% | 9, 14.1% | rule 1 |
+
+Unchanged under both rules: RoBERTa unit 23 (35.9%), polarity 49 (76.6%),
+entity 59, negation 64, omission-on-contradiction 18 (28.1%); DeBERTa polarity
+63, and every 0 and every 64. The pooled AUCs are not on the map and are not
+affected by rule 2; rule 1 changes the preserving set they are computed against
+and they have not been recomputed.
+
+**What does not change:** every direction, every ordering between the two
+checkpoints, and every conclusion drawn from them. The largest move is four
+pairs (RoBERTa directional omission), the typical move is one or two.
+
+**Which number to quote:** the map's, with its rule, for anything new. The
+ledger entries keep theirs because they are what the entries were written
+against. A document quoting both should say which rule each follows.
+**Evidence:** `results/blind_spot_map.json` for the map's counts; the
+`results_global` blocks in the two raw probe files for the published ones;
+both from the same `scores` arrays.

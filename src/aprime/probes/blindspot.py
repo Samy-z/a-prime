@@ -21,8 +21,18 @@ Two conventions, both stated on the figure:
   hedging as `verbosity` under PRESERVING. They are relabelled here, so every
   row sets its threshold over the same 256 preserving pairs and the columns
   mean the same thing on every row. The stored `results_global` in those files
-  were computed over 320 preserving pairs and differ slightly; the file names
-  the relabelling so nobody reconciles the two by hand.
+  were computed over 320 preserving pairs and differ slightly; the
+  reconciliation is a dated append under MTH-017.
+
+The grid and the shipped block are kept apart on purpose. Every grid row comes
+from the raw, un-normalised pair set, which both raw runs share byte for byte,
+so the grid can be read across: DeBERTa against RoBERTa against the embeddings
+on the same inputs under the same rule. The detector ships with normalisation
+on, and MTH-019 measured that normalisation buys detection, so a normalised
+DeBERTa row inside that grid would flatter DeBERTa against RoBERTa and a reader
+would credit the model. The shipped rows therefore sit below the grid, labelled
+as a different run, and the gap between them and the raw DeBERTa rows is
+MTH-019 made visible.
 """
 
 from __future__ import annotations
@@ -74,7 +84,7 @@ class RowSpec:
 
     label: str
     detail: str
-    group: str  # "shipped" | "replication" | "rejected"
+    group: str  # "detector" | "replication" | "rejected" in the grid; "shipped" below it
     source: str  # key into the sources dict
     channel: str  # key into that file's "channels"
     tail: str  # "upper" (score > threshold), "lower" (score < threshold)
@@ -90,30 +100,42 @@ SOURCES: dict[str, str] = {
 }
 
 ROWS: tuple[RowSpec, ...] = (
-    RowSpec("contradiction", "DeBERTa-v3-base, normalised. As shipped.",
-            "shipped", "nli_norm", "deberta_mnli:contradiction", "upper"),
+    # The grid: one pair set, raw text, every row under the same rule.
+    RowSpec("contradiction", "DeBERTa-v3-base, raw text",
+            "detector", "nli_raw", "deberta_mnli:contradiction", "upper"),
     RowSpec("information loss", "same model, signed entailment, upper tail",
-            "shipped", "nli_norm", "deberta_mnli:directional", "upper", True),
+            "detector", "nli_raw", "deberta_mnli:directional", "upper", True),
     RowSpec("information gain", "same model, signed entailment, lower tail",
-            "shipped", "nli_norm", "deberta_mnli:directional", "lower", True),
-    RowSpec("contradiction", "RoBERTa-large, before normalisation. Replication.",
+            "detector", "nli_raw", "deberta_mnli:directional", "lower", True),
+    RowSpec("contradiction", "RoBERTa-large, raw text",
             "replication", "nli_raw", "roberta_mnli:contradiction", "upper"),
     RowSpec("information loss", "RoBERTa-large, upper tail",
             "replication", "nli_raw", "roberta_mnli:directional", "upper", True),
     RowSpec("information gain", "RoBERTa-large, lower tail",
             "replication", "nli_raw", "roberta_mnli:directional", "lower", True),
-    RowSpec("embedding distance", "MiniLM-L6, ungated. Rejected.",
+    RowSpec("embedding distance", "MiniLM-L6, ungated",
             "rejected", "emb_raw", "minilm", "upper"),
-    RowSpec("embedding distance", "BGE-base, ungated. Rejected.",
+    RowSpec("embedding distance", "BGE-base, ungated",
             "rejected", "emb_raw", "bge_base", "upper"),
-    RowSpec("embedding distance", "E5-base, ungated. Rejected.",
+    RowSpec("embedding distance", "E5-base, ungated",
             "rejected", "emb_raw", "e5_base", "upper"),
+    # Below the grid: the configuration the detector ships with. A different
+    # run and a larger pair set, so not read across against the rows above.
+    RowSpec("contradiction", "DeBERTa-v3-base, text normalised first",
+            "shipped", "nli_norm", "deberta_mnli:contradiction", "upper"),
+    RowSpec("information loss", "same, upper tail",
+            "shipped", "nli_norm", "deberta_mnli:directional", "upper", True),
+    RowSpec("information gain", "same, lower tail",
+            "shipped", "nli_norm", "deberta_mnli:directional", "lower", True),
 )
 
+GRID_GROUPS = ("detector", "replication", "rejected")
+
 GROUP_TITLES = {
-    "shipped": "in the detector",
-    "replication": "a second judging model",
+    "detector": "the detector's judging model",
+    "replication": "a second judging model, same inputs",
     "rejected": "measured and rejected",
+    "shipped": "as shipped: the same model after normalisation",
 }
 
 # Sizes below which nothing fired. These do not come from the probe suite and
@@ -314,24 +336,39 @@ def _text(x: float, y: float, s: str, size: int = 12, fill: str = _INK,
 def render_svg(m: dict) -> str:
     cols = [(g["group"], k, lab) for g in m["columns"]
             for k, lab in zip(g["keys"], g["labels"])]
-    rows = m["rows"]
+    grid_rows = [r for r in m["rows"] if r["group"] in GRID_GROUPS]
+    shipped_rows = [r for r in m["rows"] if r["group"] not in GRID_GROUPS]
+    rows = grid_rows + shipped_rows
 
     label_w, cell_w, cell_h, gap, group_gap = 290, 66, 40, 2, 14
     top = 132  # title, subtitle, legend, column headers
     left = 24
     width = left + label_w + len(cols) * cell_w + 2 * group_gap + 24
 
-    # Row y positions, with a gap and a group caption between groups.
+    # Row y positions, with a gap and a group caption between groups. The
+    # shipped block gets a wider gap, a rule, and a note, because it is a
+    # different run and must not read as three more rows of the grid.
     y = top
     row_y: list[float] = []
     captions: list[tuple[float, str]] = []
+    notes: list[tuple[float, str]] = []
+    group_span: dict[str, tuple[float, float]] = {}
     last_group = None
     for r in rows:
         if r["group"] != last_group:
-            y += 26 if last_group is not None else 0
+            if r["group"] not in GRID_GROUPS:
+                y += 54
+                notes.append((y - 22, "Different run, 896 pairs, thresholds set over "
+                              "its own preserving pairs. Not read across against "
+                              "the grid: the gap to the raw rows is what "
+                              "normalisation buys (MTH-019)."))
+            elif last_group is not None:
+                y += 26
             captions.append((y - 6, GROUP_TITLES[r["group"]]))
             last_group = r["group"]
         row_y.append(y)
+        lo, _ = group_span.get(r["group"], (y, y))
+        group_span[r["group"]] = (lo, y + cell_h)
         y += cell_h + gap
     grid_bottom = y
 
@@ -395,25 +432,38 @@ def render_svg(m: dict) -> str:
             out.append(_text(cx + cell_w / 2, top - 8, line2, 10, _INK2,
                              anchor="middle"))
 
-    # Group captions and row labels.
+    # Group captions, the rule above the shipped block, and row labels.
     for cy, title in captions:
         out.append(_text(left, cy - 2, title, 10, _MUTED, weight="600",
                          extra='letter-spacing="0.06em" style="text-transform:uppercase"'))
+    for ny, note in notes:
+        out.append(f'<line x1="{left}" y1="{ny - 20}" x2="{width - 24}" y2="{ny - 20}" '
+                   f'stroke="{_AXIS}" stroke-width="1"/>')
+        out.append(_text(left, ny, note, 10, _INK2))
     for r, ry in zip(rows, row_y):
         out.append(_text(left, ry + 17, r["label"], 12, _INK, weight="600"))
         out.append(_text(left, ry + 31, r["detail"], 10, _INK2))
+
+    # A column absent from a whole group's pair set is one box, not a stack
+    # of nine "not run" cells.
+    for (g, k, lab), cx in zip(cols, col_x):
+        for grp, (y0, y1) in group_span.items():
+            members = [r for r in rows if r["group"] == grp]
+            if all(r["cells"][k] is None for r in members):
+                out.append(f'<rect x="{cx + 1}" y="{y0 + 1}" width="{cell_w - 2}" '
+                           f'height="{y1 - y0 - 2}" fill="none" stroke="{_HAIRLINE}" '
+                           f'stroke-dasharray="3 3" rx="4"/>')
+                mid = (y0 + y1) / 2
+                out.append(_text(cx + cell_w / 2 + 3, mid, "not in this pair set", 9,
+                                 _MUTED, anchor="middle",
+                                 extra=f'transform="rotate(-90 {cx + cell_w / 2 + 3:.1f} {mid:.1f})"'))
 
     # Cells.
     for r, ry in zip(rows, row_y):
         for (g, k, lab), cx in zip(cols, col_x):
             c = r["cells"][k]
             if c is None:
-                out.append(f'<rect x="{cx + 1}" y="{ry + 1}" width="{cell_w - 2}" '
-                           f'height="{cell_h - 2}" fill="none" stroke="{_HAIRLINE}" '
-                           f'stroke-dasharray="3 3" rx="4"/>')
-                out.append(_text(cx + cell_w / 2, ry + cell_h / 2 + 4, "not run", 9,
-                                 _MUTED, anchor="middle"))
-                continue
+                continue  # drawn once per group above
             fill = _ramp(c["rate"])
             ink = "#ffffff" if c["rate"] >= 0.55 else _INK
             title = (f"{lab}: fired on {c['fired']} of {c['n']} "

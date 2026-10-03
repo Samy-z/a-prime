@@ -81,13 +81,51 @@ def test_two_tailed_thresholds_match_mth_022(m):
     assert gain["cells"]["omission"]["fired"] == 0
 
 
+def test_grid_rows_share_one_pair_set_and_the_shipped_rows_do_not(m):
+    """STD-009 amendment: the grid is read across, so it is raw runs only."""
+    grid = [r for r in m["rows"] if r["group"] in blindspot.GRID_GROUPS]
+    shipped = [r for r in m["rows"] if r["group"] == "shipped"]
+    assert len(grid) == 9 and len(shipped) == 3
+    assert {r["run_id"] for r in grid} == {"20260924T031004Z", "20260924T022150Z"}
+    assert {r["run_id"] for r in shipped} == {"20260925T041059Z"}
+
+
+def test_raw_deberta_matches_the_mth_017_reconciliation(m):
+    """The counts the dated append under MTH-017 publishes for the map's rule."""
+    con = _row(m, "contradiction", "detector")
+    loss = _row(m, "information loss", "detector")
+    assert con["cells"]["unit"]["fired"] == 53
+    assert con["cells"]["quantifier"]["fired"] == 57
+    assert con["cells"]["polarity"]["fired"] == 63
+    assert con["cells"]["format"]["fired"] == 9
+    assert con["cells"]["omission"]["fired"] == 0
+    assert loss["cells"]["omission"]["fired"] == 59
+
+
 def test_second_checkpoint_reproduces_direction_not_magnitude(m):
-    """MTH-017: RoBERTa agrees on which categories are hard, not on how hard."""
-    deb = _row(m, "contradiction", "shipped")
+    """MTH-017: RoBERTa agrees on which categories are hard, not on how hard.
+
+    Compared against raw DeBERTa from the same run and the same pairs, never
+    against the normalised rows, which would credit the model with what
+    normalisation bought (MTH-019).
+    """
+    deb = _row(m, "contradiction", "detector")
     rob = _row(m, "contradiction", "replication")
+    assert deb["run_id"] == rob["run_id"]
     assert rob["cells"]["omission"]["rate"] < 0.5  # still the hard case
     assert rob["cells"]["negation"]["rate"] == 1.0
+    assert rob["cells"]["unit"]["fired"] == 23
+    assert rob["cells"]["quantifier"]["fired"] == 37
     assert rob["cells"]["unit"]["rate"] < deb["cells"]["unit"]["rate"] - 0.4
+
+
+def test_normalisation_buys_detection_is_visible(m):
+    """MTH-019, read off the figure: shipped rows beat raw DeBERTa on coverage."""
+    raw = _row(m, "contradiction", "detector")
+    norm = _row(m, "contradiction", "shipped")
+    for key in ("unit", "quantifier", "polarity"):
+        assert norm["cells"][key]["fired"] >= raw["cells"][key]["fired"]
+    assert norm["cells"]["unit"]["fired"] == 64 and raw["cells"]["unit"]["fired"] == 53
 
 
 def test_embedding_rows_are_blind_to_fact_changes(m):

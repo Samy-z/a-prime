@@ -260,3 +260,31 @@ options so the owner can decide against something concrete.
 2026-09-29.
 **Reopen if:** another decision id appears in a position block without a file
 behind it, which this entry exists to prevent.
+
+## RDR-008 — A status row is a claim with no instrument behind it
+**Date:** 2026-10-04
+**Finding:** Three status rows in `docs/knowledge/README.md` were wrong at
+once, in both directions. `provenance.md` was marked done on 2026-09-25 and did
+not exist until 2026-10-04. `cells.md` was marked GAP and had existed since
+2026-09-29. `environment.md` had existed since 2026-10-03 and had no row. Add
+RDR-007, where `STATE.md` said the paper needed a contract row five days after
+one was added, and that is four stale status claims in one week across two
+index files.
+
+**The pattern.** A row that says "done" is a sentence that looks like a fact.
+Nothing checked it, so it stayed true-looking for nine days while being false,
+and a session that trusted it would have skipped writing the doc. The same
+failure as ENG-007's `0 flagged`: a healthy state and a broken one print the
+same thing. The disciplines already say to ask for the instrument rather than
+the summary; a status table is the summary.
+
+**Consequence:** `tests/test_docs_index.py` now reads the index and fails when
+a row marked done or frozen names a file that does not exist, when a row marked
+GAP names one that does, or when a file under `docs/knowledge/` has no row. It
+runs with the rest of the suite, so a stale row fails the same command that
+every commit runs. It cannot tell whether a doc that exists is *current*; it
+only closes the gap between "the file is there" and "the index says so".
+**Evidence:** `git log --format=%ad --date=short -- docs/knowledge/cells.md | tail -1`
+gives 2026-09-29; the index row read "GAP — week 3" until this commit.
+**Reopen if:** a status claim lives somewhere the test does not read. The
+family `STATE.md` files are the obvious next place and are not covered.

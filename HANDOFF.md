@@ -791,3 +791,18 @@ once by the index claiming otherwise. The doc now exists, and it records the
 one runner that sits outside `capture()`: the probe runner, whose four result
 files feed both `probes.md` and the map, traces to its pair set and its weights
 but not to the code that scored them.
+
+## §18 — AMENDMENT (dated append, 2026-10-04)
+
+The second of the two design choices in §18 was wrong and is reversed. The
+local session pointed out that a normalised row inside a grid of raw rows
+credits the model with what normalisation bought (MTH-019), and that the grid
+did not need the normalised run because DeBERTa was measured in both raw runs.
+The grid is now raw only, and the shipped configuration is a separate block
+under it. Recorded in STD-009's append; the moved numbers are reconciled under
+MTH-017.
+
+Also corrected: an earlier message from this session said the local session had
+deleted the remote `main-ybkkmp`. It had not. The branch never existed on the
+remote until this session pushed it; what git reported as deleted was a stale
+remote-tracking ref in this container's clone. Work now goes to `main`.

@@ -59,15 +59,18 @@ a person reading both.
 | Runner | Result file | Layout |
 |---|---|---|
 | `run_cell_detection.py` | `results/cell_detection_<run_id>.json` | provenance fields flattened at the top level (`run_id`, `config_hash`, `git_commit`, `git_dirty`, `params`, `instruments`) |
-| `run_study.py` | per-cell rows under `results/study/` | **`config_hash` only.** The row carries no run id, no git commit and no dirty flag; see the gap below |
+| `run_study.py` | per-cell rows under `results/study/`, matrix in `results/study/matrix.json` | flattened via `row_provenance()`, plus the system digest, session count and an analysis timestamp; `check_row_provenance()` refuses to write the matrix if any row lacks a required field |
 | `titration.py` | `results/titration_<run_id>_<config_hash>.json` | the whole `RunProvenance` under a `"provenance"` key |
 | `demo_detect.py` | stdout only | prints run, config, git |
 | `run_probes.py` | `results/probes_<run_id>_<config_hash>.json` | **does not use `capture()`**; see the gap below |
 
 Two layouts exist because the runners were written a day apart and nobody
 unified them. Anything that reads provenance generically has to handle both.
-Pick the flattened one for new runners, since it is what the two study runners
-use.
+New runners use `row_provenance(prov, **extra)`, which returns the flattened
+fields (`run_id`, `config_hash`, `git_commit`, `git_dirty`) ready to splat into
+a row, and `check_row_provenance(rows)`, which names any row missing one of
+`REQUIRED_ROW_PROVENANCE`. One helper so two runners cannot drift apart on what
+they record, which is how the gap below appeared.
 
 ## The config hash is the resume key
 
@@ -107,14 +110,15 @@ that pins the model by tag alone, which is exactly the silent instrument change
 the rail exists to prevent. Fixed 2026-10-03; runs before that date carry the
 weaker pin and should be read as such.
 
-**The factorial's rows carry the config hash and nothing else.** `run_study.py`
-calls `capture()` and uses the result to name its checkpoints, then writes a
-per-cell row with `config_hash` alone. The run id, the git commit and the dirty
-flag are computed and dropped. Found while writing this document, before the
-factorial has run, so no number is affected yet; it needs fixing before the
-first cell lands or the headline result will be the least traceable one in the
-repository. The fix is to write the flattened provenance fields into each row,
-as `run_cell_detection.py` does.
+**The factorial's rows carried the config hash and nothing else, until
+2026-10-04.** `run_study.py` called `capture()`, used the result to name its
+checkpoints, then wrote a per-cell row with `config_hash` alone; the run id,
+git commit and dirty flag were computed and dropped. Found while writing this
+document, before the factorial had run, so no number was affected. Fixed the
+same day (`75081ad`): rows go through `row_provenance()`, and the runner refuses
+to write the matrix rather than warn when a row is untraceable, because an
+untraceable number in a committed file looks usable. Five tests, one pinning
+the broken shape.
 
 **The probe runner sits outside `capture()`.** `run_probes.py` computes its own
 hash over the pair texts and the model specs, and records the resolved model

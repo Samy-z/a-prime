@@ -231,3 +231,28 @@ interval, threshold and source run); `docs/figures/blind_spot_map.svg`.
 **Reopen if:** the probe suite is re-run on the normalised pair set with the
 second checkpoint and the embeddings, which would remove the mixed provenance
 and should replace the raw rows rather than sit beside them.
+
+## STD-009 — AMENDMENT (dated append, 2026-10-04): the second choice is reversed
+
+The entry above accepted mixed provenance across the grid: shipped rows from the
+normalised run, replication and embedding rows from the raw runs. The local
+session rejected that on an argument the entry had missed, and the argument is
+right.
+
+MTH-019 measured that normalisation buys detection. Putting a normalised DeBERTa
+row in the same grid as a raw RoBERTa row therefore flatters DeBERTa against
+RoBERTa by an amount that has nothing to do with the model, and a reader of a
+grid reads across; a run id per row is a pointer, not a warning. The entry also
+missed that DeBERTa is measured in both raw runs, so the grid never needed the
+normalised run at all.
+
+**As drawn now:** every grid row comes from the raw pair set, which the two raw
+runs share byte for byte (832 pairs, same order; the DeBERTa contradiction
+scores are identical across the two files). The shipped configuration, DeBERTa
+after normalisation, sits below the grid as its own block, labelled as a
+different run and not read across. The gap between the raw DeBERTa rows and the
+shipped rows is MTH-019 made visible: omission on the upper tail 92% to 98%,
+unit 83% to 100%, quantifier 89% to 100%.
+
+The first choice, relabelling the raw runs, stands, with the reconciliation the
+local session asked for written as a dated append under MTH-017.

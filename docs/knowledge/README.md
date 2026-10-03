@@ -7,6 +7,11 @@ the doc **in the same commit**.
 These are not design documents and not history. Design rationale lives in
 `HANDOFF.md`; settled findings live in the family ledgers.
 
+The table below is checked by `tests/test_docs_index.py`: a row marked done or
+frozen must name a file that exists, a row marked GAP must not, and every file
+in this directory must have a row. Four rows were stale in one week before that
+test existed (RDR-008).
+
 ## Docs to write
 
 | Doc | Owner family | Status |
@@ -18,7 +23,8 @@ These are not design documents and not history. Design rationale lives in
 | `decoy-fdr.md` — the calibration procedure and how flags are produced | engine | **done** 2026-09-24 |
 | `conformance.md` — rule induction from baseline output distribution, A-prime pruning, the three-tier band | engine | **done** 2026-09-25 |
 | `mode-clustering.md` — semantic equivalence classes, dispersion test, NLI channel | engine | **done** 2026-09-25 |
-| `cells.md` — the domain x format factorial, knowledge packs, base-rate control | bench | GAP — week 3 |
+| `cells.md` — the domain x format factorial, knowledge packs, base-rate control | bench | **done** 2026-09-29. This row said GAP for five days after the file existed (RDR-008). |
+| `environment.md` — what travels with the repo and what does not; the cloud round-trip | study | **done** 2026-10-03. Had no row until 2026-10-04 (RDR-008). |
 | `provenance.md` — run ids, config hashes, how a number in the paper is traced | study | **done** 2026-10-04. This row said done 2026-09-25 for nine days while the file did not exist; the code had landed without its doc. |
 | `gating.md` — surface-drift gate for the embedding channel, output-shape inference, stratified selection | engine | **done** 2026-09-25 |
 | `detector.md` — the composed detector, end-to-end behaviour and measured results | engine | **done** 2026-09-25 |

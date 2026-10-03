@@ -104,8 +104,11 @@ weights nobody could audit.
 The same results as a picture. Each cell is how often a check fired on one kind
 of change, out of 64 test pairs, at a false-alarm budget of 5%. Dark cells on
 the left are coverage; dark cells on the right are false alarms; a light cell
-on the left is a blind spot. The bottom block lists the changes that were too
-small for anything to see.
+on the left is a blind spot. The grid compares three judging models on the
+same text; the block under it is the configuration the tool ships with, where
+text is normalised before judging, and the difference between the two is what
+that normalisation buys. The last block lists the changes that were too small
+for anything to see.
 
 ![How often each check fired, by kind of change, with the floors below which nothing fired](docs/figures/blind_spot_map.svg)
 
