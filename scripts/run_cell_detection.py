@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -82,7 +83,18 @@ from aprime.recorder import (  # noqa: E402
     stop_requested,
 )
 
-HOST = "http://127.0.0.1:11434"
+# The model server. Overridable, because the system under test does not have to
+# live on the machine driving the study: `host` has always been a parameter on
+# the adapter, and only these runners assumed localhost.
+#
+#     APRIME_OLLAMA_HOST=http://192.168.1.50:11434 python scripts/...
+#
+# **The host is recorded in provenance but deliberately kept out of the config
+# hash.** What has to match for two runs to be comparable is the weights, which
+# the digest pins. Where those weights were served from does not change an
+# output, and putting a hostname in the hash would make the same run on two
+# boxes look like two different configurations.
+HOST = os.environ.get("APRIME_OLLAMA_HOST", "http://127.0.0.1:11434")
 MODEL = "granite4.2:8b"
 DOMAIN = "banking"
 FORMAT = "summary"
@@ -111,27 +123,31 @@ SECONDS_PER_INVOCATION = 4.1
 
 
 def _ollama_digest(model: str) -> str:
-    """The digest of the model actually loaded, so that the tag is a pin.
+    """The digest of the model actually served, so that the tag is a pin.
 
     A tag can be repointed at new weights without changing its name, which is
     exactly the silent instrument change the pinned-instruments rail exists to
-    prevent. Ollama returns it as bare hex, not sha256-prefixed (BCH-012).
+    prevent. This matters more, not less, once the server can be remote: the
+    digest is then the only thing establishing that another box is serving the
+    same weights, because the hostname deliberately does not enter the config
+    hash.
+
+    **`/api/show` does not carry a digest. `/api/tags` does.** An earlier version
+    asked `/api/show`, got nothing, and recorded the model as "unresolved" into
+    the config hash, which is a pin in name only. Ollama returns bare hex rather
+    than sha256-prefixed (BCH-012).
     """
     import urllib.request
 
     try:
-        req = urllib.request.Request(
-            HOST + "/api/show",
-            data=json.dumps({"model": model}).encode(),
-            headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with urllib.request.urlopen(HOST + "/api/tags", timeout=30) as r:
             body = json.loads(r.read().decode())
-        for key in ("digest", "sha256"):
-            if body.get(key):
-                return str(body[key])
-        return str((body.get("details") or {}).get("digest") or "unresolved")
+        for m in body.get("models", []):
+            if m.get("name") == model:
+                return str(m.get("digest") or "unresolved")
     except Exception:  # noqa: BLE001
-        return "unresolved"
+        pass
+    return "unresolved"
 
 
 class FaultActivation:
@@ -213,7 +229,8 @@ def build() -> dict:
                 "output_format": FORMAT, "fault": fault,
                 "seed_policy": "unset on every arm (MTH-023)"},
         corpus=corpus_fingerprint([i.input_id for i in inputs]),
-        notes={"purpose": "end-to-end detector run on a real system"},
+        notes={"purpose": "end-to-end detector run on a real system",
+               "model_host": HOST},
     )
     return {"pack": pack, "inputs": inputs, "fault": fault, "prov": prov,
             "nli_spec": nli_spec, "nli_revision": nli_revision,

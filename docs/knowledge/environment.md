@@ -38,6 +38,33 @@ channel, plus all-MiniLM-L6-v2, bge-base-en-v1.5 and e5-base-v2 for the
 embedding probes. They download on first use into `~/.cache/huggingface/hub`.
 Pinned by revision in provenance, so a re-download is the same weights.
 
+### The system under test does not have to be on this machine
+
+`host` has always been a parameter on both adapters; only the two main runners
+assumed localhost, and since 2026-10-03 they read `APRIME_OLLAMA_HOST`:
+
+    APRIME_OLLAMA_HOST=http://192.168.1.50:11434 python scripts/run_study.py --go
+
+So the GPU work can be moved off this PC without moving the study: run Ollama on
+another box and point the runners at it. **What cannot be moved is the
+requirement for a GPU somewhere.** A Claude Code cloud environment is a
+development sandbox with no GPU, and the credit attached to it is Claude usage
+rather than compute, so moving a session to the cloud moves the agent and leaves
+the system under test exactly where it was installed.
+
+**The host is recorded in provenance and deliberately kept out of the config
+hash.** What has to match for two runs to be comparable is the weights, which the
+digest pins; where they were served from does not change an output, and a
+hostname in the hash would make the same run on two boxes look like two
+configurations. Verified: the same corpus resolves to the same hash against two
+different hosts.
+
+That puts real weight on the digest. It is the only thing establishing that
+another box serves the same `granite4.2:8b`, and it comes from `/api/tags`:
+`/api/show` has no digest field, and asking the wrong endpoint recorded the
+model as "unresolved" into a config hash for several runs, which is a pin in
+name only.
+
 ### Ollama and `granite4.2:8b` — the system under test
 
 6.8 GB of weights and a server on `localhost:11434`. **This is the hard

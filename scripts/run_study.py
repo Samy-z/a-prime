@@ -52,6 +52,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from dataclasses import dataclass, field
@@ -90,7 +91,18 @@ from aprime.recorder import (  # noqa: E402
     stop_requested,
 )
 
-HOST = "http://127.0.0.1:11434"
+# The model server. Overridable, because the system under test does not have to
+# live on the machine driving the study: `host` has always been a parameter on
+# the adapter, and only these runners assumed localhost.
+#
+#     APRIME_OLLAMA_HOST=http://192.168.1.50:11434 python scripts/...
+#
+# **The host is recorded in provenance but deliberately kept out of the config
+# hash.** What has to match for two runs to be comparable is the weights, which
+# the digest pins. Where those weights were served from does not change an
+# output, and putting a hostname in the hash would make the same run on two
+# boxes look like two different configurations.
+HOST = os.environ.get("APRIME_OLLAMA_HOST", "http://127.0.0.1:11434")
 MODEL = "granite4.2:8b"
 STALE_SHAPES = frozenset({"lookup", "search", "history", "verify"})
 N, K, Q = 40, 6, 0.10
@@ -163,7 +175,7 @@ def make_job(domain: str, output_format: str, digest: str, nli_rev: str) -> Cell
                 "fault": "F5:stale_view/" + ",".join(sorted(STALE_SHAPES)),
                 "seed_policy": "unset on every arm (MTH-023)"},
         corpus=corpus_fingerprint([i.input_id for i in job.inputs]),
-        notes={"purpose": "cell factorial"},
+        notes={"purpose": "cell factorial", "model_host": HOST},
         warn_if_dirty=False,
     )
     return job
