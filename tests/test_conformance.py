@@ -192,7 +192,11 @@ def _pools(jitter, k=8, n=25):
     ids = [f"i{i}" for i in range(n)]
     tbl = realistic_table(ids)
     a, ap, b = build_arms(ids, set(), jitter=jitter, table=tbl)
-    rec = record(iter_invocations(ids), {"A": a, "A_prime": ap, "B": b}, k=k)
+    # No preflight. The stub draws from a jittered sequence, so the three extra
+    # invocations a preflight makes shift every output after them, and these
+    # tests assert exact invariants over the resulting pools.
+    rec = record(iter_invocations(ids), {"A": a, "A_prime": ap, "B": b}, k=k,
+                 check_arms_first=False)
     pool = lambda arm: [o for i in ids for o in rec.cloud(i, arm)]
     return pool("A"), pool("A_prime"), pool("B")
 

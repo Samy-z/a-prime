@@ -327,3 +327,47 @@ output is not evidence**, and nothing owned it.
 `checkpoint_health` on it, tests in `tests/test_resume.py`.
 **Reopen if:** a system under test is added whose legitimate behaviour includes
 erroring on most inputs, where the abort would fire on correct operation.
+
+## ENG-009 — A preflight, and the conformance invariant it showed to be draw-dependent
+**Date:** 2026-10-03
+**Finding:** `record` now asks every arm one question before recording anything,
+raising `PreflightFailed` when any cannot answer. Verified live against the
+server that caused ENG-008, still down: **it fails in about a second**, quoting
+the connection error per arm. `abort_after_dead` would have taken three triples;
+the unguarded recorder took 24 minutes.
+
+One rule for arm failure, matching `record`: any exception is a failure. A first
+version re-raised `ValueError` so a misconfiguration would read differently from
+an unreachable server, which disagreed with the recorder about what an arm
+failure is and relied on sniffing exception types to guess intent. An empty
+output is reported but is not a failure, because a cell exhausting its step
+budget legitimately returns nothing.
+
+**The preflight is an invocation, not an inspection**, and that has a
+consequence worth stating: it perturbs a stateful system under test. Three extra
+calls against a model cost three calls. Against the synthetic stub, which draws
+from a jittered sequence, they shift every output after them.
+
+**That is how a latent fragility surfaced.** With the sequence shifted,
+`test_an_unchanged_candidate_violates_nothing` failed at jitter=0.5: the induced
+`word_count_range(133, 159)` rule was violated by **2 of 200** candidate outputs,
+a 1% false-alarm rate on a candidate where nothing changed. The test passes 5 of
+5 on the unshifted draw and fails on the shifted one, so **its pass was
+draw-dependent and nobody knew.**
+
+This qualifies ENG-005 rather than overturning it. That entry established
+`word_count_range` as a legitimate detector: zero firings on unchanged
+candidates, 66% under injected verbosity. Both still hold for the draw it was
+measured on. What is new is that at jitter=0.5 the rule is tight enough for an
+ordinary draw to tip it, which the single-draw test could not reveal.
+
+**Confidence: one derivation, one draw.** This is an observation from a single
+shifted sample, not a measured false-alarm rate, and it should not be quoted as
+one. The actionable part is that the test is a one-draw assertion of an
+invariant, which makes it an unreliable guard either way: it will pass or fail on
+anything that changes invocation counts anywhere upstream.
+**Evidence:** `tests/test_conformance.py::test_an_unchanged_candidate_violates_nothing`
+with and without `check_arms_first`; `preflight` in `src/aprime/recorder.py`.
+**Reopen if:** anyone measures the induced word-count rule's false-alarm rate
+across many draws at several jitter levels, which is what the test is currently
+standing in for and should not be.

@@ -118,13 +118,14 @@ silently invalidate the result rather than failing loudly:
 Environment is a repo-local venv. Prefix with `.venv/Scripts/python.exe` on
 Windows.
 
-    python -m pytest tests/ -q              # 201 tests, all fast, no models
+    python -m pytest tests/ -q              # 218 tests, all fast, no models
     python scripts/run_probes.py --dry-run  # build probe pairs, no models
     python scripts/run_probes.py            # full blind-spot map (downloads 4 models)
     python scripts/run_probes.py --only deberta_mnli --normalise
     python scripts/fit_clustering.py        # refit the equivalence threshold
     python scripts/run_cell_detection.py --status   # progress of a paused run
     python scripts/run_cell_detection.py --stop     # stop one at the next triple
+    python scripts/run_study.py --status            # the nine-cell factorial
     python scripts/diagnose_channels.py     # why a channel reported nothing
     python scripts/capture_chat_fixtures.py # refresh the API test fixtures
 

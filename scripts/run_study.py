@@ -81,6 +81,7 @@ from aprime.probes.channels import (  # noqa: E402
 )
 from aprime.provenance import capture, corpus_fingerprint  # noqa: E402
 from aprime.recorder import (  # noqa: E402
+    PreflightFailed,
     Recording,
     RunPaused,
     load_checkpoint,
@@ -303,6 +304,14 @@ def main() -> int:
         try:
             record(job.inputs, arms, k=K, checkpoint=paths["checkpoint"],
                    progress_every=25, should_stop=should_stop)
+        except PreflightFailed as dead:
+            OllamaChat(model=MODEL, host=HOST).release()
+            print(f"  PREFLIGHT FAILED in {job.name}, nothing recorded for it.")
+            for probe in dead.result.failed:
+                print(f"    {probe.arm}: {probe.error}")
+            print(f"    is the model server up at {HOST}? Earlier cells are "
+                  f"still on disk.")
+            return 3
         except RunPaused as paused:
             OllamaChat(model=MODEL, host=HOST).release()
             print(f"  PAUSED in {job.name}: {paused}")

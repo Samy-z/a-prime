@@ -232,7 +232,22 @@ def test_sticky_fault_concentrates_on_its_principals():
 
 
 def test_sticky_arm_rejects_invocations_without_a_principal():
+    """Recorded as an errored sample, not raised. A system under test that
+    fails on some inputs is a real scenario and the study records it."""
     a, ap, b = build_arms(["x"], {"x"}, sticky_principals=frozenset({"u1"}))
-    rec = record(iter_invocations(["x"]), {"A": a, "A_prime": ap, "B": b}, k=1)
+    rec = record(iter_invocations(["x"]), {"A": a, "A_prime": ap, "B": b}, k=1,
+                 check_arms_first=False)
     errs = [s for s in rec.samples if s.error]
     assert errs and "principal" in errs[0].error
+
+
+def test_an_arm_that_fails_on_every_input_is_caught_before_recording():
+    """The same misconfiguration, seen by the preflight. An arm that cannot
+    answer the first question will not answer any of them, and finding that out
+    after recording a wholly errored run is how 24 minutes were wasted
+    (ENG-008)."""
+    from aprime.recorder import PreflightFailed
+
+    a, ap, b = build_arms(["x"], {"x"}, sticky_principals=frozenset({"u1"}))
+    with pytest.raises(PreflightFailed, match="principal"):
+        record(iter_invocations(["x"]), {"A": a, "A_prime": ap, "B": b}, k=1)

@@ -318,6 +318,124 @@ def decoy_independence_warnings(arms: dict[str, SystemUnderTest]) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
+@dataclass(frozen=True)
+class ArmProbe:
+    """What happened when one arm was asked a single question."""
+
+    arm: str
+    ok: bool
+    latency_ms: float
+    error: str | None = None
+    empty: bool = False
+
+
+@dataclass(frozen=True)
+class PreflightResult:
+    probes: tuple[ArmProbe, ...]
+
+    @property
+    def failed(self) -> tuple[ArmProbe, ...]:
+        return tuple(p for p in self.probes if not p.ok)
+
+    @property
+    def ok(self) -> bool:
+        return not self.failed
+
+    def summary(self) -> str:
+        parts = []
+        for p in self.probes:
+            if not p.ok:
+                parts.append(f"{p.arm} FAILED ({p.error})")
+            elif p.empty:
+                parts.append(f"{p.arm} ok but empty ({p.latency_ms:.0f}ms)")
+            else:
+                parts.append(f"{p.arm} ok ({p.latency_ms:.0f}ms)")
+        return ", ".join(parts)
+
+
+class PreflightFailed(Exception):
+    """An arm could not answer a single question, so the run never started.
+
+    The cost of not checking is measured: a server that stopped listening 90
+    seconds into a 50 minute run produced 698 connection failures, and the
+    recorder dutifully wrote every one of them (ENG-008). `abort_after_dead`
+    catches that within three triples. This catches it before the first one, in
+    the time it takes to ask one question.
+
+    Separate from `RecordingFailed` because the two mean different things to a
+    caller: this one means nothing was attempted and nothing is on disk, so there
+    is nothing to resume and no checkpoint to inspect.
+    """
+
+    def __init__(self, result: "PreflightResult"):
+        self.result = result
+        names = ", ".join(p.arm for p in result.failed)
+        detail = "; ".join(f"{p.arm}: {p.error}" for p in result.failed)
+        super().__init__(
+            f"preflight failed on {names} before recording anything. {detail}. "
+            f"Nothing was recorded and there is no checkpoint to resume. Either "
+            f"the system under test cannot be reached, or an arm is "
+            f"misconfigured; the error above says which.")
+
+
+def preflight(
+    arms: dict[str, SystemUnderTest],
+    invocation: Invocation,
+) -> PreflightResult:
+    """Ask every arm one question, and report which ones answered.
+
+    Three invocations against the 720 a real run makes, bought in exchange for
+    finding out in seconds rather than in half an hour that nothing is
+    listening.
+
+    **An empty output is reported but is not a failure.** A cell that exhausts
+    its step budget legitimately returns nothing, so refusing on that would
+    refuse correct behaviour. An exception or an errored trace is a failure: it
+    means the arm could not be reached at all.
+
+    The probe result is thrown away rather than recorded. It warms a server-side
+    cache for this one input, which every arm then shares, so it does not favour
+    one arm over another.
+
+    **It is one extra invocation per arm, and a stateful system is perturbed by
+    it.** A model is effectively stateless per call, so for the study this costs
+    three calls and nothing else. A system whose output depends on how many times
+    it has been called is a different matter: the synthetic stub draws from a
+    jittered sequence, so probing it shifts every subsequent output, and a test
+    asserting an exact invariant over its pools will see different data. Pass
+    `check_arms_first=False` for those.
+
+    **One rule, whatever went wrong.** Any exception from an arm is a failure
+    here, exactly as `record` treats any exception from an arm as an errored
+    sample. An earlier version re-raised `ValueError` on the theory that a
+    misconfiguration deserves different handling from an unreachable server, and
+    that was wrong twice over: it disagreed with the recorder about what an arm
+    failure is, and sniffing exception types to guess intent is fragile. A
+    misconfigured arm is one that cannot answer, which is the only thing this
+    check claims to detect.
+    """
+    probes = []
+    for name in ARMS:
+        system = arms[name]
+        t0 = time.perf_counter()
+        try:
+            resp = system.invoke(invocation)
+        except Exception as exc:  # noqa: BLE001
+            probes.append(ArmProbe(
+                arm=name, ok=False,
+                latency_ms=(time.perf_counter() - t0) * 1000.0,
+                error=f"{type(exc).__name__}: {exc}"))
+            continue
+        ms = (time.perf_counter() - t0) * 1000.0
+        if resp.trace.error:
+            probes.append(ArmProbe(arm=name, ok=False, latency_ms=ms,
+                                   error=str(resp.trace.error)))
+        else:
+            probes.append(ArmProbe(arm=name, ok=True, latency_ms=ms,
+                                   empty=not resp.output.strip()))
+    return PreflightResult(probes=tuple(probes))
+
+
 class RecordingFailed(Exception):
     """Every arm has been failing long enough that the run is pointless.
 
@@ -426,6 +544,7 @@ def record(
     group_by_input: bool = True,
     should_stop: Callable[[], bool] | None = None,
     abort_after_dead: int = 3,
+    check_arms_first: bool = True,
 ) -> Recording:
     """Collect k samples per input per arm, interleaved across arms.
 
@@ -441,6 +560,12 @@ def record(
     partial recording, because a partial recording is indistinguishable from a
     complete one once it reaches the detector. Everything already collected is
     on disk if `checkpoint` was given, and a rerun continues from there.
+
+    `check_arms_first` asks every arm one question before recording anything and
+    raises `PreflightFailed` if any cannot answer. On by default: it costs three
+    invocations and it is the difference between learning in seconds and learning
+    in half an hour that the system under test is down. Turn it off only when an
+    arm is expected to fail on the probe input.
 
     `abort_after_dead` stops the run once that many consecutive triples have
     had every arm fail, raising `RecordingFailed`. Setting it to 0 disables the
@@ -467,6 +592,16 @@ def record(
     # cannot actually judge. Loud, because the failure it describes is silent.
     for msg in decoy_independence_warnings(arms):
         warnings.warn(msg, RuntimeWarning, stacklevel=2)
+
+    # Before the checkpoint is even opened, so a failed preflight leaves no
+    # trace on disk and the exception can say so truthfully.
+    if check_arms_first:
+        if not invocations:
+            raise ValueError("no invocations to record")
+        result = preflight(arms, invocations[0])
+        print(f"preflight: {result.summary()}")
+        if not result.ok:
+            raise PreflightFailed(result)
 
     samples, done, session = [], set(), 0
     if checkpoint is not None:

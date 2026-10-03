@@ -20,14 +20,16 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from aprime.adapter import ARMS  # noqa: E402
+from aprime.adapter import ARMS, Invocation  # noqa: E402
 from aprime.recorder import (  # noqa: E402
+    PreflightFailed,
     RecordingFailed,
     RunPaused,
     checkpoint_health,
     decoy_independence_warnings,
     iter_invocations,
     load_checkpoint,
+    preflight,
     record,
     recording_progress,
     stop_requested,
@@ -454,7 +456,8 @@ def test_a_run_where_nothing_answers_aborts_instead_of_filling_the_checkpoint():
     throughout, and the checkpoint then called itself 100% recorded."""
     ids = [f"i{n}" for n in range(50)]
     with pytest.raises(RecordingFailed) as caught:
-        record(iter_invocations(ids), _dead_arms(), k=1, abort_after_dead=3)
+        record(iter_invocations(ids), _dead_arms(), k=1, abort_after_dead=3,
+               check_arms_first=False)
     exc = caught.value
     assert exc.consecutive == 3
     assert "refused" in exc.last_error
@@ -466,7 +469,8 @@ def test_one_failed_triple_is_noise_and_does_not_abort():
     ids = [f"i{n}" for n in range(6)]
     arms = _dead_arms(fail_from=1)   # first call each succeeds, rest fail
     with pytest.raises(RecordingFailed):
-        record(iter_invocations(ids), arms, k=1, abort_after_dead=3)
+        record(iter_invocations(ids), arms, k=1, abort_after_dead=3,
+               check_arms_first=False)
     # The first triple succeeded, so the abort counted from the second.
     assert all(a.calls >= 2 for a in arms.values())
 
@@ -475,7 +479,7 @@ def test_the_abort_can_be_switched_off(tmp_path):
     ids = ["i0", "i1"]
     cp = tmp_path / "run.jsonl"
     rec = record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
-                 abort_after_dead=0)
+                 abort_after_dead=0, check_arms_first=False)
     assert len(rec.samples) == len(ids) * len(ARMS)
     assert all(s.error for s in rec.samples)
 
@@ -485,7 +489,7 @@ def test_a_triple_where_every_arm_failed_is_not_counted_as_done(tmp_path):
     cp = tmp_path / "run.jsonl"
     ids = ["i0", "i1"]
     record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
-           abort_after_dead=0)
+           abort_after_dead=0, check_arms_first=False)
     kept, done, _ = load_checkpoint(cp)
     assert done == set(), "all-error triples must not count as finished"
     assert kept == []
@@ -499,7 +503,7 @@ def test_a_dead_run_is_redone_on_the_next_attempt(tmp_path):
     cp = tmp_path / "run.jsonl"
     ids = ["i0", "i1", "i2"]
     record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
-           abort_after_dead=0)
+           abort_after_dead=0, check_arms_first=False)
     assert recording_progress(cp, iter_invocations(ids), 1)["done"] == 0
 
     rec = record(iter_invocations(ids), _arms(ids), k=1, checkpoint=cp)
@@ -516,7 +520,8 @@ def test_a_partly_failed_triple_is_kept_because_other_samples_cover_it(tmp_path)
     ids = ["i0"]
     arms = _arms(ids)
     arms["B"] = _Dead("B", fail_from=0)
-    record(iter_invocations(ids), arms, k=1, checkpoint=cp, abort_after_dead=0)
+    record(iter_invocations(ids), arms, k=1, checkpoint=cp, abort_after_dead=0,
+           check_arms_first=False)
     _, done, _ = load_checkpoint(cp)
     assert done == {("i0", 0)}
 
@@ -526,7 +531,7 @@ def test_checkpoint_health_tells_a_failed_run_from_a_finished_one(tmp_path):
     ids = ["i0", "i1"]
     record(iter_invocations(ids), _arms(ids), k=2, checkpoint=good)
     record(iter_invocations(ids), _dead_arms(), k=2, checkpoint=bad,
-           abort_after_dead=0)
+           abort_after_dead=0, check_arms_first=False)
 
     g, b = checkpoint_health(good), checkpoint_health(bad)
     assert g["error_rate"] == 0.0 and g["dead_triples"] == 0
@@ -541,8 +546,106 @@ def test_progress_surfaces_the_error_rate(tmp_path):
     cp = tmp_path / "run.jsonl"
     ids = ["i0", "i1"]
     record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
-           abort_after_dead=0)
+           abort_after_dead=0, check_arms_first=False)
     p = recording_progress(cp, iter_invocations(ids), 1)
     assert p["error_rate"] == 1.0
     assert p["dead_triples"] == 2
     assert p["fraction"] == 0.0, "a failed run is not progress"
+
+
+# ----------------------------------------------------- preflight (ENG-008 again)
+
+
+def test_preflight_asks_every_arm_once_and_reports_each():
+    ids = ["i0"]
+    arms = _arms(ids)
+    result = preflight(arms, next(iter(iter_invocations(ids))))
+    assert result.ok
+    assert {p.arm for p in result.probes} == set(ARMS)
+    assert all(p.latency_ms >= 0 for p in result.probes)
+    assert "ok" in result.summary()
+
+
+def test_a_run_with_a_dead_arm_never_starts():
+    """abort_after_dead catches this within three triples. The preflight catches
+    it before the first one, in the time it takes to ask one question."""
+    ids = [f"i{n}" for n in range(40)]
+    with pytest.raises(PreflightFailed) as caught:
+        record(iter_invocations(ids), _dead_arms(), k=6)
+    msg = str(caught.value)
+    assert "before recording anything" in msg
+    assert "no checkpoint to resume" in msg
+
+
+def test_a_failed_preflight_writes_nothing_to_disk(tmp_path):
+    """The exception says nothing is on disk, so that had better be true."""
+    cp = tmp_path / "run.jsonl"
+    ids = ["i0", "i1"]
+    with pytest.raises(PreflightFailed):
+        record(iter_invocations(ids), _dead_arms(), k=2, checkpoint=cp)
+    assert not cp.exists()
+
+
+def test_preflight_names_only_the_arms_that_failed():
+    ids = ["i0"]
+    arms = _arms(ids)
+    arms["B"] = _Dead("B")
+    result = preflight(arms, next(iter(iter_invocations(ids))))
+    assert not result.ok
+    assert [p.arm for p in result.failed] == ["B"]
+    assert "B FAILED" in result.summary()
+    with pytest.raises(PreflightFailed, match="preflight failed on B"):
+        record(iter_invocations(ids), arms, k=1)
+
+
+def test_an_empty_output_is_reported_but_is_not_a_failure():
+    """A cell that exhausts its step budget legitimately returns nothing.
+    Refusing on that would refuse correct behaviour."""
+    from aprime.adapter import Response, Trace
+
+    class Silent:
+        def __init__(self, arm):
+            self.arm = arm
+
+        def invoke(self, inv):
+            return Response(output="", trace=Trace(latency_ms=1.0))
+
+    arms = {a: Silent(a) for a in ARMS}
+    result = preflight(arms, Invocation("i0", "q"))
+    assert result.ok, "empty is not a failure"
+    assert all(p.empty for p in result.probes)
+    assert "ok but empty" in result.summary()
+
+
+def test_an_errored_trace_counts_as_a_failure_even_without_an_exception():
+    """A system that catches its own errors and reports them in the trace is
+    still a system that cannot answer. Cells do exactly this."""
+    from aprime.adapter import Response, Trace
+
+    class Reports:
+        def __init__(self, arm):
+            self.arm = arm
+
+        def invoke(self, inv):
+            return Response(output="", trace=Trace(
+                latency_ms=1.0, error="URLError: connection refused"))
+
+    arms = {a: Reports(a) for a in ARMS}
+    result = preflight(arms, Invocation("i0", "q"))
+    assert not result.ok
+    assert len(result.failed) == len(ARMS)
+    assert "refused" in result.failed[0].error
+
+
+def test_the_preflight_can_be_switched_off(tmp_path):
+    """Only for an arm expected to fail on the probe input."""
+    cp = tmp_path / "run.jsonl"
+    ids = ["i0"]
+    rec = record(iter_invocations(ids), _dead_arms(), k=1, checkpoint=cp,
+                 abort_after_dead=0, check_arms_first=False)
+    assert all(s.error for s in rec.samples)
+
+
+def test_an_empty_corpus_is_refused_rather_than_probed():
+    with pytest.raises(ValueError, match="no invocations"):
+        record([], _arms(["i0"]), k=1)

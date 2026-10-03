@@ -76,6 +76,32 @@ saved next to the checkpoint after every invocation, and the run reports how
 many inputs carry no label so that an activation rate computed from a resumed
 run is read as a lower bound rather than a measurement.
 
+## Ask every arm one question before recording anything
+
+`record(..., check_arms_first=True)` is the default. It invokes each arm once
+with the first input, reports latency per arm, and raises `PreflightFailed` if
+any arm could not answer. Against a server that is down it fails in about a
+second with the connection error quoted, where `abort_after_dead` would take
+three triples and the unguarded recorder took 24 minutes (ENG-008).
+
+One rule, whatever went wrong: any exception from an arm is a failure, exactly
+as `record` treats any exception from an arm as an errored sample. An earlier
+version re-raised `ValueError` so that a misconfiguration would surface
+differently from an unreachable server, and that was wrong twice over. It
+disagreed with the recorder about what an arm failure is, and sniffing exception
+types to guess intent is fragile.
+
+**An empty output is reported and is not a failure.** A cell that exhausts its
+step budget legitimately returns nothing, so refusing on that would refuse
+correct behaviour.
+
+**It is one extra invocation per arm, and that perturbs a stateful system.** A
+model is effectively stateless per call, so for the study this costs three calls
+and nothing else. The synthetic stub draws from a jittered sequence, so probing
+it shifts every output after the probe: tests asserting exact invariants over
+stub pools pass `check_arms_first=False`. That is not a quirk of the stub so
+much as a reminder that the preflight is an invocation, not an inspection.
+
 ## A sample with no output is not evidence
 
 A server that stops listening does not stop the recorder. Failed invocations are
