@@ -723,3 +723,38 @@ paper for anything real, or the two split by purpose, with the README answering
 why you would use this and the paper answering what we measured. Not decided.
 Worth deciding before the paper is drafted rather than after, or the two will
 drift and both will be maintained badly.
+
+## §17 — D24: the README becomes a front door (2026-10-04)
+
+Follows D19. With the paper written for the same reader as the README, the two
+would duplicate each other, and the owner chose: **the README is a front door
+and points at the paper for anything substantial.**
+
+### Sequencing, which matters here
+
+This cannot be executed yet. A front door that points at a paper which does not
+exist is worse than the current README. **The change happens when the paper is
+drafted, not before**, and the README stays as it is until then.
+
+### What moves and what stays, because "front door" is not self-explanatory
+
+Moves to the paper: prior art, the findings in detail, the section on ideas that
+might be reusable elsewhere, and anything that argues rather than orients.
+
+Stays in the README: what problem this solves, the core idea in one paragraph,
+how to run it, repository layout, licence.
+
+### The constraint, and it is not negotiable
+
+**The honest-limits section does not move wholesale.** It is the most-cited part
+of this project so far and it is what makes a stranger trust the rest. Burying
+it in a paper that fewer people will open would be a quiet downgrade of honesty
+dressed up as deduplication.
+
+The headline limits stay in the README: that the tool cannot report fewer than
+ten changed inputs at the default setting, that twenty samples per system is the
+real minimum, that the figures describe our instruments rather than the
+technique, and that nothing has run against a production system. The paper
+carries the full version with the numbers behind each one.
+
+A front door that omits the lock is not a front door.
