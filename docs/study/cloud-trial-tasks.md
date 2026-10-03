@@ -4,6 +4,10 @@
 credit that expires 2026-11-06.** After that date this file describes nothing
 real and should be deleted.
 
+**It goes stale fast.** It was already a day out of date the first time it was
+read, because D19 had been decided in the meantime. Check `HANDOFF.md` for
+anything dated after this file before trusting the task order below.
+
 If you are reading this on a machine that has a GPU and a running Ollama, you
 are not the audience. Go to `CLAUDE.md` and the per-family `STATE.md` files.
 
@@ -24,16 +28,18 @@ work.
 
 ## The list, in the order the owner agreed
 
-### 1. D19, the paper's audience row
+### Already decided, do not redo
 
-The reader seat's audience contract in `docs/reader/METHODS.md` has a row for
-every outward-facing artifact except the paper, which is marked GAP. Decide who
-reads it, what they may be assumed to know, and what must be defined. The owner
-wants to do this one, so draft two or three options rather than picking.
+**D19 is ratified** as of 2026-10-04. The paper is written for somebody who
+ships LLM systems and might use the tool: software literacy assumed, everything
+else defined including the statistics. See HANDOFF §16. An earlier version of
+this file listed choosing that reader as task one.
 
-It blocks the paper, which is why it is first.
+**D24 is ratified.** The README becomes a front door pointing at the paper, but
+**not until the paper exists**, and the honest-limits headlines stay in the
+README regardless. See HANDOFF §17 for what moves and what does not.
 
-### 2. The blind-spot map
+### 1. The blind-spot map
 
 Highest value on this list. It is a declared figure for the paper, and **the
 data is already in the repository**: four probe runs totalling 1.3 MB under
@@ -42,7 +48,12 @@ data is already in the repository**: four probe runs totalling 1.3 MB under
 It also turns the README's honest-limits section from prose into a figure, and
 those limits are the most-cited part of the document so far.
 
-### 3. The provenance knowledge doc
+**Do not run `scripts/run_probes.py`.** It downloads four models and needs real
+compute, and it would regenerate data that is already committed. On a machine
+with no GPU it will either fail or grind for hours producing what is already
+sitting in `results/`. Read those files.
+
+### 2. The provenance knowledge doc
 
 `src/aprime/provenance.py` exists and works. `docs/knowledge/provenance.md` does
 not exist, and `docs/study/STATE.md` still lists run provenance as a GAP with
@@ -51,26 +62,26 @@ the note that no number enters the paper before it exists.
 That is a same-commit-rule violation from earlier work: code landed without its
 layer-2 doc. Cheap to fix, and it clears a stated blocker on the paper.
 
-### 4. The detector's report format
+### 3. The detector's report format
 
 Marked GAP in `docs/engine/STATE.md`. The detector currently prints whatever
 `Report.text()` produces. It needs a format a reader can act on.
 
-### 5. F2, prompt regression
+### 4. F2, prompt regression
 
 I previously recorded this as blocked on needing a system with an editable
 prompt. That was wrong: `Cell.system_prompt()` exists, so the cells have one.
 Buildable and unit-testable with no GPU, against the captured fixtures in
 `tests/fixtures/ollama_chat.json`.
 
-### 6. F11, retrieval degradation
+### 5. F11, retrieval degradation
 
 Returning the wrong rows rather than older ones. The current `_shift` in
 `cells/tools.py` serves older content of the same shape, which is staleness and
 already covered by F5. Degradation needs its own handler. Code plus tests, no
 GPU.
 
-### 7. ENG-003
+### 6. ENG-003
 
 Clustering is recomputed three times per comparison. Logged as pressure rather
 than fixed. The fix is code, and it can be verified against a recording already
