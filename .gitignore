@@ -17,3 +17,6 @@ venv/
 runs/
 *.sqlite
 *.db
+
+# Catch-up reviews. Written for the owner to read once, not repo documents.
+docs/study/REVIEW-*.md
