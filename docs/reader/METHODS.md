@@ -10,8 +10,8 @@ cannot audit your own blind spot, so the audit needs a different seat.
 
 ## The mandate
 
-This seat owns every artifact a stranger will encounter, and is **forbidden from
-assuming project context**. Concretely, it must be able to read an artifact cold,
+This seat owns every artifact a stranger will encounter, and is forbidden from
+assuming project context. Concretely, it must be able to read an artifact cold,
 having opened no other file, and come away able to say what the project does and
 why someone would use it.
 
@@ -32,17 +32,14 @@ a ledger is wrong in a README.
 | `HANDOFF.md` | future maintainers, the owner | project context | the reasoning, not the terms |
 | a report or review for the owner | the owner, catching up, reading once start to finish | the project's goals and shape | **every finding, in plain words, before any identifier** |
 
-**A report written for the owner is a read-through document, and it had no row
-here until 2026-10-03.** That omission had a consequence. Asked for a catch-up
-review, I wrote 1,800 words carrying 48 internal identifiers, which turns reading
-into a lookup exercise. Rule 2 below already forbade that. The rule was fine; the
-document simply was not recognised as outward-facing, so it was written in ledger
-register.
+A report written for the owner is a read-through document, and it had no row
+here until 2026-10-03. Rule 2 below already covered what went wrong when one was
+written in ledger voice, with 48 identifiers in 1,800 words. The row exists so
+the rule gets applied to this document type, not because the rule was missing
+(RDR-005, RDR-006).
 
-The test for this row: **a reader should get the whole picture without opening a
-second file.** Accept the extra words. A report that is 30% longer and needs no
-cross-referencing is shorter in the only sense that matters, which is time to
-understand it.
+The test for the row: a reader gets the whole picture without opening a second
+file, and the extra words that costs are worth paying.
 
 **The ledgers are deliberately outside this seat's remit.** They should stay
 dense and identifier-heavy. Someone grepping `MTH-018` at midnight wants the
@@ -75,6 +72,27 @@ maintainer documents while the README sent newcomers straight to them (RDR-003).
    often all they read. A bullet that only makes sense after the paragraph above
    it has failed at the job bullets are for. Each one states its point, gives the
    number, and says why it matters, without depending on its neighbours.
+7. **Say the thing instead of a compressed figure for the thing.** Confirmed by
+   the owner on 2026-10-03, after three wrong guesses about what made the prose hard to read. It is not vocabulary and it is
+   not sentence length. It is packing a claim into a metaphor or an abstract
+   phrase and leaving the reader to unpack it.
+
+   | written | meant |
+   |---|---|
+   | the engineering is well ahead of the evidence | we have built a lot and measured almost none of it |
+   | nothing owned it | no part of the code was responsible for checking it |
+   | this cuts against the pinned-instruments rail | this breaks our rule that instruments must be pinned |
+   | recording is the binding constraint | recording takes almost all the time |
+   | the decoy arm is the null | the second baseline run is what we compare against to see what normal variation looks like |
+
+   Each phrase on the left is shorter and each one costs the reader a step. The
+   test: **if a phrase is standing in for a claim, write the claim.** Save the
+   figure for when there is no literal way to say it, which is rarer than it
+   feels while writing.
+
+   The same habit shows up in phrases that announce an argument rather than
+   making one: "worth noting", "stepping back", "the honest summary is". Cut
+   them and start with the point.
 
 ## Style, with the specific habits to avoid
 
@@ -97,21 +115,6 @@ but busy and does not already care.
 - **Insider tone.** "Ideas worth stealing", "what's honest about", "the point of
   the whole design". Confiding in the reader before they trust you.
 - **Opening with a thesis in bold.** Start with the problem, then the claim.
-- **Sentences that make the reader hold three things before the verb arrives.**
-  This is the habit that is hardest to see from the inside, because each sentence
-  is grammatically correct. The reader still pays for it. Three shapes to watch
-  for: stacked relative clauses ("the seat that tunes the detector must not be
-  the seat that seeds the faults"), a long subject phrase before its verb ("a
-  detector built against information it will not have for a real customer's
-  system is not the detector we are testing"), and cleft openings ("what it costs
-  is that..."). Each one is fine once. Used as the default rhythm, they force the
-  reader to reconstruct the sentence before they can read it.
-
-  The fix is mechanical. Put the subject near the front. One idea per sentence.
-  State the thing, then qualify it in the next sentence rather than inside the
-  same one. Owner feedback, 2026-10-03: correct grammar is not the same as
-  readable grammar, and the gap between them is work the reader does for free.
-
 ## Checking rather than hoping
 
 `python scripts/check_prose.py <file>` reports em-dash density, sentence-length

@@ -198,3 +198,26 @@ hypothesis, not a finding, and no checker should imply otherwise.
 with `scripts/check_prose.py` against `README.md` and the untracked review.
 **Reopen if:** the owner supplies examples. Then the list is built from their
 judgement instead of my guesses, which is the step I skipped three times.
+
+## RDR-006 — CONFIRMED (dated append, 2026-10-03)
+
+The owner confirmed the low-confidence hypothesis in the entry above, and named
+it as the one rule the README's standards were missing: **"I say things in
+compressed figures instead of saying them."** Everything else in the existing
+rules stays as it is, and the owner noted that the identifier problem was
+already covered by rule 2, so no new rule was needed for it.
+
+So the three failed measurement attempts were not wasted, but they were done in
+the wrong order. The hypothesis that turned out to be right came from reading my
+own samples, which cost nothing. The three attempts to mechanise it came first
+and cost the most. **Read the examples, form the hypothesis, check it with the
+reader, and only then consider whether it can be measured.** I did those four
+steps backwards.
+
+Now rule 7 in the audience contract, with a before-and-after table and a test:
+if a phrase stands in for a claim, write the claim.
+
+**Still not measurable, and now deliberately not measured.** "Is this phrase a
+figure standing in for a claim" needs a reader. The checker keeps its four
+validated signals and says nothing about this, which is the honest state rather
+than a gap to be filled.
