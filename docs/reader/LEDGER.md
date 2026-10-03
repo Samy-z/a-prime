@@ -221,3 +221,42 @@ if a phrase stands in for a claim, write the claim.
 figure standing in for a claim" needs a reader. The checker keeps its four
 validated signals and says nothing about this, which is the honest state rather
 than a gap to be filled.
+
+## RDR-007 — A decision I restated for five days was never written down
+**Date:** 2026-10-04
+**Finding:** The owner asked what "D19" actually decides. I could not answer
+from the repository, because **it is not in the repository.** The only commit
+containing the string is yesterday's, in a file I wrote myself. For five days it
+appeared in every position block as an open decision, and it existed nowhere but
+my own messages.
+
+**What it referred to is also already half-done.** The audience contract has had
+a row for the paper since 2026-09-29, added in commit `225832c` in the same
+commit that created this seat. Meanwhile `STATE.md` still said the paper "needs
+its own contract row". Two documents in the same family, contradicting each
+other, for five days.
+
+So the real state was: a provisional row written as a first guess, never
+examined, with a stale gap note beside it and a decision id attached to neither.
+
+**The process failure is specific and worth naming.** The standing disciplines
+say to close every reply with a position block, because "a decision never
+restated is a decision made by default". I restated this one constantly. That
+turned out not to be the protection it looks like. **Restating a decision in
+conversation is not recording it.** The conversation is ephemeral and the
+position block was carrying a memory of a memory, which is why nobody could
+check it and why it drifted out of sync with the file it was about.
+
+The fix is one line of discipline: when a position block names an open decision,
+that decision needs a home in the repository on the same day, even if the home
+is one sentence saying it is open and why. An id with no file behind it is worse
+than no id, because it looks like a reference.
+
+**Corrected now.** The row is marked provisional and unratified, `STATE.md` no
+longer claims the row is missing, and the actual choice is written out with its
+options so the owner can decide against something concrete.
+**Evidence:** `git log -S"D19" --all` returns one commit, dated 2026-10-03;
+`git log -S"a researcher in a neighbouring field"` returns `225832c`, dated
+2026-09-29.
+**Reopen if:** another decision id appears in a position block without a file
+behind it, which this entry exists to prevent.
