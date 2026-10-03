@@ -151,3 +151,50 @@ look like an artifact.
 1,800 words by `scripts/check_prose.py`; owner notes 2026-10-03.
 **Reopen if:** a new document type appears with no row in the table, which is the
 condition that caused this.
+
+## RDR-006 — Three attempts to measure register all gave a clean score on prose the owner found hard to read
+**Date:** 2026-10-03
+**Finding:** The owner said my writing is "trop soutenu", too elevated a
+register. I tried three times to turn that into something the prose checker
+could measure. All three failed, and the failures are more useful than a fourth
+attempt would be.
+
+**First guess: sentence construction.** Stacked relative clauses, long subject
+phrases, cleft openings. The owner corrected this directly: "it's my bad, i
+missframed what was wrong in your style". Not the problem.
+
+**Second guess: elevated vocabulary.** A list of words with plain twins, written
+from a style guide rather than from my own text: eschew, paucity, remit,
+obviate. Run against the catch-up review, the very document under criticism, it
+found **two hits in 1,841 words**. The words were not ones I use.
+
+**Third guess: nominalisation and adverbs.** Verbs turned into abstract nouns,
+plus -ly adverbs doing argumentative work. This one looked promising: the review
+scored 29.3 abstract nouns per 1000 words against the README's 18.2. Then I
+excluded the project's own technical terms, which is necessary because
+"contradiction" and "entailment" are channel names rather than style choices.
+The gap nearly closed: 16.3 against 13.8. And the README, which the owner
+approved, scores **worse** on adverbs than the review: 11.0 against 7.6.
+
+**All three were removed rather than kept.** RDR-004 already records that this
+checker gave false passes three times before it worked. A measure that returns
+"ok" on prose the reader struggled with is a fourth false pass, and false
+reassurance is the specific failure this seat exists to prevent. The checker is
+back to the four signals that were validated against real documents.
+
+**What I believe is happening, unmeasured.** Reading my own samples, the
+elevation is not in the words but in saying things as compressed figures instead
+of saying them: "the engineering is well ahead of the evidence", "nothing owned
+it", "this cuts against the pinned-instruments rail". Each asks the reader to
+unpack a metaphor before reaching the point. Alongside that, essay connectives
+that announce an argument rather than making one: "Worth noting", "Stepping
+back", "The honest summary is".
+
+**Confidence: low, and it is my own diagnosis of my own blind spot**, which is
+precisely the thing this seat was created because nobody can do. It needs the
+owner to point at specific phrases that felt wrong. Until then it is a
+hypothesis, not a finding, and no checker should imply otherwise.
+**Evidence:** three removed implementations; counts quoted above, reproducible
+with `scripts/check_prose.py` against `README.md` and the untracked review.
+**Reopen if:** the owner supplies examples. Then the list is built from their
+judgement instead of my guesses, which is the step I skipped three times.
