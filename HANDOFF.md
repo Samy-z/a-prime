@@ -533,3 +533,60 @@ than ten changed inputs at its default setting, an empty report means "fewer tha
 ten changed" rather than "nothing changed", and anyone who needs to catch one
 specific broken input should compare that input directly instead. Ratified by the
 owner before writing.
+
+## §15 — A hosted model is a probe, not a study arm (2026-10-03)
+
+Two decisions, D22 and D23.
+
+### D23: GPU work stays on the owner's PC
+
+Decided. The alternative was a rented box, now that the runners read
+`APRIME_OLLAMA_HOST` and the system under test can live anywhere. Not taken,
+because renting costs money and the point of the current cloud trial is that it
+is free. Recording therefore stays pinned to one machine, and that machine has
+to be awake and have Ollama running.
+
+### D22: a hosted model joins as a costed probe, with a $10/month ceiling
+
+The owner wants to compare a hosted model against the local pool and will spend
+at most $10 a month. The question was whether that fits.
+
+**Token volume, from the measured smoke run** at n=40, k=6, three arms. Traffic
+is about 95% input, because every invocation sends a system prompt plus eight
+tool schemas and gets back forty words.
+
+| | tokens | at ~$0.25/M in | at ~$1/M in |
+|---|---|---|---|
+| one cell | 2.2M to 6.5M | $1.22 | $4.89 |
+| one domain, three formats | 12.2M | $3.66 | $14.66 |
+| nine cells | 36.6M | $11.00 | $43.98 |
+
+So the budget buys one domain on a cheap model, or two cells on a dearer one.
+The full factorial does not fit at either price. The agent format is three times
+the cost of summary, the same ratio as on local GPU, so dropping it halves the
+bill. Roughly half of each prompt is the identical system message and tool
+schemas, which providers usually discount when cached, and the recorder already
+groups by input to make that caching work. The size of that discount is not
+measured.
+
+**The reason it cannot be a study arm.** A hosted model cannot be pinned. The
+provider can change the weights mid-run, with no version string and no notice.
+That breaks the pinned-instruments rail, and it means a hosted baseline cannot
+be re-run later and compared, which is what the transfer matrix needs.
+
+**So it is scoped as a probe.** One cell, one fault, the same configuration as
+the run that worked, for one to five dollars. The question it answers: does the
+detector behave the same way on a hosted model as on a local one? Matching
+channel separation is an external-validity result worth having in the paper.
+Different separation is a more interesting finding at the same price.
+
+**One property makes it better than it looks.** Most hosted APIs expose no seed.
+MTH-023 says the arms must mirror the deployment's seed policy, and the
+unpinned case is the one we argued is ordinary but have only tested locally. The
+hosted probe exercises it at no extra cost.
+
+**What this probe must record**, since reproducibility is not available: the
+date, the exact model string, any version or fingerprint field the API returns,
+and the fact that none of it is a pin. A number from this probe is a
+measurement of one week in one provider's deployment, and the paper has to say
+so.

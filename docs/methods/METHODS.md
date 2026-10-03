@@ -25,6 +25,12 @@ These silently invalidate a result rather than failing loudly.
    deployment under audit, the policy used is recorded in provenance, and a run
    is reproducible because the seeds are known rather than because they are
    equal. Ratified 2026-09-30, MTH-023.
+   **A hosted model cannot satisfy this rail at all**, because the provider can
+   change the weights with no version string and no notice. A hosted system is
+   therefore usable as a one-off probe, never as a baseline the study re-runs
+   and compares. Anything measured on one records the date, the model string and
+   whatever fingerprint the API returns, and states plainly that none of it is a
+   pin. Decided 2026-10-03, HANDOFF §15, D22.
 5. **Provenance.** Every number traces to a run id and a config hash. See
    `docs/knowledge/provenance.md` when it exists.
 
