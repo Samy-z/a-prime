@@ -111,3 +111,43 @@ until you have watched it report non-zero on something you know is bad, and the
 control has to be the document you think it is.
 **Evidence:** pre-rewrite README recoverable via the parent of the commit whose
 message begins "Rewrite the README".
+
+## RDR-005 — The contract had no row for a report to the owner, so one was written in ledger voice
+**Date:** 2026-10-03
+**Finding:** The owner asked for a review to catch up after a long session. I
+wrote 1,800 words containing **48 internal identifiers**, which made reading it
+a lookup exercise. The owner's note: references force the reader "to go back and
+forth to find the meaning".
+
+**Rule 2 of the audience contract already forbade this**, in those words: an
+identifier may appear as a parenthetical pointer after the idea is explained in
+plain words, never as the explanation. So the rule was not missing and was not
+wrong.
+
+**What was missing was a row in the table.** The contract covered the README, the
+paper, dataset cards, knowledge docs, ledgers and HANDOFF. It did not cover a
+report written for the owner, which is a document type this project produces in
+almost every session. With no row, the default was ledger register, and ledger
+register is correct for ledgers and wrong for anything read start to finish.
+
+The row now exists, with a test: a reader should get the whole picture without
+opening a second file, and the extra words that costs are worth paying.
+
+**A second piece of feedback, on sentence construction.** The owner also asked
+for plainer grammar: "humans don't use perfect relative grammar like you do", and
+it forces "mental gymnastics that isn't required". This is a sharper version of
+the staccato-fragments item already in the style list, and it points the other
+way. The problem is not short sentences but **long correct ones**: stacked
+relative clauses, long subject phrases before the verb, and cleft openings. Each
+is grammatically fine, which is why it survives self-review, and each makes the
+reader hold several things in memory before the sentence resolves. Added to the
+habits list with the three shapes named and a mechanical fix.
+
+**Why this kept happening.** Both notes describe the same failure as RDR-001: a
+document written by someone with full context, for someone without it. The seat
+exists for that reason, and the seat was not consulted because a report did not
+look like an artifact.
+**Evidence:** the untracked `docs/study/REVIEW-2026-10-03.md`, 48 identifiers in
+1,800 words by `scripts/check_prose.py`; owner notes 2026-10-03.
+**Reopen if:** a new document type appears with no row in the table, which is the
+condition that caused this.

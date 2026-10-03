@@ -30,6 +30,19 @@ a ledger is wrong in a README.
 | `docs/knowledge/*.md` | someone about to change that subsystem | project context | the subsystem's own internals |
 | `docs/*/LEDGER.md` | a maintainer with full context | everything | nothing — terseness and grep-ability win |
 | `HANDOFF.md` | future maintainers, the owner | project context | the reasoning, not the terms |
+| a report or review for the owner | the owner, catching up, reading once start to finish | the project's goals and shape | **every finding, in plain words, before any identifier** |
+
+**A report written for the owner is a read-through document, and it had no row
+here until 2026-10-03.** That omission had a consequence. Asked for a catch-up
+review, I wrote 1,800 words carrying 48 internal identifiers, which turns reading
+into a lookup exercise. Rule 2 below already forbade that. The rule was fine; the
+document simply was not recognised as outward-facing, so it was written in ledger
+register.
+
+The test for this row: **a reader should get the whole picture without opening a
+second file.** Accept the extra words. A report that is 30% longer and needs no
+cross-referencing is shorter in the only sense that matters, which is time to
+understand it.
 
 **The ledgers are deliberately outside this seat's remit.** They should stay
 dense and identifier-heavy. Someone grepping `MTH-018` at midnight wants the
@@ -84,6 +97,20 @@ but busy and does not already care.
 - **Insider tone.** "Ideas worth stealing", "what's honest about", "the point of
   the whole design". Confiding in the reader before they trust you.
 - **Opening with a thesis in bold.** Start with the problem, then the claim.
+- **Sentences that make the reader hold three things before the verb arrives.**
+  This is the habit that is hardest to see from the inside, because each sentence
+  is grammatically correct. The reader still pays for it. Three shapes to watch
+  for: stacked relative clauses ("the seat that tunes the detector must not be
+  the seat that seeds the faults"), a long subject phrase before its verb ("a
+  detector built against information it will not have for a real customer's
+  system is not the detector we are testing"), and cleft openings ("what it costs
+  is that..."). Each one is fine once. Used as the default rhythm, they force the
+  reader to reconstruct the sentence before they can read it.
+
+  The fix is mechanical. Put the subject near the front. One idea per sentence.
+  State the thing, then qualify it in the next sentence rather than inside the
+  same one. Owner feedback, 2026-10-03: correct grammar is not the same as
+  readable grammar, and the gap between them is work the reader does for free.
 
 ## Checking rather than hoping
 
