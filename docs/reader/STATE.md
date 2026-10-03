@@ -13,7 +13,7 @@
 |---|---|
 | `README.md` | **reviewed and rewritten** 2026-09-29 (RDR-001) |
 | `NOTICE`, licence statements | reviewed |
-| the paper | GAP — not drafted. A provisional contract row exists (added 2026-09-29, never ratified); the reader has not been chosen. See RDR-007. |
+| the paper | GAP — not drafted. Reader ratified 2026-10-04 (D19): a practitioner who ships LLM systems, so the statistics get explained rather than assumed. |
 | dataset cards | GAP — belongs with `palworld-rag` when that is published. |
 
 ## Explicitly not owned

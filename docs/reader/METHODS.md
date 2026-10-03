@@ -25,20 +25,37 @@ a ledger is wrong in a README.
 | Artifact | Reader | May assume | Must define |
 |---|---|---|---|
 | `README.md` | a stranger who found the repo | general software literacy | **everything else** |
-| the paper (PROVISIONAL, unratified) | a researcher in a neighbouring field | statistics, ML vocabulary | project terms, fault classes, the method |
+| the paper | somebody who ships LLM systems and might use the tool | software literacy | **everything else, the statistics included** |
 | dataset cards | someone deciding whether to use the data | the domain | provenance, licence, known gaps |
 | `docs/knowledge/*.md` | someone about to change that subsystem | project context | the subsystem's own internals |
 | `docs/*/LEDGER.md` | a maintainer with full context | everything | nothing — terseness and grep-ability win |
 | `HANDOFF.md` | future maintainers, the owner | project context | the reasoning, not the terms |
 | a report or review for the owner | the owner, catching up, reading once start to finish | the project's goals and shape | **every finding, in plain words, before any identifier** |
 
-**The paper's row is provisional and has never been ratified.** It was written
-on 2026-09-29, in the same commit that created this seat, as a first guess, and
-has sat unexamined since. `STATE.md` meanwhile said the paper still "needs its
-own contract row", which stopped being true the moment the row was added.
-Choosing the paper's reader decides how much of the statistics has to be
-explained, which changes the length of the paper substantially. It is the
-owner's call, not a detail (RDR-007).
+**The paper is written for a practitioner, not a researcher.** Ratified by the
+owner on 2026-10-04 as D19, after five days in which the row was a first guess
+nobody had examined (RDR-007). The consequence is concrete: the statistics get
+explained. Not "target-decoy FDR control at q=0.10" but what a false discovery
+rate is, why running the baseline twice produces a null, and what it means for
+one text to entail another.
+
+Two arguments decided it, and the second is the owner's.
+
+The practitioner audience is the one most likely to find this useful, and the
+honest-limits section is the part of the work with the clearest use. Writing it
+for somebody who already knows statistics loses exactly the reader who needs the
+limits spelled out.
+
+And **"may assume statistics" was doing unexamined work** in the rejected
+option. Target-decoy FDR comes from proteomics. A researcher in machine-learning
+testing may never have met it, so the assumption was not buying brevity, it was
+hiding an explanation that still had to happen somewhere. The owner's phrasing:
+there is a charm in explaining complex context simply, and it is underrated as a
+vector for quick and consistent comprehension.
+
+**The known cost, stated so nobody later thinks it was free.** A paper that
+explains its own statistics is longer, and length is a harder sell at a venue
+that expects the conventional register. That was weighed and accepted.
 
 A report written for the owner is a read-through document, and it had no row
 here until 2026-10-03. Rule 2 below already covered what went wrong when one was

@@ -666,3 +666,60 @@ the existing boundary, and the boundary already takes a host.
 **What changed in the reasoning, for the record.** The first version of this
 section said a hosted model could not be a study arm at all. That was wrong, and
 the first amendment corrected it. The deferral rests only on money and timing.
+
+## §16 — D19 ratified: the paper is written for a practitioner (2026-10-04)
+
+**First time this decision has existed in the repository.** It was referred to as
+D19 in conversation for five days without ever being written down, which RDR-007
+records as its own failure. Keeping the number, because that is what it has been
+called, and noting that nothing before today backed it.
+
+### The decision
+
+The paper's reader is **somebody who ships LLM systems and might use the tool.**
+They may be assumed to have general software literacy and nothing else.
+Everything else gets defined, the statistics included.
+
+In practice: not "target-decoy FDR control at q=0.10", but what a false
+discovery rate is, why running the baseline twice produces a null, and what it
+means for one piece of text to entail another.
+
+The rejected alternatives were a researcher in a neighbouring field, which was
+the unexamined first guess, and a reviewer at a specific venue, which was the
+tersest and narrowest.
+
+### Why
+
+**The practitioner is the reader most likely to get use out of this**, and the
+honest-limits section is the part of the work with the clearest use. Writing for
+somebody who already knows statistics loses exactly the reader who needs those
+limits spelled out.
+
+**"May assume statistics" was doing unexamined work.** This is the owner's
+argument and it is the stronger one. Target-decoy FDR comes from proteomics. A
+researcher in machine-learning testing may never have encountered it, so the
+assumption was not buying brevity. It was deferring an explanation that still
+had to happen, to a reader who would not notice it was missing until they tried
+to use the method.
+
+**Explaining complex context simply is underrated.** The owner's point, quoted
+because the phrasing is the argument: there is a charm to it, and it is probably
+the best vector for quick and consistent human comprehension. The README rewrite
+is the evidence inside this project. It got shorter to read and longer on the
+page, and the owner's reaction to it was the strongest positive signal any
+artifact here has produced.
+
+### The cost, accepted rather than ignored
+
+A paper that explains its own statistics is longer, and length is a harder sell
+at a venue that expects the conventional register. That was weighed.
+
+### One consequence to settle later
+
+The paper's contract is now close to the README's. Both are written for somebody
+with software literacy and nothing assumed. That is duplication to manage, and
+there are two ways out: the README stays a short front door and points at the
+paper for anything real, or the two split by purpose, with the README answering
+why you would use this and the paper answering what we measured. Not decided.
+Worth deciding before the paper is drafted rather than after, or the two will
+drift and both will be maintained badly.
