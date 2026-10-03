@@ -25,7 +25,7 @@ Project memory is PROJECT-SCOPED and lives inside this repository.
 | 1 | `CLAUDE.md` (this file) | Current-state invariants, commands, architecture on one screen, pointers to layer 2. Session bootstrap, not a journal. Under ~150 lines. |
 | 2 | `docs/knowledge/<subsystem>.md` | What IS true now, one doc per subsystem. Read before touching that subsystem. Updated in the SAME COMMIT as the change. |
 | 3 | `HANDOFF.md` | Append-only decision journal, numbered sections, the WHY. Entered via pointers or grep, never browsed. |
-| 4 | `.agents/*.md` (gitignored) | Per-agent working dossiers, plus one claim-board per family. |
+| 4 | `.agents/*.md` (ignored, two exceptions) | Per-agent working dossiers and claim boards. Scratch, so ignored. `bench-taxonomy-research.md` and `bench-model-survey.md` are committed: they are the evidence under BCH-004 and BCH-007. |
 | Ledgers | `docs/<family>/LEDGER.md` | Append-only settled findings: stable id, date, evidence, reopen-if. Grep BEFORE investigating anything. |
 
 Each family also keeps `STATE.md` (what is live or frozen now) and

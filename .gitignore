@@ -1,5 +1,16 @@
-# Layer 4 working memory: per-agent dossiers and claim boards. Never committed.
-.agents/
+# Layer 4 working memory: per-agent dossiers and claim boards.
+#
+# The directory contents are ignored, NOT the directory itself. Git will not
+# descend into an excluded directory, so `.agents/` as the rule would make the
+# negations below impossible to express.
+#
+# Two research documents are committed as deliberate exceptions. They are the
+# evidence behind the severity floors in BCH-004 and the model-pool choices in
+# BCH-007, they took real work, and they existed on one disk with no backup.
+# The worklogs stay out: they are scratch, and they churn every session.
+.agents/*
+!.agents/bench-taxonomy-research.md
+!.agents/bench-model-survey.md
 
 # Python
 __pycache__/
