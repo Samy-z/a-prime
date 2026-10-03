@@ -288,3 +288,39 @@ only closes the gap between "the file is there" and "the index says so".
 gives 2026-09-29; the index row read "GAP — week 3" until this commit.
 **Reopen if:** a status claim lives somewhere the test does not read. The
 family `STATE.md` files are the obvious next place and are not covered.
+
+## RDR-008 — APPEND (2026-10-04): a fifth instance, and the limit of testing this
+
+Two additions to the entry above, both from the local session.
+
+**A fifth stale claim, and it was mine.** The provenance fix in `75081ad` added
+`row_provenance` and `check_row_provenance` to `src/aprime/provenance.py` and
+did not touch `docs/knowledge/provenance.md`, which went on describing the gap
+as open. The same-commit rule is the first standing discipline in `CLAUDE.md`
+and I broke it within hours of the cloud session fixing four instances of the
+same family of failure. The cloud session caught it and corrected the doc.
+
+**`tests/test_state_files.py` now covers the family STATE files, and it would
+not have caught any of the four.** The STATE files are not the same shape as the
+knowledge index: five status words across them, columns that differ per family,
+and many rows naming a capability rather than a file. "Domain x format factorial
+| GAP" has no path in it, so no script can judge it.
+
+So that suite checks path references only. A row naming a file that is absent
+fails; a row calling something a GAP while it sits on disk fails. Verified
+failing in both directions on synthetic rows, because a check nobody has seen
+fail is decoration.
+
+Three of the four original failures were in the knowledge index, which
+`test_docs_index.py` covers. The fourth was a prose contradiction in
+`reader/STATE.md`, where the row said the paper needed a contract row while the
+contract already had one. No path was wrong.
+
+**The honest conclusion: the observed failure mode resists testing.** What went
+wrong four times was a status sentence going stale, and a status sentence is
+prose about intent. RDR-004 and RDR-006 already record what happens when a
+check is built for something it cannot measure, so this is logged as a bounded
+guard rather than a solution. The remaining candidate is a cross-file
+consistency check inside the reader family, where `STATE.md` and `METHODS.md`
+both enumerate artifacts and must agree on which have contract rows. That one
+would have caught the fourth. It is narrow, it is real, and it is not built.
