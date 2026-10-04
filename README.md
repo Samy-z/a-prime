@@ -103,9 +103,12 @@ Several checks run in parallel, and none of them votes. Each reports separately,
 because combining them would need weights, and weights we invented would be
 weights nobody could audit.
 
+Figures below are for the tool as it ships, which normalises text before
+judging it.
+
 | check | what it catches | what it misses |
 |---|---|---|
-| contradiction | 7 of 8 kinds of factual change, 84% to 100% of the time | dropped conditions, completely |
+| contradiction | 7 of 8 kinds of factual change, 100% each | dropped conditions, caught only 17% of the time |
 | information loss | dropped conditions, 98% | everything else |
 | information gain | added content such as hedging, 100% | everything else |
 | structural rules | broken JSON, wrong alphabets, answers cut mid-sentence, refusals | anything about meaning |

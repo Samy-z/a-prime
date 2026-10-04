@@ -367,3 +367,47 @@ and the first time the rule in this entry ("say the thing, not a figure for
 it") has been applied at length and judged by the one instrument that can
 judge it. The register is held for the rest of the paper. Line edits remain
 the owner's, and the entry stays open to the next reader who finds it hard.
+
+## RDR-009 — The README's channel table mixed two configurations
+**Date:** 2026-10-04
+**Finding:** The table of what each check catches cited the raw-text row for
+contradiction and the shipped, normalised rows for the other two. Nothing said
+so. A reader comparing the three lines was comparing two different
+configurations.
+
+This is the same defect the blind-spot map was revised for on the same day, and
+it was sitting in the more-read document while the figure was being fixed.
+
+Owner's call: **all shipped**, because the README describes the tool rather than
+the experiment. Corrected from `results/blind_spot_map.json`:
+
+| row | was | now, shipped |
+|---|---|---|
+| contradiction | 84% to 100% | 100% on each of 7 kinds |
+| information loss | 98% | 98% (was already shipped) |
+| information gain | 100% | 100% (was already shipped) |
+
+**The switch changed a claim, not just a number.** The old "what it misses"
+column said contradiction misses dropped conditions "completely", which was true
+of the raw row at 0%. Under the shipped configuration it catches 17%. The column
+now says so. Had the number been swapped without reading the sentence beside it,
+the table would have become quietly wrong in the other direction.
+
+A caption now states that the figures are for the tool as it ships, so the
+reader does not have to infer which configuration a row belongs to.
+
+**Also corrected in the same pass:** the judge-to-judge gap, which the README
+gave as 48 percentage points. The recomputation under corrected register labels
+makes the largest 46.9, the 47 the paper quotes. The cloud session propagated
+that to the paper and to MTH-017 and not to the README.
+
+**The pattern worth naming.** Three documents now carry the same measurements:
+the figure, the paper, the README. Two corrections in one day both consisted of
+a recomputation reaching two of the three. Nothing checks that reader-facing
+prose agrees with the artifact it quotes, and RDR-006 records why building that
+check is harder than it looks: the numbers appear in sentences, with rounding
+and with words like "completely" attached.
+**Evidence:** `results/blind_spot_map.json`, shipped rows; README commit
+following this entry.
+**Reopen if:** a fourth document starts quoting the same numbers, at which point
+the manual reconciliation stops being tractable.
