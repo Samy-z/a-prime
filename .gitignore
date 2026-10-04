@@ -31,3 +31,6 @@ runs/
 
 # Catch-up reviews. Written for the owner to read once, not repo documents.
 docs/study/REVIEW-*.md
+
+# Unattended run logs. Appended to by scripts/overnight.cmd.
+logs/
