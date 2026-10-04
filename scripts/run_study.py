@@ -387,8 +387,28 @@ def main() -> int:
     print("analysing (system model released, NLI model loaded once)")
     nli = NLIChannel(nli_spec)
     predicate = NLIEquivalence(nli, threshold=0.7)
+    return analyse(list(recorded.values()), predicate, nli, digest)
+
+
+def analyse(jobs: list[CellJob], predicate, nli, digest: str,
+            out: Path | None = None) -> int:
+    """Phase 2: read every recorded cell from disk, detect, write the matrix.
+
+    Separate from `main` so it can be driven without a model server or the
+    NLI model: `predicate=None, nli=None` is the exact-match path, which is
+    enough to exercise the file layout, the row construction and the refusal.
+    This path had never run before the first factorial night and had no test;
+    `tests/test_study_analysis.py` now runs it against a synthetic recording
+    laid out exactly as the recorder lays out a real one.
+
+    Returns 0 and writes `matrix.json`, or 4 and writes nothing when a row
+    cannot be traced back. The check runs per row before that row's own report
+    file is written, so a refusal leaves no untraceable file behind at all,
+    not just no matrix.
+    """
+    out = out or (RUNS / "matrix.json")
     matrix = []
-    for job in recorded.values():
+    for job in jobs:
         paths = job.paths()
         samples, _, _ = load_checkpoint(paths["checkpoint"])
         ids = list(dict.fromkeys(s.input_id for s in samples))
@@ -432,29 +452,28 @@ def main() -> int:
             "gradable": not activation_warnings(fired, ids, q=Q,
                                                 label=job.name),
         }
+        # Refuse rather than warn, and refuse BEFORE this cell's report file is
+        # written. An untraceable number in a committed results file is worse
+        # than no number, because it looks usable.
+        problems = check_row_provenance([row])
+        if problems:
+            print()
+            print("REFUSING to write results: a row cannot be traced back.")
+            for msg in problems:
+                print(f"  {msg}")
+            print("  The recordings are on disk and nothing is lost. Fix the row "
+                  "construction and rerun the analysis.")
+            return 4
         matrix.append(row)
         paths["report"].write_text(json.dumps(row, indent=2), encoding="utf-8")
         print(f"  {job.name:<24} activated {len(fired):>3}/{len(ids):<3} "
               f"flagged {len(flagged):>3}  {secs:.0f}s"
               f"{'' if row['gradable'] else '  NOT GRADABLE at this size'}")
 
-    # Refuse rather than warn. An untraceable number in a committed results file
-    # is worse than no number, because it looks usable.
-    problems = check_row_provenance(matrix)
-    if problems:
-        print()
-        print("REFUSING to write the matrix: rows cannot be traced back.")
-        for msg in problems:
-            print(f"  {msg}")
-        print("  The recordings are on disk and nothing is lost. Fix the row "
-              "construction and rerun the analysis.")
-        return 4
-
-    out = RUNS / "matrix.json"
     out.write_text(json.dumps({"model": MODEL, "digest": digest, "n": N, "k": K,
                                "q": Q, "rows": matrix}, indent=2),
                    encoding="utf-8")
-    print(f"\nwrote {out.relative_to(ROOT)}")
+    print(f"\nwrote {out.relative_to(ROOT) if out.is_relative_to(ROOT) else out}")
     return 0
 
 

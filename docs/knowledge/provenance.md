@@ -59,7 +59,7 @@ a person reading both.
 | Runner | Result file | Layout |
 |---|---|---|
 | `run_cell_detection.py` | `results/cell_detection_<run_id>.json` | provenance fields flattened at the top level (`run_id`, `config_hash`, `git_commit`, `git_dirty`, `params`, `instruments`) |
-| `run_study.py` | per-cell rows under `results/study/`, matrix in `results/study/matrix.json` | flattened via `row_provenance()`, plus the system digest, session count and an analysis timestamp; `check_row_provenance()` refuses to write the matrix if any row lacks a required field |
+| `run_study.py` | per-cell rows under `results/study/`, matrix in `results/study/matrix.json` | flattened via `row_provenance()`, plus the system digest, session count and an analysis timestamp; `check_row_provenance()` runs per row **before that cell's report file is written**, so a refusal (exit 4) leaves no untraceable file of any kind. Phase 2 is `analyse()`, driven model-free end to end by `tests/test_study_analysis.py` against a synthetic recording laid out as the recorder lays out a real one |
 | `titration.py` | `results/titration_<run_id>_<config_hash>.json` | the whole `RunProvenance` under a `"provenance"` key |
 | `demo_detect.py` | stdout only | prints run, config, git |
 | `run_probes.py` | `results/probes_<run_id>_<config_hash>.json` | **does not use `capture()`**; see the gap below |

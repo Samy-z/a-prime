@@ -1,8 +1,45 @@
 # Does label-free regression detection transfer across domains?
 
-*Draft in progress. Every section except 8 (results) and the abstract is
-drafted, with appendices A to E; `docs/reader/paper-outline.md` maps each
+*Draft in progress. Every section except 8 (results) is drafted, with
+appendices A to E and an abstract whose result is left blank; `docs/reader/paper-outline.md` maps each
 claim to its backing.*
+
+## Abstract
+
+When the model behind a feature is swapped, re-prompted or re-indexed,
+nothing in a normal test suite says which inputs now behave differently,
+because the tests check the code and not the model's judgement, and nobody
+has labels for their own domain. We describe a method that finds those inputs
+from the output text alone, with a false-alarm rate the user chooses in
+advance, and we ask whether such a method built on one domain still works when
+moved to another, which no published work answers.
+
+The method runs the old system twice. The second run is a comparison in which
+nothing changed, so its differences are noise, and that noise sets the
+threshold for the real comparison. Asking for at most 10 percent false alarms
+produced 10.1 percent or fewer on a synthetic system where the truth is known,
+across nine settings. The same second run prunes rules inferred from the old
+system's own output, which catch a class of failure no meaning check can see.
+Of eight kinds of factual change, one judging model catches seven at 83 to 100
+percent of cases; the eighth, a deleted condition, needs the same model asked a
+different question, and the sign of that answer names the fault. Comparing
+embeddings, the obvious approach, performed below chance on three model
+families.
+
+[RESULT: across N systems spanning three domains and three output formats,
+with every threshold chosen without sight of the held-out system, the detector
+flagged changed inputs at the chosen budget and caught injected faults down to
+severity s per class; performance on an unseen system is expected within
+[lower, upper]. Filled from the nine-system study.]
+
+Two limits matter most. The method cannot report fewer than ten changed
+inputs at its default setting, by arithmetic, so an empty report means fewer
+than ten changed and not that nothing did. And every figure describes one
+judging model: a second model of the same kind reproduced the direction of
+every finding and none of the magnitudes, with gaps of up to 47 points.
+Nothing here has yet run against a production system.
+
+---
 
 ---
 
@@ -1095,6 +1132,15 @@ under test are served locally through Ollama and pinned by the digest of the
 served weights, which the runners read from the server's model listing;
 several early runs recorded that digest as unresolved because they asked the
 wrong endpoint, and are marked as pinned by name only.
+
+One exception is stated here because it is a real limit on tracing. The
+script that scored the probe pairs and produced the four result files behind
+the blind-spot map predates the shared provenance capture. It records its
+inputs and the model revisions, which is the right thing to pin, and not the
+code revision that scored them. Those four files therefore trace to their pair
+set and their weights, and not to the code. The script moves onto the shared
+capture with the next probe re-run, so that the change in how its hashes are
+computed coincides with a run nobody would compare to an old one.
 
 **Code and data.** The code is under the Apache 2.0 licence. The
 documentation, the measured results and the findings are under Creative

@@ -27,6 +27,13 @@ Owner decision 2026-10-04: it moves onto `capture()` in the same commit as the
 next probe re-run, so the hash scheme changes once, alongside a run that is
 new anyway. The pinned instrument table lives in `docs/methods/STATE.md`.
 
+The factorial's analysis phase (`run_study.analyse`) had never run and had
+no test until 2026-10-04; its first execution would have been at about 4am
+after twelve hours of recording. `tests/test_study_analysis.py` now lays a
+synthetic cell on disk under the runner's own file names and config hash and
+drives the real function: matrix rows carry full provenance, and an
+untraceable row is refused before any file is written.
+
 ## Figures
 
 | Figure | Status |
