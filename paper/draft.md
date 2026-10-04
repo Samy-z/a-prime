@@ -1,6 +1,6 @@
 # Does label-free regression detection transfer across domains?
 
-*Draft in progress. Sections 3, 4 and 9 are drafted; the rest follow
+*Draft in progress. Sections 3 to 7 and 9 are drafted; the rest follow
 `docs/reader/paper-outline.md`. Section numbers match the outline. Because
 sections 1 and 2 are not written yet, a few terms they will introduce are
 defined again here where first needed.*
@@ -396,6 +396,396 @@ different budget moves every detection rate. Everything is English and
 generated from templates, and nothing here says anything about other languages
 or about free text no template produced.
 
+## 5. Rules the baseline teaches about itself
+
+The checks in section 4 read meaning. Some failures have none to read. A
+model that starts emitting Thai characters in the middle of English replies,
+or raw `\u` escape codes instead of the glyphs they stand for, or JSON with a
+key missing, has not changed what it is claiming. A judging model, asked
+whether the corrupted output means the same as the clean one, answers
+correctly: yes. So these failures need a check that reads structure and
+ignores meaning, and such a check needs rules about what the output should
+look like.
+
+We do not write those rules. The baseline writes them, by example.
+
+### Where the idea comes from
+
+In 2001 a tool called Daikon watched programs run and guessed the rules their
+variables obeyed: this value is never negative, that list is always sorted.
+The rules were inferred from observed executions rather than written by the
+programmer, and they turned out to be a good way to catch a change in
+behaviour, because a rule that held for a thousand runs and breaks on the next
+one is worth a look. Nobody appears to have applied the idea to the text a
+language model produces.
+
+Daikon's known weakness is that it proposes far more rules than a person can
+review, and most of them are true by coincidence. Fit a range exactly to the
+values seen so far and every range is a rule. The two mechanisms below are the
+answer to that.
+
+### What is inferred, and what each rule is for
+
+From a few hundred baseline outputs, the tool proposes candidate rules of
+these kinds: the output parses as JSON; a named key is always present and
+always of the same type; a field only ever takes one of a handful of values;
+the characters belong to one script; there are no raw escape sequences or
+control characters; the text ends with a terminator rather than mid-sentence;
+no refusal phrase appears; the word count and line count stay inside a range.
+
+None of these is invented. Each kind corresponds to a failure that has
+happened in production. A large professional network measured schema errors in
+model output at about 10 percent and cut them to about 0.01 percent with a
+defensive parser. Three unrelated serving faults at two providers, a
+misconfigured accelerator, a miscompiled operation and an aggressive
+quantisation, all produced wrong-script characters or raw escapes in otherwise
+correct replies. Truncation leaves a mid-sentence stop. Refusal drift leaves a
+phrase.
+
+Rules are fitted tight, in Daikon's style. A range fitted exactly to the
+observed minimum and maximum is the strongest claim the data supports, and
+guessing a safety margin up front would be inventing a number. Ranges rarely
+survive as hard rules, and that is informative rather than a defect.
+
+### The second baseline run prunes coincidence
+
+Every candidate rule is checked on both baseline runs. A rule that holds on
+the first run of a system and breaks on a second run of the same system was
+never a rule; it was an accident of one sample. This is the decoy arm doing a
+second job beyond calibrating the false-alarm rate, at no extra cost, because
+those samples already exist.
+
+What survives is sorted into three bands by how often it held on both runs:
+
+| held on both baseline runs | what happens |
+|---|---|
+| 99 percent of the time or more | enforced against the candidate, no person involved |
+| between 60 and 99 percent | shown to a person as a question: "this held 87 percent of the time, is it a rule or usual variation?" |
+| less than 60 percent | discarded |
+
+A rule that clears 99 percent on the first run and fails on the second is
+demoted to the middle band rather than discarded, because the data says
+something is going on, just not that it is an invariant. Only the top band is
+enforced automatically; firing on the middle band would bring back the flood
+the band exists to prevent. The person never sees a thousand candidates. They
+answer a few dozen questions the system has already established are worth
+asking.
+
+### What the rules caught that nothing else could
+
+On a synthetic system producing realistic 150-word outputs, we injected six
+kinds of fault at three severities each and ran both the meaning checks and
+the rules. Refusals and truncations were caught by both. Deleted content was
+caught by the meaning checks, 73 percent of the time at the lowest severity
+and always above it. Corrupted characters and raw escape codes were caught by
+the rules at every severity and by no meaning check at any, for the reason
+given at the top of this section: a corrupted output means the same thing.
+The rules are not a supplement there. They are the only cover for a whole
+class of fault.
+
+A rule describes the system as a whole, not one input, so it is not subject
+to the ten-input floor of section 3. On the first run against a real system,
+where that floor suppressed every meaning check, the rules were the one part
+of the report that could say anything: eight rules were inferred, all eight
+held on both baseline runs, and the candidate broke two of them, a word-count
+range on 2 of 120 outputs and a line-count range once. That is a small number
+of changes reported from a run that otherwise reported none, and it was not
+designed for.
+
+### What has not been shown
+
+The pruning mechanism has not yet been exercised by a realistic system. The
+synthetic one produces no coincidental rule for the second baseline run to
+knock down, so every "zero pruned" reading so far says nothing about whether
+pruning is needed. Daikon's over-generation may be milder at this sample size
+than its reputation suggests, because three hundred draws already explore a
+range; that is a hypothesis, not a finding.
+
+A tightly fitted rule can be tipped by an ordinary draw of the baseline. One
+shifted draw produced a word-count violation on 2 of 200 outputs from a
+candidate where nothing had changed, a 1 percent false-alarm rate on that
+rule. That is one draw and not a measured rate, and it is what the middle band
+is for.
+
+All rules are about the whole corpus. Nothing yet infers "for this input the
+answer always mentions 42,000", which is plausible at twenty samples per cloud
+and untried. The script rule will produce a permissive rule and catch nothing
+on a system that legitimately switches language per input. And the cap of six
+distinct values for an enumerated field is a guess, not a measurement.
+
+---
+
+## 6. The systems under test, and the faults
+
+To find out whether detection transfers across domains, we need systems in
+several domains where we know, for every input, whether a given fault touched
+it. No real deployment tells you that. So we built nine systems whose
+knowledge we author and whose tools we control, which is the only way to have
+per-input ground truth, and we accept the cost that comes with it: nothing
+here has run against a production system, which is limit 4 in section 9.
+
+### Nine systems: three domains by three output formats
+
+Each system is a tool-calling agent over a knowledge pack in one of three
+domains: banking, logistics, hospitality. Each exposes the same eight tools,
+looking up a record, searching its history, reading a policy, computing a
+ratio, evaluating eligibility, listing prior records, verifying a document and
+recording an action, under domain-specific names. The packs are generated from
+a seed with identical structure in every domain, differing only in vocabulary
+and subject matter. If the detector behaves differently on banking than on
+logistics, the difference cannot be that one domain was given a richer agent.
+
+The three output formats are a JSON object with four named keys, three to
+five sentences of prose, and a single decision line beginning APPROVE, DECLINE
+or ESCALATE. All three call the tools, because real extraction and
+summarisation agents retrieve before they write, and they differ in what they
+must produce, which is what the per-shape thresholds of section 3 depend on.
+
+Two things were measured before the systems were committed to. The 8-billion-
+parameter models we use picked the right tool on 16 of 16 single-tool
+requests among the eight, and the eight tool schemas cost 461 to 751 prompt
+tokens, not the 1,200 to 2,000 the design had assumed. Eight tools cost
+nothing in reliability.
+
+### What the first live run found
+
+Running all nine systems against a live model for the first time, 36
+invocations in 185 seconds, found four defects in the systems themselves, and
+none of them had been caught by 159 unit tests. A quarter of every corpus
+returned an empty output, because the one request that needed a figure could
+not reach it through any tool and the model ran out of steps hunting for it.
+The model wrote its deliberation into the output and closed it with a tag it
+never opened. A quarter of outputs were cut mid-sentence by a generation cap
+set too low. And an amount filter named no direction, so "above 1000" became
+"at most 1000".
+
+The second and third of those matter beyond this project. How much a model
+thinks aloud, and where it gets cut off, are exactly the kinds of thing that
+change when a model is swapped. Left in place, either would have produced a
+strong and entirely spurious regression signal. Both are now stripped or
+recorded, and the run that found them is why every test double in this
+project is built from captured responses of a live server rather than written
+from memory of the API: eight separate divergences between the two were found
+that way, each of them a place where a hand-written fake was more cooperative
+than reality.
+
+The decision-line format is the one that did not come right. It produces a
+distinct output shape, which the grid needs, but it obeys its own instruction
+on 4 of 12 attempts, puts the decision last, and varies 36-fold in length where
+summaries vary 3-fold. Three rounds of fixes bought three inputs, at which
+point further fixing becomes tuning the bench until the number looks right. It
+is kept as it is.
+
+### The models
+
+Four locally served models from four labs, two of them with different
+architectures, all under a permissive licence. They were chosen for family
+diversity rather than capability, because capability did not discriminate:
+every 8-billion-parameter model tested drove a chained two-step tool loop 12
+times out of 12, and the one 3-billion-parameter model failed a quarter of the
+chains. That smaller model is kept as a deliberately weak system, whose high
+natural error rate tests whether the detector reads "bad" as "changed".
+
+Two of the four, as shipped, silently inject faults the study is trying to
+measure. One vendor template inserts a hidden system prompt of about 540
+tokens that interpolates today's date, so the prompt changes every midnight
+and a run straddling midnight compares two prompts nobody edited. Another
+defaults to reasoning before answering and can spend its whole generation
+budget on the reasoning and return an empty string, which is indistinguishable
+from a truncation fault. So every system under test gets an explicit system
+message and explicit sampling parameters, vendor defaults are never compared
+(default temperature alone differs 1.0 to 0.15 across the pool), and a run
+that crosses midnight is flagged in the report.
+
+### The faults
+
+The faults come from a taxonomy of fourteen classes, frozen in a dated
+document before any threshold in the detector was tuned, so that the detector
+could not be fitted to the faults it would be scored on. Nine classes have at
+least one documented production incident behind them: a model swap, a prompt
+regression, a change to the tool surface, provider drift, a stale or corrupted
+knowledge base, cache contamination, serving-stack corruption at a fixed model
+version, sticky routing, and persona drift. Five more have a documented
+mechanism and no incident with a measured blast radius: input truncation,
+retrieval degradation, output truncation, refusal drift, and a mismatch in how
+the prompt is serialised to tokens. That grading is carried into the results
+rather than smoothed over. One class the original design listed, a change in
+decoding parameters, was dropped for having no documented instance at all.
+
+Every fault is injected across the blast radii that occur in the wild, which
+is a separate axis from its class. The documented split is not real-versus-
+injected but shared-artifact versus request-path. A fault in something with
+one copy, a system prompt or a model version, hits at least 84 percent of
+requests and usually all of them. A fault on the request path, in routing or
+load balancing or provider selection, runs between 0.0004 and 16 percent, and
+the same routing bug measured below 0.0004 percent on one surface and 16
+percent on another in the same week. Sticky routing concentrates a request-
+level rate onto a subset of users: 0.8 to 16 percent of requests became about
+30 percent of users. If the harness injected every fault globally, a detector
+would learn that "global" means "injected", which is an artifact of the
+harness with no counterpart in production.
+
+Two severity floors are set by published evidence rather than by us. A
+controlled study on five hundred questions found that corrupting 10 percent of
+retrieved rows produced no measurable change in any downstream metric, so a
+miss at that level is not a detector failure. And real production prompt
+edits, measured across fourteen commits of a flagship deployment's published
+prompts, are one to three lines; a harness that rewrites whole prompts injects
+something that does not happen.
+
+### Ground truth is per input, never per system
+
+A fault configured on a system is wrong as a label for every input it never
+touched. Truncation cannot truncate a four-word answer. A schema break only
+bites JSON. A refusal only bites where the system would otherwise have
+answered. Labelling every input of a faulty system as changed is label noise
+by construction, and it is the kind that inflates every downstream number in
+the direction that looks like success. So every injection records, per input
+and per sample, whether it actually fired, and that record is what the
+detector is scored against. On the first real run, a stale-data fault
+configured on the whole system fired on 15 of 30 inputs, and the detector was
+graded on those fifteen.
+
+The harness injects a fault in one of three ways, and the difference is about
+whose fingerprints are on the output. The first rewrites an output after the
+fact: truncating it, inserting corrupted characters, replacing it with a
+refusal. That works on any system, including one we did not build, and it
+leaves our vocabulary and sentence shape in the output, so in principle a
+check could learn to spot us rather than the fault. The second degrades what
+the system's tools return, serving older rows of the right record, or
+well-formed rows of the wrong one, and lets the model write a different answer
+itself. The third edits the lines of the system prompt, on the one-to-three-
+line ladder above, and again lets the model write. Outputs from the second and
+third carry only the model's own fingerprints, which is what a real regression
+looks like.
+
+For a prompt edit, whether an input counts as affected is decided by exposure:
+the edited prompt was sent and the model answered. Whether the edit actually
+changed the answer is the detector's question, and deciding it in the harness
+would need a second clean call for every input at double the recording cost.
+That convention errs towards scoring the detector as having missed inputs it
+had no way to see, never the reverse, and it is why recall on prompt
+regressions is reported as a lower bound.
+
+### Keeping the detector away from the answers
+
+The seat that tunes the detector must not be the seat that seeds the faults,
+or the detector will learn the seeds. In this project the guarantee is the
+commit history rather than a promise: every threshold in the detector, the
+clustering cut, the choice of checks, the false-discovery machinery, was fitted
+and committed against the hand-built text pairs and the synthetic system,
+neither of which contains an injected fault, before the fault harness existed.
+Anyone can check the order.
+
+One further system, a retrieval-augmented assistant for a video game with an
+authored knowledge base, is the development system: the one whose correct
+answers we know, and the one the detector was built against. It is excluded
+from every transfer number and reported on its own.
+
+---
+
+## 7. Study design
+
+Nothing in this section has run. It is written now so that a reader can judge
+the design before the result exists, and so that the result, when it comes,
+cannot be shaped by the design being written afterwards.
+
+### The claim the study can support
+
+Across a set of systems spanning the three domains and three output formats
+above, with the detector's every threshold chosen without sight of the system
+it is tested on, the detector flagged changed inputs at the chosen
+false-discovery budget and detected injected faults down to a stated severity
+per fault class, and its performance on a system it has not seen is expected
+to fall within a stated interval.
+
+The interval is wide, and that has to be said before any number. The unit of
+evidence for a claim about transfer is the system, not the input, because
+inputs within one system are near-replicates of each other. With six systems
+and the detector succeeding on every one, the 95 percent lower bound on the
+per-system success rate is 0.54. With nine, 0.66. "It worked on every system
+we tried" is consistent with failing on a third of the systems we did not.
+
+### Leave one system out
+
+Every threshold and every fittable choice in the detector is selected inside
+a held-out loop. Hold out one whole system. Fit everything on the rest. Test
+on the one held out. Repeat for each system. The same is done leaving out one
+fault class at a time, and the two are crossed. A system is never split
+between fitting and testing, not even across severities of one fault, because
+a detector will learn a system's identity, its output style and its noise
+level, as if it were a fault signature, and random splits inflate every
+number. Random-split numbers are reported beside the held-out ones so that the
+inflation is visible, and never instead of them.
+
+### The things that would silently invalidate the result
+
+Some mistakes make a study fail loudly. These make it succeed falsely, so
+each is a rule rather than a hope.
+
+**Base rates.** A published attempt to transfer a detection threshold across
+domains found that its apparent transfer was driven by how often the target
+occurred in each domain rather than by the method. So the rate at which
+inputs change is controlled across our domain cells by design, before the
+study runs. Left uncontrolled, the transfer finding would be uninterpretable
+in either direction.
+
+**Pre-registration.** The fault taxonomy and its severity ladders were frozen
+in a dated document before any tuning. Changes to it are dated additions with
+a reason, never edits in place.
+
+**A sealed holdout of real regressions.** A set of thirty to eighty regressions
+that actually happened, opened once, with the opening recorded. It is not
+collected yet, and when it is, its power is limited: at thirty cases, a recall
+of 0.80 has a 95 percent interval from 0.63 to 0.90, which can show
+catastrophic non-transfer and nothing finer. Worse, collectable regressions
+are the ones somebody noticed, which are the loud ones.
+
+**Pinned instruments.** The judging model and the embedding models are locked
+to specific revisions, listed in the appendix. Changing one makes every earlier
+number incomparable and is recorded as such rather than carried over. The
+sampling seed is deliberately outside this rule, for the reason in section 3:
+pinning it on both baseline runs collapses the yardstick.
+
+**Provenance.** Every number traces to a run identifier and a hash of the
+configuration that produced it. The hash covers everything that changes a
+result: the instrument revisions, the sample count, the budget, the fault, the
+seed policy and a fingerprint of the inputs. It deliberately excludes things
+that do not, such as which machine served the model, so that the same run on
+two machines is one configuration. A results row without its run identifier
+and its hash is refused at write time rather than warned about, because an
+untraceable number in a results file looks usable.
+
+### The cost, and where it goes
+
+Detection is cheap and recording is not. On the first run against a real
+system, recording took 589 seconds and detection 10. At the working minimum of
+twenty samples per cloud and three runs, one system in one domain and format
+is 1,800 model calls for thirty inputs, and a chained tool-calling format
+costs about three and a half times a summarising one. Three things keep that
+tractable: calls for one input are grouped so a server with prompt caching
+pays the shared prefix once per input rather than once per call, which on the
+measured hardware is the difference between weeks and hours; runs checkpoint
+after every triple of calls and resume where they stopped, so a long run can
+be paused from another terminal and does not have to finish in one sitting;
+and a run whose model server has died is stopped within seconds rather than
+recorded as complete, which happened once and produced a checkpoint that
+called itself finished while 97 percent of its samples were connection errors.
+
+### What will be reported, and what will not
+
+Every number with its denominator and its interval. Negative results with the
+same care as positive ones; a finding that detection does not transfer is the
+more interesting outcome and is written up as such. The development system
+separately, never pooled. And four things we will not claim: that the method
+is domain-agnostic, as a bare statement; any recall or precision on real
+regressions beyond what the holdout can support; that the tool can tell a
+regression from an improvement; and any headline number produced under a
+random split.
+
+Section 8 holds the results. Until the nine-system study has run, it holds a
+table of what each result will be backed by.
+
 ---
 
 ## 9. Honest limits
@@ -493,5 +883,5 @@ first four are the ones a reader must know before running the tool at all.
 
 ---
 
-*Sections 1, 2, 5, 6, 7, 8, 10, 11 and 12 follow the outline and are not yet
+*Sections 1, 2, 8, 10, 11 and 12 follow the outline and are not yet
 drafted. Section 8 stays a table of gaps until the nine-cell study has run.*
