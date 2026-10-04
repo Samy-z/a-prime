@@ -171,6 +171,20 @@ def make_job(domain: str, output_format: str, digest: str, nli_rev: str) -> Cell
     job = CellJob(domain=domain, output_format=output_format, digest=digest)
     pack = build_pack(domain, n_entities=N_ENTITIES, seed=1)
     job.inputs = build_inputs(pack, n=N, seed=1, output_format=output_format)
+    # DO NOT TIDY THE nli_revision FORMAT WHILE A RECORDING IS IN FLIGHT.
+    #
+    # `capture()` warns that a bare SHA is "not a pin" and wants the model id
+    # alongside it. The warning is cosmetic: the SHA is the pin and it is
+    # correct. The fix is not cosmetic. `instruments` feeds
+    # `compute_config_hash`, so reformatting this string changes every cell's
+    # config hash, which changes every checkpoint filename, which orphans the
+    # recording on disk and starts the factorial again from zero.
+    #
+    # Measured 2026-10-04: the bare SHA hashes to 9864af6f7989ee8a and the
+    # prefixed form to 9ed71b092eb45c10, on otherwise identical inputs.
+    #
+    # Change it at a boundary where nothing is part-recorded, and expect to
+    # rerecord anything that was.
     job.prov = capture(
         instruments={"predicate": "NLIEquivalence@0.7",
                      "nli_revision": nli_rev,
