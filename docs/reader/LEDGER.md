@@ -324,3 +324,34 @@ guard rather than a solution. The remaining candidate is a cross-file
 consistency check inside the reader family, where `STATE.md` and `METHODS.md`
 both enumerate artifacts and must agree on which have contract rows. That one
 would have caught the fourth. It is narrow, it is real, and it is not built.
+
+## RDR-009 — The report changed and the README kept showing the old one
+**Date:** 2026-10-04
+**Finding:** The detector's report format was rewritten on 2026-10-04 (HANDOFF
+§19). The README's worked example, which quotes that report, was not touched in
+that commit and showed the old format for four further commits. The same commit
+also left `134 tests` in the README and `218 tests` in CLAUDE.md against 344
+real ones. Nobody noticed because nothing compared the README to the program.
+
+This is the "known gap" the reader STATE had listed since 2026-09-29: nothing
+checked whether a worked example still matched actual output. It is also a
+same-commit-rule violation by the session that changed the report, which is
+this one, hours after it recorded five instances of the same family under
+RDR-008.
+
+**The pattern is the same as RDR-008's.** A worked example is a status claim
+about program output. It looks like a fact and nothing tests it, so it stays
+true-looking after it is false, and a reader who trusts it learns a format
+the tool no longer prints.
+
+**Consequence:** `tests/test_readme_example.py` runs the demo (model-free, under
+a second) and fails if any line of the README's example block is not printed
+verbatim; the run id line and the elision are skipped. Test counts are no
+longer quoted in either file, because a number that goes stale on every commit
+is a number that will be wrong. The prose around the example was updated to
+describe the report that is now shown.
+**Evidence:** `git log -S"a-prime report: 29 of 300" -- README.md` shows the
+old block surviving `a115857`, the commit that changed the format.
+**Reopen if:** a second worked example is added anywhere outward-facing
+without a test of the same shape. The blind-spot map already has one; this
+closes the README's.

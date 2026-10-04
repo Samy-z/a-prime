@@ -118,7 +118,7 @@ silently invalidate the result rather than failing loudly:
 Environment is a repo-local venv. Prefix with `.venv/Scripts/python.exe` on
 Windows.
 
-    python -m pytest tests/ -q              # 218 tests, all fast, no models
+    python -m pytest tests/ -q              # the whole suite in seconds, no models
     python scripts/run_probes.py --dry-run  # build probe pairs, no models
     python scripts/run_probes.py            # full blind-spot map (downloads 4 models)
     python scripts/run_probes.py --only deberta_mnli --normalise
