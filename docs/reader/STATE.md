@@ -13,7 +13,7 @@
 |---|---|
 | `README.md` | **reviewed and rewritten** 2026-09-29 (RDR-001) |
 | `NOTICE`, licence statements | reviewed |
-| the paper | **outlined** 2026-10-04, `docs/reader/paper-outline.md`; the draft itself is not started. Reader ratified 2026-10-04 (D19): a practitioner who ships LLM systems, so the statistics get explained rather than assumed. The outline grades every claim measured / constructed / asserted and points it at its backing; its results section is a table of what is missing until the factorial runs. |
+| the paper | **outlined** 2026-10-04, `docs/reader/paper-outline.md`; sections 3, 4 and 9 **drafted** 2026-10-04 in `paper/draft.md`, the rest not started. Reader ratified 2026-10-04 (D19): a practitioner who ships LLM systems, so the statistics get explained rather than assumed. The outline grades every claim measured / constructed / asserted and points it at its backing; its results section is a table of what is missing until the factorial runs. |
 | dataset cards | GAP — belongs with `palworld-rag` when that is published. |
 
 ## Explicitly not owned
