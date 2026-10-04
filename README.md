@@ -207,7 +207,7 @@ cases into one and threw away the only part that identified the fault.
 - **The figures describe our setup, not the technique.** Most checks depend on a
   model trained to judge whether one piece of text follows from another.
   Substituting a different model of the same kind reproduced the direction of
-  every finding and none of the magnitudes, with gaps of up to 48 percentage
+  every finding and none of the magnitudes, with gaps of up to 47 percentage
   points on individual categories. Anyone reusing this should re-measure with
   their own judge.
 
