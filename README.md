@@ -14,8 +14,8 @@ So how do you find out what actually broke?
 Most teams read fifty outputs and hope. That is not carelessness, it is the
 absence of anything better. Across 118 incidents published by the two largest
 model providers, not one describes a drop in output quality. Quality regressions
-in the wild have run from four days to ten months before anyone noticed them, and
-in the cases that have been written up, none was caught by the operator's own
+in the wild have run from four days to fifteen months before anyone noticed them,
+and in the cases that have been written up, none was caught by the operator's own
 automated tests.
 
 a-prime is an attempt at something better. Give it your old system, your new

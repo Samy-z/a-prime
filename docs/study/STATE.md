@@ -22,8 +22,10 @@ The judge-calibration stance is a posture, not a moat.
 `src/aprime/provenance.py`, documented in `docs/knowledge/provenance.md` since
 2026-10-04 (the code had landed on 2026-09-25 without its doc). Every runner
 except `run_probes.py` goes through `capture()`; that script carries its own
-pair-and-model hash and records no git commit, which is a known gap stated in
-the doc. The pinned instrument table lives in `docs/methods/STATE.md`.
+pair-and-model hash and records no git commit, a known gap stated in the doc.
+Owner decision 2026-10-04: it moves onto `capture()` in the same commit as the
+next probe re-run, so the hash scheme changes once, alongside a run that is
+new anyway. The pinned instrument table lives in `docs/methods/STATE.md`.
 
 ## Figures
 
