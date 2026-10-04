@@ -130,6 +130,15 @@ Nobody has needed that trace yet. The fix is to call `capture()` with the pair
 hash as `corpus`, and it has not been done because it would change the config
 hashes of files the ledgers cite by hash.
 
+**Owner decision, 2026-10-04: fix it in the same commit as the next probe
+re-run, not before.** The next re-run is already named (STD-009, reopen-if:
+the normalised pair set scored with the second checkpoint and the embeddings).
+That run is new regardless, so the one-time change in how probe hashes are
+computed coincides with a run nobody would compare to an old one, and the
+hash scheme stays consistent on each side of that boundary. Whoever makes
+that run: call `capture()`, keep the pair hash as `corpus`, record the legacy
+hash in `notes` for the four committed files' sake, and date the change here.
+
 **`packages` records the torch version without its build.** The GPU machine
 runs `2.14.0+cu126` and `importlib.metadata` reports it as such, but a CPU box
 reports `2.14.0`, so the same pinned requirement looks like two versions. See
