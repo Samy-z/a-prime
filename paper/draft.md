@@ -1,9 +1,138 @@
 # Does label-free regression detection transfer across domains?
 
-*Draft in progress. Sections 3 to 7 and 9 are drafted; the rest follow
-`docs/reader/paper-outline.md`. Section numbers match the outline. Because
-sections 1 and 2 are not written yet, a few terms they will introduce are
-defined again here where first needed.*
+*Draft in progress. Every section except 8 (results) and the abstract is
+drafted; `docs/reader/paper-outline.md` maps each claim to its backing.*
+
+---
+
+## 1. The problem: you swapped the model, and nothing you have can tell you what broke
+
+You run a feature that calls a language model. One day something behind it
+changes. Perhaps you move to a cheaper model, or your provider retires the
+snapshot you were pinned to, or you bump a locally served model by one
+version, or someone edits two lines of the system prompt. Your unit tests
+still pass, because they test your code and not the model's judgement. You
+have no labelled data for your own domain, because almost nobody does. And
+every output now reads slightly differently, because the new model phrases
+things its own way.
+
+We call that change a **regression** when it alters what the feature does on
+inputs it used to handle, whether or not any score you can compute moves. The
+question this paper is about is how to find those inputs **without labels**,
+meaning without reference answers or hand-written assertions, and **through
+the black box**, meaning from the text that comes out and nothing else, so
+that the method works against a hosted API you do not control.
+
+### How long regressions go unnoticed
+
+The incident record says the problem is real and that the industry has no
+channel for it. We counted the public status-page incidents of the two
+largest model providers over their published history windows: 25 for one over
+about forty days, 93 for the other over about ninety. Of those 118, none
+describes a drop in output quality. Every one is an error rate, a latency, an
+availability or an authentication or billing failure. One provider's own
+month-long quality degradation, which affected up to 16 percent of requests on
+one surface, was never a status incident; it surfaced as an engineering blog
+post after the fact. Status pages do not under-report this class of failure.
+They have no category for it.
+
+Hard failures are caught in minutes. Silent ones are not. In the written-up
+cases we could find with a documented timeline, a sycophancy regression in a
+widely used assistant was live for about four days before user reaction forced
+a rollback; a routing fault that degraded quality at one provider ran for
+about thirty days and was found through user reports; a city government's
+business chatbot gave wrong legal guidance for about five months until
+journalists tested it; a tool-surface change silently broke 474 agents on an
+open-source platform for about ten months and was found by a manual database
+query; and an airline's chatbot gave a customer wrong refund policy that took
+fifteen months and a tribunal to surface. Not one of these was caught by the
+operator's own automated evaluation. Every one was found by a person noticing,
+or by somebody running a ground-truth probe.
+
+[Verify before submission: the sycophancy post-mortem is cited through two
+secondary sources because the originals returned an access error; the quotes
+agree across both.]
+
+### What the incident record also tells us
+
+The same record shapes the rest of this paper. Production prompt edits,
+measured across fourteen commits of a flagship deployment's published prompts,
+are one to three lines, so a test harness that rewrites whole prompts tests
+something that does not happen. Three unrelated serving faults, a
+misconfigured accelerator, a miscompiled operation and an aggressive
+quantisation, all produced the same visible symptom, wrong-script characters
+or raw escape codes in otherwise correct replies, so one check covers all
+three. And the same routing bug ran at below 0.0004 percent of requests on one
+deployment surface and 16 percent on another in the same week, so how many
+requests a fault touches is a property of where it sits in the deployment
+rather than of what kind of fault it is. Section 6 builds the test harness on
+those three facts.
+
+### What this paper offers
+
+A method that takes your old system, your new system and a few hundred of
+your own inputs, and reports which inputs changed behaviour and how often it
+is likely to be wrong when it says so. It does this without knowing what your
+outputs mean. The method is a tool; the contribution we care more about is the
+study attached to it, which asks whether detection built on one domain still
+works when moved to another. Nobody has published an answer to that, and the
+study is designed so that the answer, when it comes, can be no.
+
+---
+
+## 2. What already exists, and where the gap is
+
+This is not an empty field, and one project got to the core idea first. We
+write this section with a rule: no claim that a named tool lacks a capability
+is made from reading its documentation alone. Where we have not run the tool,
+we say what appears to be the case.
+
+The statistics of comparing two model versions are settled. Repeated sampling
+with the right error bars for a paired comparison is shipped by Inspect, the
+evaluation framework from the UK AI Safety Institute, and at least four
+open-source or preprint projects gate a change on whether its delta exceeds
+the noise. We use those statistics and claim nothing for them.
+
+Metamorphic testing, checking that a transformation which should not change
+an answer in fact does not, has been a task-agnostic methodology since
+CheckList in 2020; a 2025 survey catalogued 191 such relations for language
+tasks and ran about 560,000 tests, and Giskard ships invariance testing as a
+named primitive. We use the idea and claim nothing for it. The one narrow gap
+adjacent to it, inferring which relations apply to a system from its own
+unlabelled traffic, is close to what section 5 does with structure.
+
+Grouping outputs by meaning and ranking the groups by how far they drifted
+from a reference set is shipped by Arize Phoenix. Replaying inputs, embedding
+the outputs and reviewing the top of the list by displacement is a sound
+engineering composition and not a novel mechanism; section 4 also measures
+why it is a poor one for this job.
+
+The nearest work is Clausius, an open-source project that detects regressions
+without labels on unlabelled production prompts, using a measured null for
+comparison, validated across five model families and seven task domains with
+published sensitivity figures. It is further along than we are on the
+evidence. Two things leave room beside it. It reads the model's internal token
+probabilities, so it works only with models you host yourself and cannot be
+pointed at a commercial API, where most deployments live; and its own
+documentation says its null must be re-measured on each new stack. a-prime
+reads only the text that comes out, which is slower and less informative and
+works anywhere.
+
+Two things appear not to exist. No tool we found infers rules about a
+system's output from the baseline's own output distribution; everything
+adjacent, schema assertions and constrained decoding, is written by hand. The
+nearest ancestor is Daikon, a 2001 program-analysis tool, and it was never
+ported to language-model output. And no tool we found uses a repeated baseline
+run as a general way to calibrate a black-box comparison; the target-decoy
+construction behind it is standard in proteomics and has, as far as we can
+tell, no prior use in evaluating language models.
+
+And one thing has not been studied at all: whether any of this transfers
+across domains. One recent paper tested moving a detection threshold across
+domains for a related task and found its apparent transfer was driven by how
+often the target occurred in each domain rather than by the method. That is a
+warning about design, which section 7 takes, and it is not an answer to the
+question.
 
 ---
 
@@ -883,5 +1012,106 @@ first four are the ones a reader must know before running the tool at all.
 
 ---
 
-*Sections 1, 2, 8, 10, 11 and 12 follow the outline and are not yet
-drafted. Section 8 stays a table of gaps until the nine-cell study has run.*
+## 10. Two ideas that may be useful elsewhere
+
+Both are mechanisms, built and tested on synthetic systems, and neither is a
+measured result on a real one.
+
+**The second baseline run does a second job.** It was introduced to set the
+false-alarm threshold. It also prunes inferred rules, at no extra cost,
+because the samples already exist. A rule that holds on one run of a system
+and breaks on a second run of the same system was never a rule, and
+discarding it needs no judgement, no schema and no person. Anyone inferring
+anything from a stochastic system's output could use a second draw this way.
+
+**One number, read at both ends, names two faults.** Asking a judging model
+how much the old output implies the new one, and how much the new implies the
+old, and subtracting, gives a number whose sign carries information. Strongly
+positive means the new output says less than the old; strongly negative means
+it says more. The first implementation took the absolute value and threw away
+the only part that identified which fault had occurred. The general point is
+that a symmetric distance between two outputs is the wrong summary whenever
+the direction of a change matters, and in regression detection it usually
+does.
+
+A third is less an idea than a posture. The method cannot report fewer than
+ten changed inputs, and we have come to regard that as a feature. A tool that
+can be made to find something by lowering its bar will be made to, and a
+threshold of infinity, which is what the tool reports when no cut qualifies,
+is a more useful answer than a finding it cannot stand behind.
+
+---
+
+## 11. Extensions, in one sentence each
+
+Each of these is constructed or derived and not measured, and is stated in
+that register.
+
+The same statistic pointed at time rather than at a candidate detects whether
+a hosted model has changed under you: record a baseline now, record it again
+later, and score the two periods against the first period's own
+baseline-versus-baseline spread; the negative control, a locally served model
+whose weights provably did not change, is about an hour of compute and has not
+been run, so this is an extension and not a result.
+
+A hosted model as a system under test is one adapter behind the existing
+boundary, and it was deferred on cost rather than on principle; the one real
+constraint is that the two baseline runs must be the same system, which a
+provider that changes a model mid-run would violate, and the recorder keeps
+the three calls for one input close in time to bound that exposure.
+
+The judging model is the dominant cost of the detector, and the cost line now
+counts every clustering it is asked for, which is the evidence for or against
+distilling it into something cheaper once a real study has shown the cost to
+bind; fine-tuning anything before that point was considered and cut.
+
+---
+
+## 12. Reproducibility
+
+Every number in this paper traces to a run identifier and a configuration
+hash, written into the results file that holds it. The hash covers the
+instrument revisions, the sample count, the budget, the fault, the seed policy
+and a fingerprint of the inputs. A figure computed from other results names
+the runs it was computed from; the blind-spot map prints its three source runs
+in its footer.
+
+**Instruments.** The judging model and the embedding models are pinned to the
+Hugging Face revisions below, resolved at load time and recorded from the run
+rather than copied from a model card. Changing any of them invalidates every
+earlier number rather than silently changing it.
+
+| role | model | revision |
+|---|---|---|
+| judging model, primary | MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli | 6f5cf0a2 |
+| judging model, replication | FacebookAI/roberta-large-mnli | 2a8f12d2 |
+| embedding, small | sentence-transformers/all-MiniLM-L6-v2 | 1110a243 |
+| embedding, base | BAAI/bge-base-en-v1.5 | a5beb1e3 |
+| embedding, base, prefixed | intfloat/e5-base-v2 | f52bf8ec |
+
+Full revision hashes are in the repository's methods state file. The systems
+under test are served locally through Ollama and pinned by the digest of the
+served weights, which the runners read from the server's model listing;
+several early runs recorded that digest as unresolved because they asked the
+wrong endpoint, and are marked as pinned by name only.
+
+**Code and data.** The code is under the Apache 2.0 licence. The
+documentation, the measured results and the findings are under Creative
+Commons Attribution 4.0, which asks for attribution when the numbers are
+quoted. The test suite runs in seconds without any model download and
+includes the checks that the repository's own self-description is current:
+that every status row in its index names a file that exists, that the
+worked example in its README is what the demo prints, and that the blind-spot
+map reproduces the numbers the ledger records.
+
+**To reproduce.** The probe suite, the blind-spot map and the synthetic
+validation of the false-discovery guarantee run from the committed result
+files or from a model-free demo. The nine-system study needs a machine with a
+graphics processor and a local model server; the repository documents what
+travels with it and what does not, and the recorder resumes a run from its
+checkpoint on any machine that can reach the model server.
+
+---
+
+*Section 8, results, is not drafted: it stays a table of gaps in the outline
+until the nine-system study has run. The abstract is written last.*
