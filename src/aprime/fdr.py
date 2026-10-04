@@ -81,6 +81,47 @@ def discoveries(targets: np.ndarray, sel: Selection) -> np.ndarray:
     return np.asarray(targets, dtype=float) >= sel.threshold
 
 
+@dataclass(frozen=True)
+class BestCut:
+    """The closest a channel came to reporting, whether or not it did.
+
+    `select` returns nothing when no cut satisfies q, and nothing is the same
+    answer for a channel that separated the arms cleanly but fell short of the
+    1/q floor (MTH-024) and for a channel that cannot see the change at all
+    (ENG-007). This is the number that tells them apart: the lowest estimated
+    FDR any cut achieves, with the counts behind it.
+    """
+
+    estimate: float
+    cut: float
+    targets_above: int
+    decoys_above: int
+
+    @property
+    def separated(self) -> bool:
+        """Some targets sit above every decoy."""
+        return self.decoys_above == 0 and self.targets_above > 0
+
+
+def best_achievable(targets: np.ndarray, decoys: np.ndarray) -> BestCut | None:
+    """The cut with the lowest estimated FDR, or None with no targets.
+
+    Ties go to the cut admitting more targets, matching `select`.
+    """
+    targets = np.asarray(targets, dtype=float)
+    decoys = np.asarray(decoys, dtype=float)
+    if targets.size == 0:
+        return None
+    best: BestCut | None = None
+    for t in np.unique(targets)[::-1]:
+        est = estimate_fdr(targets, decoys, t)
+        n_t = int((targets >= t).sum())
+        n_d = int((decoys >= t).sum())
+        if best is None or est < best.estimate:
+            best = BestCut(float(est), float(t), n_t, n_d)
+    return best
+
+
 def realised_fdr(flagged: np.ndarray, truly_changed: np.ndarray) -> float:
     """Actual FDR, computable only when ground truth is known.
 

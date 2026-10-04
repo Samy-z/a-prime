@@ -62,25 +62,35 @@ python scripts/demo_detect.py
 ```
 
 ```
-a-prime report: 29 of 300 inputs flagged at q=0.1
+a-prime report
+  300 inputs compared, 12 samples per input from each of three runs: the old system, the old system again, and the new one.
+  False-discovery budget q=0.1: of the inputs flagged, at most about 10% are expected to be false alarms. The second run of the old system sets every threshold.
 
-channels:
-  mode_share       28 flagged   short: n=300 thr=0.583 found=28
-  novel_mode       13 flagged   short: n=300 thr=0.500 found=13
-  dispersion        0 flagged   short: n=300 thr=inf   found=0
-  embedding     skipped - no embedder supplied
+29 of 300 inputs flagged.
 
-conformance: 8 candidates -> 7 hard, 0 surfaced, 1 discarded
+checks  (each judged against its own baseline-vs-baseline scores; none votes)
+  mode_share (answer mix)                   28 flagged   short outputs: 28 flagged above 0.583, estimated false-discovery rate 0.07
+  dispersion (spread)                        0 flagged   short outputs: 6 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 4 more would have cleared it
+  novel_mode (new answers)                  13 flagged   short outputs: 13 flagged above 0.500, estimated false-discovery rate 0.08
+  nli_contradiction (contradiction)        skipped: no NLI model supplied
+  nli_directional (information direction)  skipped: no NLI model supplied
+  embedding (embedding distance)           skipped: no embedder supplied
 
-flagged inputs:
-  in025 [short] mode_share=+1.000, novel_mode=+1.000
-  in030 [short] mode_share=+1.000, novel_mode=+1.000
+rules inferred from the old system  (describe the system as a whole, so not subject to the floor above)
+  8 candidate rules: 7 held on both old-system runs and are enforced, 0 held often but not always and are listed for a person, 1 discarded (0 of those knocked down by the second run).
+  none of the enforced rules was broken by the new system.
+
+flagged inputs  (which checks fired, and their scores)
+  in025 [short]  answer mix 1.000 · new answers 1.000
+  in030 [short]  answer mix 1.000 · new answers 1.000
   ...
 ```
 
-Note the `dispersion` line. That check found no threshold it could justify, so it
-reported nothing rather than lowering its bar until something appeared. A tool
-that always finds something is not measuring anything.
+Note the `dispersion` line. That check saw six inputs stand out from the
+baseline's own variation, four short of the ten it needs before it can report
+anything, and it said so rather than lowering its bar until something appeared.
+A tool that always finds something is not measuring anything. The ten is
+explained under honest limits below.
 
 ## What we found, including the parts that did not work
 
@@ -259,7 +269,7 @@ check can and cannot see, and
 the pieces fit together.
 
 ```bash
-python -m pytest tests/ -q     # 134 tests, no model downloads required
+python -m pytest tests/ -q     # the whole suite in seconds, no model downloads
 ```
 
 ## Licence

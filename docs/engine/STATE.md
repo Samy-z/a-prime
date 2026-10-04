@@ -29,7 +29,7 @@ truth, across nine (k, severity) cells (MTH-018).
 |---|---|
 | Adapter (`input -> output + trace`) | **done**. Deliberately minimal; resist widening it, log the pressure instead. |
 | Trace format | **done** — latency, tools, steps, finish reason, model id, error. |
-| Report format | GAP — week 2 |
+| Report format | **done** 2026-10-04. `Report.text()` for a reader, `Report.to_dict()` for a results file. Every check carries a reading in words that separates "under the floor" from "cannot see it" (ENG-007, MTH-024), from `fdr.best_achievable`, which `scripts/diagnose_channels.py` now shares. `docs/knowledge/detector.md`, "Reading the report". |
 
 ## Cost posture
 
@@ -38,6 +38,11 @@ from combinatorics, but the measured envelope puts k=10 at 8% detection for a
 moderate shift, against 73% at k=20 (MTH-018). Cheap models for systems under
 test — the object of measurement is the detector, not the systems. Subsample
 corpora rather than reducing k: k is load-bearing, corpus size is not.
+
+The partition is derived once per (input, arm pair) and shared by the three
+partition statistics; `Report.cost` counts every clustering (ENG-003, fixed
+2026-10-04). The live re-measurement of the cost line on the committed
+recording is still owed by the GPU machine.
 
 ## Hard requirement: runs must be resumable
 

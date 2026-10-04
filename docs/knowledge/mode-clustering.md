@@ -65,6 +65,12 @@ representative per cluster, not every member. `ClusterResult.predicate_calls`
 records what was actually spent — that number is the justification for
 distilling the predicate later, so it is measured rather than asserted.
 
+The detector derives each partition once per input and arm pair and reads all
+three partition statistics off it. Until 2026-10-04 it re-clustered once per
+statistic and counted only the first pass, so `Report.cost` under-reported the
+dominant cost by three (ENG-003, fixed). Every clustering is now counted and
+`predicate_calls` equals what the predicate was asked.
+
 ### Threshold: 0.7, chosen on an asymmetry argument (MTH-020)
 
 Fitted against 320 equivalent and 512 different probe pairs. Pooled balanced

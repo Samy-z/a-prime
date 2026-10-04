@@ -118,7 +118,7 @@ silently invalidate the result rather than failing loudly:
 Environment is a repo-local venv. Prefix with `.venv/Scripts/python.exe` on
 Windows.
 
-    python -m pytest tests/ -q              # 218 tests, all fast, no models
+    python -m pytest tests/ -q              # the whole suite in seconds, no models
     python scripts/run_probes.py --dry-run  # build probe pairs, no models
     python scripts/run_probes.py            # full blind-spot map (downloads 4 models)
     python scripts/run_probes.py --only deberta_mnli --normalise
@@ -152,7 +152,8 @@ interception. Entry points already do it.
     probes/         the probe suite: what each channel can and cannot resolve.
     cells/          nine systems under test: 3 domains x 3 output formats, with
                     eight tools each. `retrieval_faults.py` degrades what they
-                    know rather than rewriting what they say.
+                    know and `prompt_faults.py` edits what they are told,
+                    rather than rewriting what they say.
 
 Pipeline: record three arms -> dedup -> normalise -> cluster jointly -> score
 (mode-share, dispersion, NLI contradiction, NLI directional both tails,
@@ -183,5 +184,6 @@ runs are pausable, see `docs/knowledge/recorder.md`.
 
 Not built: embedding style-stability gate, shape-stratified thresholds in anger
 (every run so far pooled to one stratum), Palworld adapter, the nine-cell
-factorial, F11, F2. The agent output format is distinct but 4/12 compliant,
-kept deliberately (HANDOFF §13).
+factorial. F2 and F11 are built for cells and unit-tested, never run live.
+The agent output format is distinct but 4/12 compliant, kept deliberately
+(HANDOFF §13).

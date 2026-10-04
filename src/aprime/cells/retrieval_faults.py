@@ -48,7 +48,6 @@ fault that fired on nothing.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -67,9 +66,16 @@ from .tools import SHAPES, ToolSet
 # rather than inferred, so that adding a shape to tools.py cannot quietly widen a
 # pre-registered fault.
 RETRIEVAL_FAULTS: dict[str, str] = {
-    "stale_view": "F5",       # knowledge-base staleness
-    "tool_withdrawn": "F3",   # upstream tool renamed or removed
+    "stale_view": "F5",            # knowledge-base staleness: older rows
+    "tool_withdrawn": "F3",        # upstream tool renamed or removed
+    "degraded_retrieval": "F11",   # retrieval degradation: wrong rows
 }
+
+# The published severity ladder for F11 (arXiv 2606.28337, n=500): the share
+# of retrieved rows replaced by noise. At 0.10 every downstream metric was
+# identical to 0.00, so a miss at that rung is not a detector failure and is
+# not scored as one (BCH-004).
+F11_LADDER: tuple[float, ...] = (0.10, 0.20, 0.30)
 
 CellFactory = Callable[[ToolSet], Cell]
 
@@ -124,31 +130,14 @@ class RetrievalFault:
                 "logged as unaffected and the fault would appear to have fired "
                 "on nothing, which is worse than refusing.")
         self.log = ActivationLog(self.spec)
-        if self.store is not None and self.store.exists():
-            try:
-                loaded = json.loads(self.store.read_text(encoding="utf-8"))
-                for key, hit in loaded.items():
-                    iid, _, idx = key.rpartition("#")
-                    self.log.record(iid or key, int(idx or 0), bool(hit))
-            except (ValueError, OSError):
-                pass
+        self.log.load_from(self.store)
 
     @property
     def arm(self) -> str:
         return self.inner.arm
 
     def _persist(self) -> None:
-        if self.store is None:
-            return
-        try:
-            self.store.parent.mkdir(parents=True, exist_ok=True)
-            payload = {f"{iid}#{idx}": hit
-                       for (iid, idx), hit in self.log.fired.items()}
-            tmp = self.store.with_suffix(".tmp")
-            tmp.write_text(json.dumps(payload), encoding="utf-8")
-            tmp.replace(self.store)
-        except OSError:
-            pass
+        self.log.persist_to(self.store)
 
     @property
     def name(self) -> str:
@@ -227,6 +216,41 @@ def stale_view(
                        regime=regime, share=share, seed=seed),
         clean=ToolSet(pack),
         faulty=ToolSet(pack, stale=picked),
+    )
+
+
+def degraded_retrieval(
+    pack,
+    make_cell: CellFactory,
+    shapes: Iterable[str],
+    noise: float = 0.20,
+    regime: str = "B0",
+    share: float = 1.0,
+    seed: int = 0,
+) -> RetrievalFault:
+    """A cell whose reads return the wrong rows some of the time.
+
+    Not staleness. A stale index serves older content of the right record; a
+    degraded one serves well-formed content of the wrong record, which is what
+    a confused retriever looks like from outside: the right keys, a plausible
+    row, belonging to somebody else. Severity is `noise`, the fraction of rows
+    replaced, on the published ladder in `F11_LADDER`.
+
+    Activation is decided the same way as `stale_view`: each call is replayed
+    against a clean and a degraded toolset and compared. Degradation is seeded
+    on the call, so the replay reproduces the rows the cell actually saw. At
+    low noise many calls come back unchanged; those are true negatives.
+    """
+    picked = _validate(shapes)
+    if not 0.0 < noise <= 1.0:
+        raise ValueError(f"noise must be in (0, 1], got {noise}")
+    faulty = ToolSet(pack, degraded=picked, noise=noise, seed=seed)
+    return RetrievalFault(
+        inner=make_cell(faulty),
+        spec=FaultSpec(fault_class="F11", name="degraded_retrieval",
+                       severity=noise, regime=regime, share=share, seed=seed),
+        clean=ToolSet(pack),
+        faulty=ToolSet(pack, degraded=picked, noise=noise, seed=seed),
     )
 
 
@@ -345,6 +369,7 @@ def check_activation_is_usable(
                                label=log.spec.cell_id)
 
 
-__all__ = ["RETRIEVAL_FAULTS", "CellFactory", "RetrievalFault",
+__all__ = ["F11_LADDER", "RETRIEVAL_FAULTS", "CellFactory", "RetrievalFault",
            "UsageRecorder", "activation_warnings",
-           "check_activation_is_usable", "stale_view", "tool_withdrawn"]
+           "check_activation_is_usable", "degraded_retrieval", "stale_view",
+           "tool_withdrawn"]

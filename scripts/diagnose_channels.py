@@ -41,6 +41,7 @@ import numpy as np  # noqa: E402
 
 from aprime.clustering import NLIEquivalence  # noqa: E402
 from aprime.detect import detect  # noqa: E402
+from aprime.fdr import best_achievable  # noqa: E402
 from aprime.probes.channels import NLI_MODELS, NLIChannel  # noqa: E402
 from aprime.recorder import Recording, load_checkpoint  # noqa: E402
 
@@ -95,18 +96,13 @@ def main() -> int:
         print("    " + describe("decoys, all inputs  ", d))
 
         # The question the FDR estimator actually asks: is there a cut where
-        # many targets sit above almost every decoy?
-        best = None
-        for cut in np.unique(t)[::-1]:
-            above_t = int((t >= cut).sum())
-            above_d = int((d >= cut).sum())
-            est = (1 + above_d) / max(above_t, 1)
-            if best is None or est < best[0]:
-                best = (est, float(cut), above_t, above_d)
+        # many targets sit above almost every decoy? Same function the report
+        # uses, so the two cannot disagree.
+        best = best_achievable(t, d)
         if best:
-            est, cut, at, ad = best
-            print(f"    best achievable estimate {est:.3f} at cut {cut:.4f} "
-                  f"({at} targets, {ad} decoys above) -- needs <= 0.100")
+            print(f"    best achievable estimate {best.estimate:.3f} at cut "
+                  f"{best.cut:.4f} ({best.targets_above} targets, "
+                  f"{best.decoys_above} decoys above) -- needs <= 0.100")
         sep = 0.0
         if len(fi):
             sep = float(np.mean(t[fi]) - np.mean(d))

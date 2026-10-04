@@ -472,3 +472,81 @@ now leads on the token, which is the discriminative feature.
 **Reopen if:** a different model drives the agent cells. Compliance here is a
 statement about one 8B model's instruction following, and a stronger model may
 make the whole finding moot.
+
+## BCH-016 — F2 is built on the frozen ladder, and its activation is exposure for five edits of six
+**Date:** 2026-10-04
+**Finding:** Prompt regression is injectable in all nine cells
+(`src/aprime/cells/prompt_faults.py`). The mechanism is the retrieval faults':
+change what the model is given, here the system prompt's lines, and let the
+model write, so the output carries its own fingerprints. Six edits, each
+shaped after a documented incident, declare their lines added and removed; a
+test measures the real diff on every format, with and without identity, and
+refuses an edit that outgrows its rung. The ladder is the frozen one: +1/−1,
++2/−3, +9/−23. `FaultSpec.severity` is the rung over three.
+
+**The activation decision, stated so it is not mistaken for purchase.** The
+taxonomy says F2 fires only where the changed instruction has purchase, and
+that per-input instrumentation is mandatory despite B0. Purchase, whether the
+instruction changed what the model wrote, is the detector's question. Deciding
+it in the harness would need a paired clean invocation of every input, which
+doubles recording, the binding constraint (MTH-024). So activation is: in the
+blast radius, and the edited prompt differs from the clean one for this
+invocation, and the model answered, and the edit's own purchase predicate
+where it has one. `identity_dropped` has one (a requester was named). The
+other five fire on every answered input, which is exposure.
+
+**Which way that errs.** An input the model answered unchanged despite the
+edit is counted as fired and the detector is scored as missing it. That
+understates recall on F2; it never inflates it. The opposite convention,
+counting only inputs whose output visibly changed, would be grading the
+detector against its own answer.
+
+**One consequence for the bench.** `Cell.system_prompt()` now builds lines and
+joins them; the joined text is byte-identical to before, asserted in
+`test_the_clean_prompt_is_byte_identical_to_before_the_lines_refactor`, so no
+recording on disk is affected.
+**Evidence:** `tests/test_prompt_faults.py`, 54 tests including the
+parametrised ladder check; `docs/knowledge/faults.md`.
+**Reopen if:** a study cell can afford the paired clean invocation, at which
+point purchase becomes measurable and the five exposure-based edits should be
+re-graded against it; or if a seventh edit is proposed, which must name its
+incident and sit inside a rung.
+
+## BCH-017 — F11 is built as wrong rows, seeded per call, on the published ladder
+**Date:** 2026-10-04
+**Finding:** Retrieval degradation is injectable in all nine cells
+(`ToolSet(degraded=..., noise=..., seed=...)`, `degraded_retrieval()` in
+`cells/retrieval_faults.py`). A `noise` fraction of what a read returns is
+replaced by a well-formed row belonging to another record of the same pack:
+another entity under a lookup, somebody else's events in a search, another
+principal's figures under an evaluation, another topic's policy, another
+document under a verification. Keys and lengths are preserved, so structural
+conformance cannot catch it for free, which is the same discipline `stale_view`
+follows.
+
+**This is not the fault `stale_view` already injects.** `_shift` serves older
+rows of the right record; the task file and `cells.md` had both described it as
+covering F5 and F11. A stale index is behind; a degraded one is confused. On the
+same history call the stale read returns the principal's own older records,
+the degraded read returns records that are not theirs, and the clean read
+returns neither; a test asserts all three disagree.
+
+**Severity is the noise fraction, on the ladder the taxonomy cites:** 0.10,
+0.20, 0.30 from arXiv 2606.28337. At 0.10 that study measured no downstream
+change, so a miss there is not a detector failure (BCH-004). In the harness the
+floor shows as true negatives rather than as a flag: at 10% noise most reads
+come back unchanged, and activation, decided by replaying each call against a
+clean and a degraded toolset, records them as unaffected. The replay works
+because degradation is seeded on (seed, shape, canonical arguments), so an
+identically built toolset returns the same wrong rows.
+
+**Limit stated now rather than found later.** Wrong rows come from the same
+pack, so they are always plausible records of the same domain. A retriever that
+returns rows from an unrelated corpus is a different, louder fault and is not
+modelled.
+**Evidence:** `tests/test_degraded_retrieval.py`, 18 tests;
+`docs/knowledge/faults.md`.
+**Reopen if:** a live run at 0.20 or 0.30 fires on fewer inputs than the
+estimator can report (MTH-024), which would mean the seeded replacement is too
+gentle for the pack's record sizes and the ladder needs re-anchoring against
+measured activation.

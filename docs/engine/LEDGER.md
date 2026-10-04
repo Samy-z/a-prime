@@ -371,3 +371,30 @@ with and without `check_arms_first`; `preflight` in `src/aprime/recorder.py`.
 **Reopen if:** anyone measures the induced word-count rule's false-alarm rate
 across many draws at several jitter levels, which is what the test is currently
 standing in for and should not be.
+
+## ENG-003 — FIXED (dated append, 2026-10-04)
+
+`detect()` now derives the partition once per (input, arm pair) and reads all
+three statistics off it; `_pairwise` returns the three arrays together. Every
+clustering is counted, because every one is now real work: `cost["clusterings"]`
+is `2n` for `n` inputs, and `cost["predicate_calls"]` equals what the predicate
+was asked, asserted against a counting predicate in `tests/test_cluster_once.py`.
+The same test counts the ratio the entry above asserted: re-clustering per
+statistic costs exactly three times the judgements, on the same clouds.
+
+The statistics themselves are unchanged: a test recomputes each from an
+independent `cluster_jointly` call per input and matches the detector's arrays
+element for element. Only the accounting moved, from under-reporting by three
+to reporting what was spent.
+
+**What is not in this append.** The re-measurement of the cost line on
+`results/cell_detection_20260929T231931Z.jsonl` with the real NLI predicate,
+which the cloud task list asked for. The container that made this fix cannot
+install torch, so the seconds are still the GPU machine's to measure:
+`scripts/diagnose_channels.py` against that recording prints the new cost
+line, and the figure to compare it with is the old report's
+`7 predicate calls over 4 clusterings` (run `20260930T001738Z`), which counted
+one pass of three. Expect both counts to read the same, since the old line
+already described one pass, and the detector stage to be faster by whatever
+share of its 2.7 s the two discarded passes were. The counts did not move; the
+work did.

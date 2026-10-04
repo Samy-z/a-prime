@@ -70,6 +70,47 @@ One check found nothing at all and said so, reporting a threshold of infinity.
 That is the intended behaviour: a check that cannot find a threshold it can
 justify reports nothing, rather than lowering its bar until something appears.
 
+## Reading the report
+
+The report is what `detect()` returns, printed with `Report.text()` or written
+as data with `Report.to_dict()`. It is written for the same reader as the paper:
+somebody who ships systems and has not opened this code. Every check is named
+twice, by the name the code uses and by a plain label, so a line can be both
+read and searched for.
+
+The headline line, "N of M inputs flagged", is the least informative line in
+it. Nothing flagged has three different causes, and the report says which one
+applies, next to every check:
+
+| what the check line says | what happened | what to do |
+|---|---|---|
+| *n inputs sit above every baseline-vs-baseline score, under the floor of 10: m more would have cleared it* | the check saw the change cleanly, but fewer than 1/q inputs cleared the bar, and the false-alarm estimate cannot go below 1/n | test more inputs, or more samples per input so the statistic has finer steps |
+| *partly separated: n inputs above against d baseline scores* | some signal, not enough to set a threshold the budget allows | more samples per input first; the baseline's own variation is close to the effect |
+| *no separation: the new system's scores sit inside the old system's own run-to-run variation* | either nothing changed that this check can see, or this check cannot see this kind of change | the report cannot tell those two apart; consult the blind-spot map for whether this check sees this kind of change at all |
+| *skipped: no NLI model supplied* | the check did not run | a check that could not run is not a check that found nothing |
+
+The number behind the first two readings is the lowest false-discovery
+estimate any cut achieves, with the counts of inputs and baseline scores above
+that cut. `scripts/diagnose_channels.py` prints the same number from the same
+function, with the score distributions beside it.
+
+Three more things the report states because nothing in the numbers would:
+
+- **How many samples each arm really had.** The header gives the samples per
+  input, and a line follows if any input had fewer usable samples on some arm
+  because calls failed. Those inputs' thresholds rest on fewer baseline scores.
+- **That the rules section is outside the floor.** Rules inferred from the old
+  system describe the system as a whole, so a broken rule is reported even when
+  no individual input can be. It is the only part of the report that can
+  report a small number of changes.
+- **The sign of the information-direction check.** A flagged input shows the
+  signed value with its meaning: positive means the new output says less than
+  the old one, negative means it says more.
+
+The report carries a run id and config hash when the caller sets
+`report.provenance` from `provenance.row_provenance()`; the runners do. A
+report without one cannot be traced and should not be quoted.
+
 ## Deliberate behaviours worth knowing
 
 - **An input missing any of its three runs is dropped, not estimated.** Without

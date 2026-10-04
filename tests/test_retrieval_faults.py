@@ -222,7 +222,8 @@ def test_a_fault_mislabelled_against_the_frozen_taxonomy_is_refused():
 
 
 def test_every_retrieval_fault_names_a_taxonomy_class():
-    assert set(RETRIEVAL_FAULTS) == {"stale_view", "tool_withdrawn"}
+    assert set(RETRIEVAL_FAULTS) == {"stale_view", "tool_withdrawn", "degraded_retrieval"}
+    assert RETRIEVAL_FAULTS["degraded_retrieval"] == "F11"
     assert all(v.startswith("F") for v in RETRIEVAL_FAULTS.values())
 
 
