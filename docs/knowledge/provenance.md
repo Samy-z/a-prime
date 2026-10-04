@@ -103,6 +103,24 @@ nearest commit.
 
 ## Traps already fallen into
 
+**A hashed string is part of a filename, so tidying it is a migration.**
+`make_job` in `run_study.py` records the judging model's revision as a bare
+SHA under `instruments`, and `capture()` warns on every run that a bare value
+is not a pin. The pin is correct; the warning is cosmetic. The one-line fix
+that silences it, prefixing the model id, is not cosmetic: `instruments` feeds
+the config hash, the config hash names every cell's checkpoint, and a renamed
+checkpoint is an orphaned recording. Measured on otherwise identical inputs,
+the bare form hashes to `9864af6f7989ee8a` and the prefixed form to
+`9ed71b092eb45c10`. This session offered that fix while `banking-summary` was
+46 percent recorded; the local session checked before taking it. Decision
+2026-10-04: leave the warning until the factorial completes, then change the
+format at a boundary where nothing is part-recorded, expecting to re-record
+anything in flight. The general rule: **anything inside `instruments` or
+`params` is load-bearing for the filename, not only for the record, and a
+formatting change there is a schema migration wearing the clothes of a typo
+fix.** The guard comment at the call site says the same.
+
+
 **A pin in name only.** The same file records `system_digest: "unresolved"`.
 Ollama's `/api/show` carries no digest; `/api/tags` does, and the runner asked
 the wrong endpoint for several runs. Every one of those runs has a config hash
