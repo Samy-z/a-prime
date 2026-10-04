@@ -39,6 +39,11 @@ moderate shift, against 73% at k=20 (MTH-018). Cheap models for systems under
 test — the object of measurement is the detector, not the systems. Subsample
 corpora rather than reducing k: k is load-bearing, corpus size is not.
 
+The partition is derived once per (input, arm pair) and shared by the three
+partition statistics; `Report.cost` counts every clustering (ENG-003, fixed
+2026-10-04). The live re-measurement of the cost line on the committed
+recording is still owed by the GPU machine.
+
 ## Hard requirement: runs must be resumable
 
 Study runs are free in money (local models) and expensive in wall-clock, and

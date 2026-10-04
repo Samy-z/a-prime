@@ -81,7 +81,7 @@ Returning the wrong rows rather than older ones. The current `_shift` in
 already covered by F5. Degradation needs its own handler. Code plus tests, no
 GPU.
 
-### 6. ENG-003
+### 6. ENG-003 — DONE 2026-10-04, except the live re-measurement (see the ENG-003 append)
 
 Clustering is recomputed three times per comparison. Logged as pressure rather
 than fixed. The fix is code, and it can be verified against a recording already

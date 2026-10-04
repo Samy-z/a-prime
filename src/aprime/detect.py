@@ -355,32 +355,36 @@ class Report:
         }
 
 
+PARTITION_STATS = ("mode_share", "dispersion", "novel_mode")
+
+
 def _pairwise(
     clouds_a: dict[str, list[str]],
     clouds_other: dict[str, list[str]],
     ids: Sequence[str],
     predicate: EquivalencePredicate | None,
-    stat: str,
-    cost: dict | None = None,
-) -> np.ndarray:
-    out = []
+    cost: dict,
+) -> dict[str, np.ndarray]:
+    """All three partition statistics for every input, from one clustering each.
+
+    The three statistics read the same partition, so it is derived once per
+    (input, arm pair) and shared. An earlier version re-clustered once per
+    statistic and counted only the first pass, which under-reported the
+    dominant cost of the detector by a factor of three (ENG-003). The cost
+    recorded here is what was spent.
+    """
+    out: dict[str, list[float]] = {s: [] for s in PARTITION_STATS}
     for iid in ids:
         a, b = clouds_a[iid], clouds_other[iid]
         ma, mb, joint = cluster_jointly(a, b, predicate)
-        if cost is not None:
-            cost["predicate_calls"] += joint.predicate_calls
-            cost["clusterings"] += 1
-            cost["samples_clustered"] += joint.n_samples
-            cost["distinct_after_normalisation"] += joint.distinct_after_normalisation
-        if stat == "mode_share":
-            out.append(stats.tv_distance(ma, mb))
-        elif stat == "dispersion":
-            out.append(stats.dispersion_ratio(ma, mb))
-        elif stat == "novel_mode":
-            out.append(stats.novel_mode_mass(ma, mb))
-        else:  # pragma: no cover
-            raise ValueError(stat)
-    return np.asarray(out, dtype=float)
+        cost["predicate_calls"] += joint.predicate_calls
+        cost["clusterings"] += 1
+        cost["samples_clustered"] += joint.n_samples
+        cost["distinct_after_normalisation"] += joint.distinct_after_normalisation
+        out["mode_share"].append(stats.tv_distance(ma, mb))
+        out["dispersion"].append(stats.dispersion_ratio(ma, mb))
+        out["novel_mode"].append(stats.novel_mode_mass(ma, mb))
+    return {s: np.asarray(v, dtype=float) for s, v in out.items()}
 
 
 def detect(
@@ -413,23 +417,20 @@ def detect(
     channels: dict[str, ChannelResult] = {}
 
     # The equivalence predicate is the dominant cost of the whole detector, so
-    # it is counted rather than estimated. This number is the evidence for or
-    # against distilling it later.
+    # it is counted rather than estimated, and every clustering is counted
+    # because every one is now real work: one per input per arm pair, shared
+    # by the three partition statistics (ENG-003). This number is the evidence
+    # for or against distilling the predicate later.
     cost = {
         "predicate_calls": 0,
         "clusterings": 0,
         "samples_clustered": 0,
         "distinct_after_normalisation": 0,
     }
-    # Only the first statistic's clusterings are counted: all three re-derive
-    # the same partition, so counting each would treble the reported cost for
-    # work the caller did once conceptually. The real fix is to cluster once and
-    # reuse -- logged as pressure rather than done, see ENG-003.
-    for stat in ("mode_share", "dispersion", "novel_mode"):
-        first = stat == "mode_share"
-        t = _pairwise(ca, cb, ids, predicate, stat, cost if first else None)
-        d = _pairwise(ca, cp, ids, predicate, stat, cost if first else None)
-        channels[stat] = ChannelResult(stat, t, d)
+    targets = _pairwise(ca, cb, ids, predicate, cost)
+    decoys = _pairwise(ca, cp, ids, predicate, cost)
+    for stat in PARTITION_STATS:
+        channels[stat] = ChannelResult(stat, targets[stat], decoys[stat])
 
     # Embedding displacement, gated. Ungated it is anti-correlated with meaning
     # change (MTH-011), so a blocked gate is the channel working, not failing.
