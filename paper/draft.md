@@ -1,7 +1,8 @@
 # Does label-free regression detection transfer across domains?
 
 *Draft in progress. Every section except 8 (results) and the abstract is
-drafted; `docs/reader/paper-outline.md` maps each claim to its backing.*
+drafted, with appendices A to E; `docs/reader/paper-outline.md` maps each
+claim to its backing.*
 
 ---
 
@@ -1110,6 +1111,226 @@ files or from a model-free demo. The nine-system study needs a machine with a
 graphics processor and a local model server; the repository documents what
 travels with it and what does not, and the recorder resumes a run from its
 checkpoint on any machine that can reach the model server.
+
+---
+
+## Appendix A. Two rules for the same numbers
+
+A few figures in section 4 differ by one to four pairs from the same figures
+as first recorded in the project's findings log. The published figures are not
+wrong and have not been edited. The map and section 4 follow one rule for
+every row, and that rule differs from the first recording in two ways.
+
+First, when the first runs were scored, pairs with an added hedge were
+labelled as rewordings, so each check's 5 percent threshold was set over 320
+preserving pairs. Those pairs were later reclassified as a change of
+register, which is what they are, and the map sets every threshold over the
+256 pairs that remain. Second, the signed entailment check is read at both
+ends with a budget of 2.5 percent per end, where the first recording quoted
+the one-ended 5 percent rate.
+
+Every cell that moved by at least one pair, as counts out of 64:
+
+| quantity | as first recorded | on the map and in section 4 | which rule |
+|---|---|---|---|
+| contradiction, changed unit | 54 (84%) | 53 (83%) | first |
+| contradiction, changed quantifier | 59 (92%) | 57 (89%) | first |
+| contradiction, false alarms on reformatting | 12 (19%) | 9 (14%) | first |
+| entailment asymmetry, deleted condition | 61 (95%) | 59 (92%) | second |
+| second judge, contradiction, changed quantifier | 35 (55%) | 37 (58%) | first |
+| second judge, contradiction, changed number | 54 (84%) | 56 (88%) | first |
+| second judge, contradiction, changed date | 54 (84%) | 55 (86%) | first |
+| second judge, false alarms on rewording | 8 (13%) | 9 (14%) | first |
+| second judge, entailment asymmetry, deleted condition | 42 (66%) | 38 (59%) | both |
+| smallest embedding model, swapped name | 38 (59%) | 36 (56%) | first |
+| smallest embedding model, deleted condition | 21 (33%) | 20 (31%) | first |
+| smallest embedding model, false alarms on rewording | 13 (20%) | 10 (16%) | first |
+| mid-size embedding model, swapped name | 38 (59%) | 36 (56%) | first |
+| mid-size embedding model, deleted condition | 22 (34%) | 18 (28%) | first |
+| mid-size embedding model, false alarms on reordering | 11 (17%) | 10 (16%) | first |
+| largest embedding model, false alarms on rewording | 11 (17%) | 9 (14%) | first |
+
+Nothing else moved. No direction changed, no ordering between the two judging
+models changed, and no conclusion drawn from them changed. The largest move is
+four pairs. The ranking scores quoted in section 4 for the embedding models
+are the first-recorded ones; they are not on the map and have not been
+recomputed under the new preserving set.
+
+## Appendix B. The fault taxonomy
+
+Fourteen classes, frozen in a dated document before any threshold in the
+detector was tuned. Changes since the freeze are dated additions to a log at
+the foot of that document; two have been made, one splitting a class in two
+and one ratifying the exclusions below. The evidence grade is carried into
+every result that uses the class.
+
+| class | what changed | evidence |
+|---|---|---|
+| model swap or downgrade | the model behind the feature | production incidents |
+| prompt regression | the instruction text, or old text resurrected by a code path | production incidents; edits measured at one to three lines |
+| tool surface change | a tool renamed, removed or re-specified under the agent | production incidents |
+| provider drift | the hosted model changed under a fixed name | production incidents |
+| knowledge-base staleness or corruption | what a retrieval-backed system knows | production incidents |
+| cache contamination | one request's state leaking into another's | production incidents |
+| serving-stack corruption at fixed model identity | numerics, compilation or quantisation; wrong-script characters or raw escapes | production incidents, three with one symptom |
+| sticky routing, in two variants | a subset of users pinned to a bad backend; or a system that legitimately varies by user, as the control | production incidents |
+| persona, tone or sycophancy drift | how confident or agreeable the system sounds, with facts unchanged | production incidents |
+| input-side truncation | long inputs cut before the model sees them | documented mechanism, no measured incident |
+| retrieval degradation | the retriever returns the wrong rows | controlled study; 10 percent corruption produced no measurable change |
+| output-side truncation | long answers cut mid-sentence | documented mechanism |
+| refusal drift | the system refuses what it used to answer, or the reverse | documented, unquantified |
+| prompt-template or token serialisation mismatch | the same text serialised differently into tokens | documented mechanism |
+
+One class in the original design, a change to decoding parameters such as
+temperature, was dropped before the freeze for having no documented
+production instance. Three were considered and excluded as out of scope for a
+black-box detector that knows nothing about the data or the requester:
+retrieval permission drift, a destructive action by an agent, and a group of
+practitioner-folklore failures with no graded source. The exclusions are
+recorded as deferred, not rejected.
+
+Every class is injected across the blast radii that occur in production,
+which is a separate axis: a fault in a shared artifact hits everyone; a fault
+on the request path hits a uniform share of requests, or a sticky share of
+users at roughly twenty times the request rate.
+
+## Appendix C. How the probe pairs are built and checked
+
+The 896 pairs behind section 4 come from sixteen seed scenarios, four per
+subject area (banking, logistics, hospitality and technical operations). Each
+scenario is a small record of facts: a decision, a number with a unit, a date,
+a name, a quantifier and a condition. Each is rendered in four output shapes,
+a short answer of about thirty words, a JSON object, a multi-sentence summary
+of about 150 words, and a numbered list of reasoning steps. Both halves of a
+pair come from the same scenario and the same shape with one deliberate
+difference.
+
+The preserving differences are: a full paraphrase, two independent sentences
+reordered, a phrase replaced by a synonym, and prose reformatted as a bulleted
+list. The breaking differences are: a decision flipped, a negation inserted, a
+number changed, a unit changed, a date changed, a name swapped, a quantifier
+changed, and a condition deleted. The register differences are an added hedge
+and an added assertion of confidence. Every combination of scenario, shape and
+difference is one pair, which gives 64 pairs per kind of difference.
+
+The four shapes were made to span a factor of about five in length, from 32
+to 148 words at the median, by giving the summaries realistic filler that is
+identical in both halves. The first design spanned only a factor of 1.7, which
+is too narrow to separate "the check cannot see meaning" from "the check works
+but the change was diluted in a long output".
+
+The pairs have tests of their own that involve no check at all. They assert
+that the two halves of every pair differ, that the intended difference is
+present, and that nothing else is. On first assembly those tests found three
+kinds of pair whose halves were identical: the synonym substitution had no
+target phrase in the JSON rendering, the quantifier change had no quantifier
+to change in the short answer, and the reformatting collapsed whitespace that
+single-line prose did not have. Each would have produced a plausible finding
+about a check that was in fact a finding about a broken pair. A new kind of
+pair needs such a test before any number derived from it is read.
+
+## Appendix D. A report, annotated
+
+The report below is what the tool prints on the worked example that ships
+with the code, a synthetic system of three hundred inputs of which thirty
+really changed, twelve samples per cloud, budget 0.10. Each block is followed
+by what it means.
+
+```
+a-prime report
+  300 inputs compared, 12 samples per input from each of three runs: the old system, the old system again, and the new one.
+  False-discovery budget q=0.1: of the inputs flagged, at most about 10% are expected to be false alarms. The second run of the old system sets every threshold.
+```
+
+The header states the three things the rest depends on: how many inputs, how
+many samples per cloud, and the budget. A run id and configuration hash appear
+above these lines when the caller supplies them; a report without them should
+not be quoted. If any input had fewer usable samples on some arm because
+calls failed, a line here says how many, because their thresholds rest on
+fewer baseline scores.
+
+```
+29 of 300 inputs flagged.
+```
+
+The headline, and the least informative line in the report. When this reads
+zero, two lines follow it: the floor of ten and the check that came closest,
+with its best estimate and the counts behind it.
+
+```
+checks  (each judged against its own baseline-vs-baseline scores; none votes)
+  mode_share (answer mix)                   28 flagged   short outputs: 28 flagged above 0.583, estimated false-discovery rate 0.07
+  dispersion (spread)                        0 flagged   short outputs: 6 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 4 more would have cleared it
+  novel_mode (new answers)                  13 flagged   short outputs: 13 flagged above 0.500, estimated false-discovery rate 0.08
+  nli_contradiction (contradiction)        skipped: no NLI model supplied
+  nli_directional (information direction)  skipped: no NLI model supplied
+  embedding (embedding distance)           skipped: no embedder supplied
+```
+
+One line per check, named twice: by the name the code uses, so a line can be
+searched for, and in plain words. Each line carries one of four readings. A
+check that flagged gives its threshold and the estimated false-discovery rate
+among what it flagged. A check that separated the arms but fell short of the
+floor says how many inputs stood above every baseline score and how many more
+would have cleared it; the spread check here saw six, four short. A check with
+partial separation gives the counts at its best cut. A check with no
+separation says that the new system's scores sit inside the old system's own
+variation, and that the report cannot tell whether nothing changed or the
+check cannot see this kind of change. A check that did not run says so and
+why, because a check that could not run is not a check that found nothing.
+
+```
+rules inferred from the old system  (describe the system as a whole, so not subject to the floor above)
+  8 candidate rules: 7 held on both old-system runs and are enforced, 0 held often but not always and are listed for a person, 1 discarded (0 of those knocked down by the second run).
+  none of the enforced rules was broken by the new system.
+```
+
+The three bands of section 5, with counts, then any rule the candidate broke
+with how many outputs broke it and an example, then any rule held for a
+person to decide. This block is outside the floor, and on the first real run
+it was the only block that could report a small number of changes.
+
+```
+flagged inputs  (which checks fired, and their scores)
+  in025 [short]  answer mix 1.000 · new answers 1.000
+  in030 [short]  answer mix 1.000 · new answers 1.000
+  ...
+```
+
+One line per flagged input: its identifier, the output shape it was judged
+in, and each check that fired with its score. When the information-direction
+check fires, the signed value is shown with its meaning, "new output says
+less" or "new output says more", because the sign is what names the fault.
+
+A notes block follows when there is something to say: inputs dropped for a
+missing arm, a run that crossed midnight, the embedding check switched off on
+some inputs. A cost line closes the report with how many model judgements of
+equivalence were spent and how far normalisation collapsed the samples before
+any were made.
+
+## Appendix E. The repository checks its own description
+
+A reader deciding whether to trust what a repository says about itself should
+know whether anything checks it. Four things do, and they run with the rest of
+the test suite on every change.
+
+The index of the repository's component documents is read by a test that
+fails when a row marked done names a file that does not exist, when a row
+marked as a gap names a file that does, or when a document has no row. Four
+rows were wrong in one week before it existed, in both directions. The
+per-family state files are read by a second test that fails when a path they
+name does not exist, with the stated limit that it cannot catch a prose
+contradiction between two files. The worked example in the README is compared
+line by line against what the demo actually prints, because the report format
+changed once and the example went on showing the old format until somebody
+noticed. And the blind-spot map is recomputed from the committed probe runs by
+a test that pins its cells to the counts the findings log records, so a
+regenerated figure that disagrees is a changed input file or a drifted
+recomputation and never a new finding.
+
+None of these can tell whether a document that exists is current. They close
+the gap between "the file is there" and "the index says so", and between "the
+example is printed" and "the program prints it".
 
 ---
 

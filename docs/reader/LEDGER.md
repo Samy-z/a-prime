@@ -355,3 +355,15 @@ old block surviving `a115857`, the commit that changed the format.
 **Reopen if:** a second worked example is added anywhere outward-facing
 without a test of the same shape. The blind-spot map already has one; this
 closes the README's.
+
+## RDR-006 — SECOND CONFIRMATION (dated append, 2026-10-04)
+
+The first prose written under D19, about 10,000 words of the paper draft, was
+read by the owner to roughly two thirds. Their verdict: easy to read, including
+the section that explains the false discovery rate from nothing, with only
+minor line edits to come. That is the first positive evidence for the D19 bet
+that explaining the statistics for a practitioner would not cost readability,
+and the first time the rule in this entry ("say the thing, not a figure for
+it") has been applied at length and judged by the one instrument that can
+judge it. The register is held for the rest of the paper. Line edits remain
+the owner's, and the entry stays open to the next reader who finds it hard.
