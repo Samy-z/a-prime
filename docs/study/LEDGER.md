@@ -256,3 +256,54 @@ unit 83% to 100%, quantifier 89% to 100%.
 
 The first choice, relabelling the raw runs, stands, with the reconciliation the
 local session asked for written as a dated append under MTH-017.
+
+## STD-010 — First two rows of the matrix: prose transfers across three domains, JSON fails in two of them
+**Date:** 2026-10-05
+**Finding:** Six cells recorded and analysed, `granite4.2:8b` (digest
+`f586c02fdecdf151`), F5 stale view over the four readable shapes, n=40, k=6,
+q=0.10, per-input activation as ground truth. 240 triples per cell, 4,320
+samples, zero errored. Analysis run `20261005T145729Z` (hospitality-extraction
+`...730Z`), commit `26345e7`.
+
+| cell | activated | flagged | true positives | realised FDR | recall |
+|---|---|---|---|---|---|
+| banking-summary | 17/40 | 19 | 15 | 0.21 | 0.88 [0.66, 0.97] |
+| logistics-summary | 14/40 | 11 | 11 | 0.00 | 0.79 [0.52, 0.92] |
+| hospitality-summary | 21/40 | 21 | 18 | 0.14 | 0.86 [0.65, 0.95] |
+| banking-extraction | 11/40 | 0 | 0 | — | 0.00 [0.00, 0.26] |
+| logistics-extraction | 23/40 | 11 | 11 | 0.00 | 0.48 [0.29, 0.67] |
+| hospitality-extraction | 25/40 | 0 | 0 | — | 0.00 [0.00, 0.13] |
+
+**Summary row: transfer across all three domains.** Pooled recall 44/52 =
+0.85 [0.72, 0.92] with no threshold tuned to any domain. Claimed at exactly
+that width: one fault class, one model, one output format. Three systems
+succeeding bound the per-system success rate below at 0.29 (Clopper-Pearson,
+95%, MTH-008).
+
+**Extraction row: the failure is format-shaped.** Logistics caught 11/23 with
+zero false; banking flagged nothing on 11 activated (near the floor, sizing
+miss not excluded); hospitality flagged nothing on 25 activated, well above
+the floor. **Diagnosis not run**: `diagnose_channels.py` needs the NLI model
+on the GPU machine, which is recording the agent row. Recorded as a measured
+hole, not explained.
+
+**FDR: not yet decidable.** Two summary cells over budget (0.21, 0.14), one at
+0.00; pooled 7/51 = 0.14 [0.07, 0.26], which contains 0.10. At ~20 flags per
+cell this is indistinguishable from an honest 0.10 and from a miscalibration.
+Needs the agent row.
+
+**Channels:** mode_share 57 and novel_mode 61 flags across the six cells;
+nli_contradiction 10 (logistics-summary only); nli_directional 0; embedding
+skipped. Not a contradiction of MTH-013: the probes measure a judging model
+on single pairs, the cells measure which statistic separates clouds under a
+fault that changes which answer is given; the NLI predicate still underlies
+the clustering. Contradiction's per-input mean over paired samples diluting a
+partial change is a plausible, unmeasured reason.
+
+**k=6, not 20.** Below the working minimum of MTH-018; every recall is a lower
+bound on k=20 and mode_share takes seven values. Stated in the paper.
+**Evidence:** `results/study/matrix.json`, the six `*.report.json`, the six
+`*.jsonl` checkpoints and `*.activation.json` stores; `paper/draft.md` §8.
+**Reopen if:** the agent row lands (completes the matrix and the FDR
+question); the extraction diagnosis runs (names the hole); a second model
+drives the cells (MTH-008 needs more systems than three per row).
