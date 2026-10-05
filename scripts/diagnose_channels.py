@@ -90,7 +90,15 @@ def main() -> int:
     print(f"activation: {len(fired)} fired, {len(quiet)} quiet")
     print()
 
-    nli = NLIChannel(next(s for s in NLI_MODELS if s.key == "deberta_mnli"))
+    spec = next(s for s in NLI_MODELS if s.key == "deberta_mnli")
+    nli = NLIChannel(spec)
+    # Printed results are also written as a JSON file beside the checkpoint,
+    # so a quoted number traces to a committed file rather than to prose
+    # (owner request, 2026-10-05).
+    diag = {"checkpoint": cp.name, "k": k, "n_inputs": len(ids),
+            "fired": len(fired), "quiet": len(quiet), "q": 0.10,
+            "nli": spec.hub_id, "nli_revision": str(nli.revision),
+            "channels": {}}
     rep = detect(rec, predicate=NLIEquivalence(nli, threshold=0.7),
                  nli_channel=nli, q=0.10)
 
@@ -102,6 +110,7 @@ def main() -> int:
         if ch.skipped:
             print(f"--- {name}: SKIPPED ({ch.skipped})")
             print()
+            diag["channels"][name] = {"skipped": ch.skipped}
             continue
         t, d = np.asarray(ch.targets, float), np.asarray(ch.decoys, float)
         print(f"--- {name}")
@@ -122,11 +131,24 @@ def main() -> int:
             sep = float(np.mean(t[fi]) - np.mean(d))
         print(f"    mean(target|fired) - mean(decoy) = {sep:+.4f}")
         print()
+        diag["channels"][name] = {
+            "best_estimate": round(best.estimate, 4) if best else None,
+            "best_cut": round(best.cut, 6) if best else None,
+            "targets_above": best.targets_above if best else None,
+            "decoys_above": best.decoys_above if best else None,
+            "mean_target_fired_minus_decoy": round(sep, 4),
+            "targets_fired": [round(float(x), 6) for x in sorted(t[fi])],
+            "targets_quiet": [round(float(x), 6) for x in sorted(t[qi])],
+            "decoys": [round(float(x), 6) for x in sorted(d)],
+        }
 
     print("conformance:", rep.contract.summary() if hasattr(rep.contract, "summary")
           else rep.contract)
     print()
     print("cost:", json.dumps(rep.cost))
+    out = cp.with_name(cp.name[: -len(".jsonl")] + ".diagnosis.json")
+    out.write_text(json.dumps(diag, indent=1), encoding="utf-8")
+    print(f"wrote {out.name}")
     return 0
 
 
