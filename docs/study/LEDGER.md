@@ -338,3 +338,24 @@ recall moves modestly; realised FDR moves towards the budget. Full k=20
 re-record only if that row's recall leaves the k=6 interval [0.72, 0.92].
 **Evidence:** HANDOFF §21; the activation stores; `paper/draft.md` §8.
 **Reopen if:** the k=20 summary row lands.
+
+## STD-010 — SECOND APPEND (2026-10-05): the 101/104 discrepancy resolved
+
+Shared instrument run on the committed stores: fired-sample counts per touched
+input come out {1:6, 3:2, 4:2, 5:1, 6:96, 7:4}, 111 touched, 101 at five or
+more. **The cloud session's 101 stands.** My 104 came from bucketing by
+fired/total fraction over totals that included the artifact below.
+
+The four seven-count inputs are the first input (`lookup-000`) of four cells,
+carrying keys `#0` through `#6` where k is 6. Mechanism: the preflight probe
+invokes the first invocation inside the same process, consuming the fault
+wrapper's sample counter at 0; the six recorded samples then take 1 to 6. So
+per-sample key numbering drifts by one for that input wherever a preflight and
+the recording share a process.
+
+**Per-input any-fired ground truth is unaffected**, so every recall and FDR
+number stands. Canonical instrument from here: count fired keys per input id;
+read per-sample distributions knowing input zero of a cell may carry one probe
+key. A sentinel-id probe was tried and reverted: 64 tests failed, because
+systems may key answers on the input id and a probe must stay answerable. The
+right fix lives where the wrapper assigns indices, and is open, low priority.
