@@ -55,8 +55,16 @@ echo END %DATE% %TIME%  exit %RC% >> "%LOG%"
 
 REM Exit codes from run_study.py, for reading the log at a glance:
 REM   0 = finished the work it was given
-REM   1 = refused to start (stop flag set, or over --max-hours without --yes)
+REM   1 = refused to start, or crashed with a traceback
 REM   2 = paused, either by the stop flag or by the hour cap. The normal case.
 REM   3 = preflight failed, the model server was unreachable
 REM   4 = refused to write the matrix because a row was untraceable
+REM   6 = the model server died mid-recording
+REM
+REM Anything except 0 and 2 is a break, and a break at 5am is invisible in a
+REM log nobody has opened. Owner request 2026-10-05: put it on screen, so they
+REM can see it and ping the agent session to set things back up.
+if not "%RC%"=="0" if not "%RC%"=="2" (
+  start "" powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0notify.ps1" -Title "a-prime run broke (exit %RC%)" -Message "0/2=ok 1=refused-or-crash 3=server unreachable 4=untraceable rows 6=server died mid-run. See logs\overnight.log, then ping Claude."
+)
 exit /b %RC%

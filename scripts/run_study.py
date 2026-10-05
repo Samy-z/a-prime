@@ -89,6 +89,7 @@ from aprime.provenance import (  # noqa: E402
 from aprime.recorder import (  # noqa: E402
     PreflightFailed,
     Recording,
+    RecordingFailed,
     RunPaused,
     load_checkpoint,
     record,
@@ -386,6 +387,14 @@ def main() -> int:
             print(f"    is the model server up at {HOST}? Earlier cells are "
                   f"still on disk.")
             return 3
+        except RecordingFailed as died:
+            # The server was alive at preflight and died mid-recording. Last
+            # seen 2026-10-05, when Ollama dropped the connection during a
+            # call. Without this handler it surfaced as a raw traceback.
+            OllamaChat(model=MODEL, host=HOST).release()
+            print(f"  SERVER DIED mid-recording in {job.name}: {died}")
+            print("    everything recorded so far is on disk and resumes.")
+            return 6
         except RunPaused as paused:
             OllamaChat(model=MODEL, host=HOST).release()
             print(f"  PAUSED in {job.name}: {paused}")
