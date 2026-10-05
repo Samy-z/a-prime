@@ -1,0 +1,55 @@
+{
+  "cell": "banking-extraction",
+  "domain": "banking",
+  "output_format": "extraction",
+  "run_id": "20261005T145729Z",
+  "config_hash": "7e1c3a40f5946fc8",
+  "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+  "git_dirty": false,
+  "system": "granite4.2:8b",
+  "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+  "sessions": 2,
+  "analysed_utc": "2026-10-05T14:59:51Z",
+  "n_inputs": 40,
+  "k": 6,
+  "q": 0.1,
+  "activated": 11,
+  "flagged": 0,
+  "true_positives": 0,
+  "realised_fdr": null,
+  "recall": 0.0,
+  "detect_s": 21.5,
+  "cost": {
+    "predicate_calls": 704,
+    "clusterings": 80,
+    "samples_clustered": 960,
+    "distinct_after_normalisation": 350
+  },
+  "channels": {
+    "mode_share": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "dispersion": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "novel_mode": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "embedding": {
+      "flagged": 0,
+      "skipped": "no embedder supplied"
+    },
+    "nli_contradiction": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "nli_directional": {
+      "flagged": 0,
+      "skipped": null
+    }
+  },
+  "gradable": true
+}

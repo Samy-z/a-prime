@@ -1,0 +1,55 @@
+{
+  "cell": "banking-summary",
+  "domain": "banking",
+  "output_format": "summary",
+  "run_id": "20261005T145729Z",
+  "config_hash": "60ac20518858cf53",
+  "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+  "git_dirty": false,
+  "system": "granite4.2:8b",
+  "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+  "sessions": 3,
+  "analysed_utc": "2026-10-05T14:58:27Z",
+  "n_inputs": 40,
+  "k": 6,
+  "q": 0.1,
+  "activated": 17,
+  "flagged": 19,
+  "true_positives": 15,
+  "realised_fdr": 0.21052631578947367,
+  "recall": 0.8823529411764706,
+  "detect_s": 24.5,
+  "cost": {
+    "predicate_calls": 900,
+    "clusterings": 80,
+    "samples_clustered": 960,
+    "distinct_after_normalisation": 469
+  },
+  "channels": {
+    "mode_share": {
+      "flagged": 19,
+      "skipped": null
+    },
+    "dispersion": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "novel_mode": {
+      "flagged": 18,
+      "skipped": null
+    },
+    "embedding": {
+      "flagged": 0,
+      "skipped": "no embedder supplied"
+    },
+    "nli_contradiction": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "nli_directional": {
+      "flagged": 0,
+      "skipped": null
+    }
+  },
+  "gradable": true
+}

@@ -1,0 +1,339 @@
+{
+  "model": "granite4.2:8b",
+  "digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+  "n": 40,
+  "k": 6,
+  "q": 0.1,
+  "rows": [
+    {
+      "cell": "banking-summary",
+      "domain": "banking",
+      "output_format": "summary",
+      "run_id": "20261005T145729Z",
+      "config_hash": "60ac20518858cf53",
+      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_dirty": false,
+      "system": "granite4.2:8b",
+      "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+      "sessions": 3,
+      "analysed_utc": "2026-10-05T14:58:27Z",
+      "n_inputs": 40,
+      "k": 6,
+      "q": 0.1,
+      "activated": 17,
+      "flagged": 19,
+      "true_positives": 15,
+      "realised_fdr": 0.21052631578947367,
+      "recall": 0.8823529411764706,
+      "detect_s": 24.5,
+      "cost": {
+        "predicate_calls": 900,
+        "clusterings": 80,
+        "samples_clustered": 960,
+        "distinct_after_normalisation": 469
+      },
+      "channels": {
+        "mode_share": {
+          "flagged": 19,
+          "skipped": null
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "novel_mode": {
+          "flagged": 18,
+          "skipped": null
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "nli_directional": {
+          "flagged": 0,
+          "skipped": null
+        }
+      },
+      "gradable": true
+    },
+    {
+      "cell": "logistics-summary",
+      "domain": "logistics",
+      "output_format": "summary",
+      "run_id": "20261005T145729Z",
+      "config_hash": "164081630f20c414",
+      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_dirty": false,
+      "system": "granite4.2:8b",
+      "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+      "sessions": 1,
+      "analysed_utc": "2026-10-05T14:58:57Z",
+      "n_inputs": 40,
+      "k": 6,
+      "q": 0.1,
+      "activated": 14,
+      "flagged": 11,
+      "true_positives": 11,
+      "realised_fdr": 0.0,
+      "recall": 0.7857142857142857,
+      "detect_s": 30.2,
+      "cost": {
+        "predicate_calls": 1263,
+        "clusterings": 80,
+        "samples_clustered": 960,
+        "distinct_after_normalisation": 591
+      },
+      "channels": {
+        "mode_share": {
+          "flagged": 11,
+          "skipped": null
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "novel_mode": {
+          "flagged": 11,
+          "skipped": null
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 10,
+          "skipped": null
+        },
+        "nli_directional": {
+          "flagged": 0,
+          "skipped": null
+        }
+      },
+      "gradable": true
+    },
+    {
+      "cell": "hospitality-summary",
+      "domain": "hospitality",
+      "output_format": "summary",
+      "run_id": "20261005T145729Z",
+      "config_hash": "19ffac0bccf2ddd8",
+      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_dirty": false,
+      "system": "granite4.2:8b",
+      "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+      "sessions": 1,
+      "analysed_utc": "2026-10-05T14:59:30Z",
+      "n_inputs": 40,
+      "k": 6,
+      "q": 0.1,
+      "activated": 21,
+      "flagged": 21,
+      "true_positives": 18,
+      "realised_fdr": 0.1428571428571429,
+      "recall": 0.8571428571428571,
+      "detect_s": 32.5,
+      "cost": {
+        "predicate_calls": 1411,
+        "clusterings": 80,
+        "samples_clustered": 960,
+        "distinct_after_normalisation": 572
+      },
+      "channels": {
+        "mode_share": {
+          "flagged": 16,
+          "skipped": null
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "novel_mode": {
+          "flagged": 21,
+          "skipped": null
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "nli_directional": {
+          "flagged": 0,
+          "skipped": null
+        }
+      },
+      "gradable": true
+    },
+    {
+      "cell": "banking-extraction",
+      "domain": "banking",
+      "output_format": "extraction",
+      "run_id": "20261005T145729Z",
+      "config_hash": "7e1c3a40f5946fc8",
+      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_dirty": false,
+      "system": "granite4.2:8b",
+      "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+      "sessions": 2,
+      "analysed_utc": "2026-10-05T14:59:51Z",
+      "n_inputs": 40,
+      "k": 6,
+      "q": 0.1,
+      "activated": 11,
+      "flagged": 0,
+      "true_positives": 0,
+      "realised_fdr": null,
+      "recall": 0.0,
+      "detect_s": 21.5,
+      "cost": {
+        "predicate_calls": 704,
+        "clusterings": 80,
+        "samples_clustered": 960,
+        "distinct_after_normalisation": 350
+      },
+      "channels": {
+        "mode_share": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "novel_mode": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "nli_directional": {
+          "flagged": 0,
+          "skipped": null
+        }
+      },
+      "gradable": true
+    },
+    {
+      "cell": "logistics-extraction",
+      "domain": "logistics",
+      "output_format": "extraction",
+      "run_id": "20261005T145729Z",
+      "config_hash": "b541f3b106c5d06d",
+      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_dirty": false,
+      "system": "granite4.2:8b",
+      "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+      "sessions": 1,
+      "analysed_utc": "2026-10-05T15:00:13Z",
+      "n_inputs": 40,
+      "k": 6,
+      "q": 0.1,
+      "activated": 23,
+      "flagged": 11,
+      "true_positives": 11,
+      "realised_fdr": 0.0,
+      "recall": 0.4782608695652174,
+      "detect_s": 21.8,
+      "cost": {
+        "predicate_calls": 610,
+        "clusterings": 80,
+        "samples_clustered": 960,
+        "distinct_after_normalisation": 335
+      },
+      "channels": {
+        "mode_share": {
+          "flagged": 11,
+          "skipped": null
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "novel_mode": {
+          "flagged": 11,
+          "skipped": null
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "nli_directional": {
+          "flagged": 0,
+          "skipped": null
+        }
+      },
+      "gradable": true
+    },
+    {
+      "cell": "hospitality-extraction",
+      "domain": "hospitality",
+      "output_format": "extraction",
+      "run_id": "20261005T145730Z",
+      "config_hash": "418a3438efcfbb12",
+      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_dirty": false,
+      "system": "granite4.2:8b",
+      "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+      "sessions": 1,
+      "analysed_utc": "2026-10-05T15:00:46Z",
+      "n_inputs": 40,
+      "k": 6,
+      "q": 0.1,
+      "activated": 25,
+      "flagged": 0,
+      "true_positives": 0,
+      "realised_fdr": null,
+      "recall": 0.0,
+      "detect_s": 32.8,
+      "cost": {
+        "predicate_calls": 1319,
+        "clusterings": 80,
+        "samples_clustered": 960,
+        "distinct_after_normalisation": 444
+      },
+      "channels": {
+        "mode_share": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "novel_mode": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null
+        },
+        "nli_directional": {
+          "flagged": 0,
+          "skipped": null
+        }
+      },
+      "gradable": true
+    }
+  ]
+}
