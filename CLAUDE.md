@@ -171,19 +171,22 @@ the headline transfer numbers**; it is reported separately. See HANDOFF §3.
 
 ## Where things stand
 
-The nine cells run against a live model and the detector has run end to end
-against one of them. **It separates a real fault cleanly**: mode-share,
-novel-mode and NLI contradiction each put zero decoys above their best cut, and
-the two blind channels reported nothing rather than noise (ENG-007). **Nothing
-was flagged anyway**, because the estimator cannot report fewer than `1/q`
-findings and 9 inputs cleared the cut against a floor of 10. Sizing is
-`n >= (1/q)/(a*s)`, with `s` set by cloud size (MTH-024).
+**Six of nine cells are recorded, analysed and pushed**: the summary and
+extraction rows, one fault class (stale knowledge base, F5), per-input
+activation as ground truth. First matrix in `results/study/matrix.json`.
+Headline so far: detection transfers across all three domains on the summary
+format (recall 79-88%), and fails silently in two of three domains on
+extraction — hospitality flagged nothing with 25 of 40 inputs changed. That
+failure is undiagnosed; `diagnose_channels.py` answers it and needs the GPU.
+Realised FDR ran hot in two summary cells (0.21, 0.14 against the 0.10
+budget); too few cells yet to call that calibration.
 
-**Recording is the binding constraint, not detection**: 589s against 10s. Long
-runs are pausable, see `docs/knowledge/recorder.md`.
+The agent row (~10h) records via a daily 05:00 scheduled task, uncapped — the
+owner stops runs, timers do not (`scripts/overnight.cmd`). A break fires an
+on-screen notification. The serving process has stopped twice without logging
+a cause; the guards and the resume path cover it
+(`docs/knowledge/environment.md`).
 
-Not built: embedding style-stability gate, shape-stratified thresholds in anger
-(every run so far pooled to one stratum), Palworld adapter, the nine-cell
-factorial. F2 and F11 are built for cells and unit-tested, never run live.
-The agent output format is distinct but 4/12 compliant, kept deliberately
-(HANDOFF §13).
+Not built: the extraction-failure diagnosis, the severity titration rerun,
+LOSO, the embedding style-stability gate, the Palworld adapter, F11, F2. The
+paper is drafted except §8 and the abstract's result.
