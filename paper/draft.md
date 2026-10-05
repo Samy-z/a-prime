@@ -1,7 +1,8 @@
 # Does label-free regression detection transfer across domains?
 
-*Draft in progress. Every section except 8 (results) is drafted, with
-appendices A to E and an abstract whose result is left blank; `docs/reader/paper-outline.md` maps each
+*Draft in progress. Every section is drafted, section 8 against a partial
+matrix with its gaps bracketed, with appendices A to F and an abstract whose
+result is left blank; `docs/reader/paper-outline.md` maps each
 claim to its backing.*
 
 ## Abstract
@@ -953,6 +954,140 @@ random split.
 Section 8 holds the results. Until the nine-system study has run, it holds a
 table of what each result will be backed by.
 
+## 8. Results
+
+This section is partial by design. Two of the three rows of the nine-system
+grid have been recorded and analysed; the third is being recorded as this
+draft is written, and the paragraphs that depend on it are marked. Everything
+below comes from one analysis run and six per-cell result files, each carrying
+its run identifier, configuration hash and the code revision that produced it.
+
+### What has run
+
+Six systems: the summary format and the JSON extraction format, each in the
+three domains. One fault class: a stale knowledge base, injected as the four
+readable tools serving older rows of the right record. One model behind every
+system, an 8-billion-parameter model served locally and pinned by the digest
+of its weights. Forty inputs per system, six samples per cloud, three runs,
+a false-discovery budget of 0.10. Six cells of 240 triples each, 4,320 model
+calls, none of which errored. Per-input activation, recorded by the fault
+wrapper as each call was made, is the ground truth throughout.
+
+Two things to hold in mind while reading the numbers. These cells ran at six
+samples per cloud, not the twenty that section 3 calls the working minimum,
+because six was what fitted in the nights available; every recall figure here
+is therefore a lower bound on what twenty would give, and the share-of-answers
+statistic can take only seven distinct values at six samples. And the
+false-discovery rates below are only computable because the bench records
+which inputs the fault touched. No production user ever has that number. In
+production, the budget is the promise and the realised rate is unknowable,
+which is why a validation like this one is the only place the promise can be
+checked.
+
+### The partial matrix
+
+| | banking | logistics | hospitality |
+|---|---|---|---|
+| **summary** (prose) | 15 of 17 changed inputs caught; 19 flagged, 4 false | 11 of 14; 11 flagged, 0 false | 18 of 21; 21 flagged, 3 false |
+| **extraction** (JSON) | 0 of 11; nothing flagged | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
+| **agent** (decision line) | [recording; 11 of 240 triples at this draft] | [recording] | [recording] |
+
+Each cell reads: inputs the fault actually touched and how many of them were
+flagged; then how many inputs were flagged in all and how many of those the
+fault had not touched. A cell where nothing was flagged is one where no check
+found a threshold it could justify at the budget.
+
+### On prose, detection transferred across all three domains
+
+On the summary format the detector caught 88 percent of the inputs the fault
+touched in banking (15 of 17), 79 percent in logistics (11 of 14) and 86
+percent in hospitality (18 of 21). Pooled, 44 of 52, with a 95 percent interval
+from 72 to 92 percent. Nothing in the detector was tuned to any of these three
+domains; every threshold was set by each system's own second baseline run. For
+one fault class, one model and one output format, the paper's title question
+has the answer yes.
+
+That is the full width of the claim, and the width is set by the unit of
+evidence. Three systems succeeded, and three successes out of three bound the
+per-system success rate below at 0.29 at 95 percent confidence. The row says
+that transfer across these three domains happened; it cannot yet say how often
+it happens.
+
+### On JSON, the failure is shaped by format, not domain
+
+The same three domains that detect at 79 to 88 percent on prose split three
+ways on JSON. Logistics worked: 11 of 23 touched inputs caught, 11 flagged,
+none false. Banking flagged nothing, with 11 touched inputs, which is close
+enough to the ten-input floor of section 3 that a sizing miss cannot be ruled
+out. Hospitality is the sharp case: 25 of 40 inputs were touched by the fault,
+well above the floor, and nothing was flagged.
+
+We do not know why. The diagnosis, which reads each check's target scores
+against its decoy scores to tell a separated-but-unreported result from a
+blind one, needs the judging model on the machine that is now recording the
+third row, and it has not run. So the hospitality result is reported here as
+what it is: a measured hole, above the floor, with its diagnosis pending. What
+can be said from the files alone is that the same code, the same fault and the
+same model produced a clean detection in one domain and none in another on
+the same output format, so "JSON never works" is not the finding either. [To
+be completed when the diagnosis has run; expected with the third row.]
+
+### The false-alarm budget, on the evidence so far
+
+Two of the three summary cells ran over the budget: 4 false among 19 flagged
+in banking, a realised rate of 0.21; 3 among 21 in hospitality, 0.14; none
+among 11 in logistics. Pooled across the row, 7 false in 51 flagged, 0.14,
+with a 95 percent interval from 0.07 to 0.26 that contains the 0.10 asked
+for. At roughly twenty flags per cell, a realised rate of 0.14 is not yet
+distinguishable from an honest 0.10 with ordinary variation around it, and it
+is not yet distinguishable from a miscalibration either. The extraction cells
+that flagged anything flagged no false alarms, on 11 flags. Whether the
+budget holds is a question for the full matrix, and the third row is what will
+answer it. [To be completed with the agent row.]
+
+### Which checks carried the result, and why that is not a contradiction
+
+Of everything flagged across the six cells, the share-of-answers check
+flagged 57 inputs and the new-answers check 61, with most inputs flagged by
+both. The contradiction check flagged 10, all in one cell, and the
+information-direction check flagged none. The embedding check was switched
+off, as it is in the shipped configuration without an embedding model.
+
+A reader of section 4 will notice that the judging-model checks carried the
+load there and the clustering checks carried it here. The two measurements
+answer different questions on different material. Section 4 asks which kinds
+of change a judging model can see in a single pair of texts, one fact changed
+and nothing else. This section asks which statistic separated two clouds of
+samples when a stale fact changed which answer the system gave. A fault that
+moves the system from one answer to another shows up directly in the mix of
+answers, which is what the clustering checks read, and the judging model is
+still doing the work underneath them: it is the predicate that decides which
+samples count as the same answer. One plausible reason the contradiction
+check scored lower on its own, not measured here, is that its per-input score
+is an average over paired samples, which dilutes a change present in some of
+them. The information-direction check flagging nothing is expected: a stale
+fact substitutes one value for another and neither adds nor removes content,
+which is the same reading the first end-to-end run gave.
+
+### What is missing from this section
+
+- The agent row, three cells, recording at the time of writing. It completes
+  the matrix and is what the false-alarm question and the format-shaped
+  failure both need.
+- The diagnosis of the two JSON cells that flagged nothing.
+- Leave-one-system-out and leave-one-fault-out numbers. With one fault class
+  recorded, leave-one-fault-out is undefined, and leave-one-system-out across
+  three systems per row gives the interval above and no more.
+- The severity titration per fault class on real systems. The only
+  titration so far is on the synthetic system (section 5).
+- The sealed holdout of real regressions, not yet collected.
+- Any second model. Every cell here was driven by one model, so this section
+  describes that model, as section 4 described one judging model.
+
+Every number above traces to analysis run `20261005T145729Z` (the hospitality
+extraction cell to `20261005T145730Z`), to the six per-cell configuration
+hashes listed in Appendix F, and to code revision `26345e7`.
+
 ---
 
 ## 9. Honest limits
@@ -1380,5 +1515,25 @@ example is printed" and "the program prints it".
 
 ---
 
-*Section 8, results, is not drafted: it stays a table of gaps in the outline
-until the nine-system study has run. The abstract is written last.*
+## Appendix F. The cells of section 8
+
+| cell | configuration hash | triples | sessions | detection time |
+|---|---|---|---|---|
+| banking-summary | `60ac20518858cf53` | 240 | 3 | 24.5 s |
+| logistics-summary | `164081630f20c414` | 240 | 1 | 30.2 s |
+| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 32.5 s |
+| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 21.5 s |
+| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 21.8 s |
+| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 32.8 s |
+
+Model `granite4.2:8b`, digest `f586c02fdecdf151`. A cell with more than one
+session was paused and resumed; the recorder resumes from its checkpoint, and
+no sample in any of the six was an errored call. Detection time is for the
+analysis of one recorded cell with the judging model loaded; recording took
+hours per cell and is the binding cost, as section 7 says.
+
+---
+
+*Section 8 is drafted against two of three rows; its bracketed paragraphs
+fill when the agent row and the diagnosis land. The abstract's result stays
+blank until the matrix is complete.*

@@ -267,16 +267,16 @@ design before the result exists.
 
 ## §8 Results
 
-**`GAP`: the transfer matrix, the LOSO/LOFO comparison, the severity
-titration per fault type.** All downstream of the nine-cell factorial, which
-waits on the GPU machine. The section is written now as a table of what each
+**Drafted 2026-10-05 against two of three rows (STD-010); the agent row and
+the extraction diagnosis are bracketed.** The LOSO/LOFO comparison and the
+severity titration per fault type remain downstream of the full factorial. The section is written now as a table of what each
 result will be backed by, so that the draft cannot quietly promote a
 constructed mechanism to a measured result when the numbers arrive.
 
 | result | status | backing when it exists |
 |---|---|---|
-| transfer matrix, 3 domains x 3 formats | `GAP` | `results/study/matrix.json`, per-row provenance (75081ad) |
-| random / LOSO / LOFO / LOSO x LOFO side by side | `GAP` | same |
+| transfer matrix, 3 domains x 3 formats | **partial**: summary and extraction rows measured (STD-010); agent row recording | `results/study/matrix.json`, per-row provenance (75081ad) |
+| random / LOSO / LOFO / LOSO x LOFO side by side | `GAP`; LOFO undefined with one fault class (STD-010) | same |
 | severity titration per fault class, semantic path | partial: six faults on the stub (ENG-004) | the factorial, per class |
 | FDR control on ground truth | **measured**: 0.101 or below against 0.10 (MTH-018) | `tests/test_pipeline.py` sweep |
 | one real cell, end to end | **measured**: three checks separated the fault with zero decoys above the cut; nine inputs cleared against a floor of ten; nothing reported (ENG-007) | `results/cell_detection_20260929T231931Z.json` |
