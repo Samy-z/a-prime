@@ -466,6 +466,13 @@ def analyse(jobs: list[CellJob], predicate, nli, digest: str,
             "n_inputs": len(ids), "k": K, "q": Q,
             "activated": len(fired), "flagged": len(flagged),
             "true_positives": tp,
+            # The flagged ids themselves, not only their count. Their absence
+            # blocked an offline caught-versus-firing-fraction analysis on
+            # 2026-10-05: counts cannot be joined with per-sample activation.
+            "findings": [
+                {"input_id": f.input_id, "channels": sorted(f.channels)}
+                for f in rep.findings
+            ],
             "realised_fdr": (1 - tp / len(flagged)) if flagged else None,
             "recall": (tp / len(fired)) if fired else None,
             "detect_s": round(secs, 1),
