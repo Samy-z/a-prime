@@ -865,3 +865,38 @@ this project leans, and the one a reviewer can live with.
 
 Persistence of activation moved from the retrieval wrapper onto
 `ActivationLog` itself, so the three mechanisms write one on-disk shape.
+
+
+## §21 — D25 ratified: how the k question gets settled (2026-10-05)
+
+Caught by the cloud session: the factorial records at k=6 while the engine
+STATE posture says k=20, and no entry anywhere decided k=6. Correct catch. It
+was my post-floor sizing choice, never reconciled. Recorded here so the gap is
+closed.
+
+Facts gathered before deciding, both without GPU cost worth naming:
+
+- Per-sample activation: 104 of 111 touched inputs fired on 5 or 6 of their 6
+  samples. This fault is close to all-or-nothing per input, which is not the
+  regime the k=20 power figures were measured in.
+- Both zero-flag extraction cells diagnosed. Separation is strong in each; the
+  best cuts land at 0.111 (one decoy at the top value) and 0.176 (two decoys)
+  against the 0.100 budget. Mechanism: decoy-tail resolution at seven possible
+  statistic values. Not channel blindness. This corrects my same-evening
+  earlier reading.
+
+Ratified course:
+
+1. Agent row completes at k=6; the k=6 matrix stays self-consistent.
+2. One night: summary row re-recorded at k=20, about 7 hours. Prediction on
+   record before the run: recall moves modestly; the expected effect is decoy
+   resolution and threshold calibration, the mechanism both diagnoses point at
+   and the likely driver of the two hot FDR cells.
+3. Full k=20 re-record (about 57 hours) only if that row leaves the k=6
+   interval.
+4. The titration figure requires k of at least 20 regardless, and also a fault
+   with a severity knob or partial blast share; a near-binary fault cannot
+   drive a severity curve at any k.
+
+Support landed with this entry: analysis rows persist their flagged input ids,
+and the diagnosis script reads the study cells' per-sample activation files.

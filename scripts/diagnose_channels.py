@@ -63,17 +63,31 @@ def describe(name: str, vals: np.ndarray) -> str:
 
 def main() -> int:
     cp = Path(sys.argv[1]) if len(sys.argv) > 1 else newest("cell_detection_*.jsonl")
-    art = newest("cell_detection_*.json")
     samples, done, _ = load_checkpoint(cp)
     k = max(s.sample_idx for s in samples) + 1
     ids = list(dict.fromkeys(s.input_id for s in samples))
     rec = Recording(samples=samples, k=k, input_ids=ids)
-    activation = json.loads(art.read_text(encoding="utf-8")).get("activation", {})
+
+    # Activation labels live in two shapes. The single-cell artifacts store
+    # {input_id: bool}. The study cells store a sibling .activation.json keyed
+    # "input_id#sample_idx", one flag per sample; an input counts as touched
+    # when any sample was.
+    sib = cp.with_suffix("").with_suffix(".activation.json")         if cp.name.endswith(".jsonl") else None
+    sib = Path(str(cp)[: -len(".jsonl")] + ".activation.json")
+    if sib.exists():
+        raw = json.loads(sib.read_text(encoding="utf-8"))
+        activation: dict[str, bool] = {}
+        for key, hit in raw.items():
+            iid = key.rpartition("#")[0] or key
+            activation[iid] = activation.get(iid, False) or bool(hit)
+    else:
+        art = newest("cell_detection_*.json")
+        activation = json.loads(art.read_text(encoding="utf-8")).get("activation", {})
     fired = [i for i in ids if activation.get(i)]
     quiet = [i for i in ids if i in activation and not activation[i]]
 
     print(f"recording {cp.name}: {len(samples)} samples, {len(ids)} inputs, k={k}")
-    print(f"activation from {art.name}: {len(fired)} fired, {len(quiet)} quiet")
+    print(f"activation: {len(fired)} fired, {len(quiet)} quiet")
     print()
 
     nli = NLIChannel(next(s for s in NLI_MODELS if s.key == "deberta_mnli"))
