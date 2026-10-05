@@ -4,7 +4,7 @@ Current state doc. Read before moving this project to another machine, and
 before moving it back.
 
 The project is being worked on temporarily from a Claude Code cloud instance
-(free credit until 2026-11-06) and will return to the owner's PC afterwards.
+(free credit until 2026-11-05, 8:59 AM GMT+1) and will return to the owner's PC afterwards.
 **Both directions matter, and they are not symmetric.**
 
 ## What the repository carries
@@ -64,6 +64,25 @@ another box serves the same `granite4.2:8b`, and it comes from `/api/tags`:
 `/api/show` has no digest field, and asking the wrong endpoint recorded the
 model as "unresolved" into a config hash for several runs, which is a pin in
 name only.
+
+### The serving process stops without logging why
+
+Twice now (2026-09-30 about 01:53, 2026-10-05 about 15:05) the Ollama server
+stopped mid-study. Its own logs show **zero** fault lines across 333k lines: no
+out-of-memory, no CUDA error, no panic. It simply stops logging, and later
+restarts. That pattern points at termination from outside the process rather
+than a serving fault, and the cause is unknown.
+
+Consequences for operating runs:
+
+- Assume the server can vanish at any time. The guards already cover it: the
+  preflight fails in about a second before recording, a mid-run death exits
+  cleanly with code 6, checkpoints resume, and a break fires an on-screen
+  notification.
+- **Data trap:** `server.log` concatenates across restarts with silent gaps.
+  A continuous-looking file does not mean continuous uptime; check per-minute
+  line counts, not file spans. A restart shows as a burst of about 14 banner
+  lines.
 
 ### Ollama and `granite4.2:8b` — the system under test
 

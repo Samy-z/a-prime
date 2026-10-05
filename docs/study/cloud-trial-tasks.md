@@ -1,7 +1,7 @@
 # Work for a machine with no GPU
 
 **Written 2026-10-04 for a Claude Code cloud session running on free trial
-credit that expires 2026-11-06.** After that date this file describes nothing
+credit that expires 2026-11-05, 8:59 AM GMT+1.** After that date this file describes nothing
 real and should be deleted.
 
 **It goes stale fast.** It was already a day out of date the first time it was
