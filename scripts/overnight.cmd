@@ -6,7 +6,7 @@ REM Exists because opening Ollama does not start a recording. On 2026-10-04 the
 REM server came up on time and sat idle for six hours, because nothing was
 REM wired to launch the run. This is that wiring.
 REM
-REM Usage:  overnight.cmd [hours]      default 12
+REM Usage:  overnight.cmd [hours]      default: no cap, run to completion
 REM
 REM Called by the Windows scheduled task "aprime-factorial". Safe to run by
 REM hand. Two things it does that matter:
@@ -25,8 +25,13 @@ REM SYSTEM would start a recording against a server that is not there.
 
 cd /d "%~dp0.."
 
+REM No default time cap. Owner instruction, 2026-10-05, after I added caps
+REM twice unasked: runs are scoped by choosing which cells to record, so the
+REM natural end is "those cells are done". Whether a slowed run keeps going is
+REM the owner's call, made with --stop, not a timer's. Pass hours explicitly
+REM only when the owner asks for a cap.
 set "HOURS=%~1"
-if "%HOURS%"=="" set "HOURS=12"
+if "%HOURS%"=="" set "HOURS=0"
 
 if not exist "logs" mkdir "logs"
 set "LOG=logs\overnight.log"
