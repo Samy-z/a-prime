@@ -233,11 +233,26 @@ class ActivationLog:
             self.record(iid or key, int(idx or 0), bool(hit))
 
     def persist_to(self, store: "Path | None") -> None:
+        """Write the labels, keeping any already on disk that this log lacks.
+
+        A store is append-only in effect: a resumed session never re-invokes
+        the triples an earlier one finished, so the earlier labels exist only
+        on disk. The first version replaced the file with this log's contents,
+        and a wrapper that had not loaded the file first wiped every earlier
+        session's labels on its first write (BCH-018: 25 inputs in two cells).
+        Merging makes the write safe whatever order the store was attached in.
+        """
         if store is None:
             return
         try:
             store.parent.mkdir(parents=True, exist_ok=True)
-            payload = {f"{iid}#{idx}": hit for (iid, idx), hit in self.fired.items()}
+            payload: dict[str, bool] = {}
+            if store.exists():
+                try:
+                    payload = dict(json.loads(store.read_text(encoding="utf-8")))
+                except ValueError:
+                    payload = {}
+            payload.update({f"{iid}#{idx}": hit for (iid, idx), hit in self.fired.items()})
             tmp = store.with_suffix(".tmp")
             tmp.write_text(json.dumps(payload), encoding="utf-8")
             tmp.replace(store)

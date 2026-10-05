@@ -359,3 +359,32 @@ read per-sample distributions knowing input zero of a cell may carry one probe
 key. A sentinel-id probe was tried and reverted: 64 tests failed, because
 systems may key answers on the input id and a probe must stay answerable. The
 right fix lives where the wrapper assigns indices, and is open, low priority.
+
+## STD-010 — THIRD APPEND (2026-10-05): diagnosis artifacts, and two banking denominators corrected
+
+**The diagnosis now traces to files.**
+`results/study/hospitality-extraction.418a3438efcfbb12.diagnosis.json`:
+mode_share best estimate 0.1111 at cut 1.0, 18 targets and 1 decoy above;
+18 of 25 touched inputs sit at exactly 1.0, 0 of 15 quiet ones do, and the
+single decoy at 1.0 is in the sorted decoy array. The first append cited
+HANDOFF §21 for these numbers; cite the file.
+`results/study/banking-extraction.7e1c3a40f5946fc8.diagnosis.json`:
+mode_share best 0.1765 at cut 0.6667, 17 targets and 2 decoys above; 9 of 11
+labelled-touched inputs at or above the cut, 0 of 9 labelled-quiet, and the
+other 8 targets above are label-unknown (below).
+
+**Two denominators in the table above are over labelled inputs, not over the
+cell (BCH-018).** A resume bug erased earlier sessions' labels: banking-
+extraction has 20 of 40 inputs labelled, banking-summary 35 of 40. Corrected
+reading: banking-extraction, 11 touched of 20 labelled, 20 unknown; banking-
+summary, 17 touched of 35 labelled, 5 unknown. Recall figures stand as recall
+over labelled inputs. banking-summary's realised FDR of 0.21 (4 false of 19
+flagged) is an upper bound until phase 2 is re-run with `findings` and the
+four are split into known-quiet and unknown; the pooled summary FDR 7/51
+inherits that. The other four cells are unaffected. The claim of the first
+append, transfer across three domains on the summary row, stands: 15 of 17
+labelled-touched in banking is unchanged by five unknown inputs.
+**Evidence:** the two diagnosis artifacts; BCH-018; the activation stores
+against the checkpoints' session fields.
+**Reopen if:** phase 2 is re-run with findings (gives the banking-summary FDR
+as a number again), or the k=20 summary row lands.

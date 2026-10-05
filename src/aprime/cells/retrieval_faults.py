@@ -136,6 +136,18 @@ class RetrievalFault:
     def arm(self) -> str:
         return self.inner.arm
 
+    def attach_store(self, store: Path | None) -> None:
+        """Point the wrapper at a label store after construction, loading it.
+
+        Setting `store` as a plain attribute after `__post_init__` skipped the
+        load, so a resumed run began with an empty log and its first persist
+        replaced the earlier sessions' labels (BCH-018). `persist_to` now
+        merges with the file as well; this method is the right way to attach
+        a store late, and the factories take `store=` so it need not be late.
+        """
+        self.store = store
+        self.log.load_from(store)
+
     def _persist(self) -> None:
         self.log.persist_to(self.store)
 
@@ -196,6 +208,7 @@ def stale_view(
     regime: str = "B0",
     share: float = 1.0,
     seed: int = 0,
+    store: Path | None = None,
 ) -> RetrievalFault:
     """A cell whose reads come from a knowledge base that has fallen behind.
 
@@ -216,6 +229,7 @@ def stale_view(
                        regime=regime, share=share, seed=seed),
         clean=ToolSet(pack),
         faulty=ToolSet(pack, stale=picked),
+        store=store,
     )
 
 
@@ -227,6 +241,7 @@ def degraded_retrieval(
     regime: str = "B0",
     share: float = 1.0,
     seed: int = 0,
+    store: Path | None = None,
 ) -> RetrievalFault:
     """A cell whose reads return the wrong rows some of the time.
 
@@ -251,6 +266,7 @@ def degraded_retrieval(
                        severity=noise, regime=regime, share=share, seed=seed),
         clean=ToolSet(pack),
         faulty=ToolSet(pack, degraded=picked, noise=noise, seed=seed),
+        store=store,
     )
 
 

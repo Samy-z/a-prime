@@ -900,3 +900,20 @@ Ratified course:
 
 Support landed with this entry: analysis rows persist their flagged input ids,
 and the diagnosis script reads the study cells' per-sample activation files.
+
+## §14 — AMENDMENT (dated append, 2026-10-05)
+
+§14 said the per-input activation labels "are now persisted after every
+invocation", so that a resumed session loses nothing. The persistence was
+right and the resume was wrong: the study runner attached the label store to
+the fault wrapper after construction, the wrapper loads a store only at
+construction, and the first write of a resumed session replaced the file.
+Twenty-five inputs across the two banking cells lost their labels this way,
+unrecoverably, because activation is a tool-result diff and the checkpoint
+does not hold tool arguments. Found by the cloud session reading the
+diagnosis artifacts: eight of the seventeen inputs above banking-extraction's
+best cut had no label at all. BCH-018 has the measurement and the fix, which
+is two-layered so that attachment order can never matter again. The lesson is
+the ENG-008 one a second time: every component behaved as written, the
+composition lost data, and nothing reported it, because a store with fewer
+labels than inputs looks like a store.

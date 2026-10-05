@@ -550,3 +550,46 @@ modelled.
 estimator can report (MTH-024), which would mean the seeded replacement is too
 gentle for the pack's record sizes and the ladder needs re-anchoring against
 measured activation.
+
+## BCH-018 — A resumed recording erased the earlier sessions' activation labels
+**Date:** 2026-10-05
+**Finding:** The fault wrapper loads its label store only in `__post_init__`,
+and `run_study.arms_for` attached the store after construction. A resumed
+session therefore started with an empty log, and its first `persist_to`
+replaced the file. Every input recorded in an earlier session lost its label,
+except the cell's first input, which the preflight re-invokes in-process.
+
+Measured on the committed stores against the checkpoints' session numbers:
+`banking-extraction` (2 sessions) has 20 of 40 inputs labelled, the 20
+unlabelled all from session 0; `banking-summary` (3 sessions) has 35 of 40,
+the 5 unlabelled from sessions 0 and 1. The four single-session cells have all
+40. The one session-0 input labelled in each banking cell is `lookup-000`, the
+preflight input.
+
+**Consequence for STD-010.** The two banking rows' activation counts are
+counts over labelled inputs, not over the cell: 11 touched of 20 labelled in
+banking-extraction, 17 of 35 in banking-summary. The 25 lost labels cannot be
+recovered: activation is the diff of clean and faulty tool results, and the
+checkpoint stores outputs and tool names, not tool arguments. Those inputs are
+label-unknown. For banking-summary the four "false" flags may include
+unlabelled inputs, so its realised FDR of 0.21 is an upper bound until the
+analysis is re-run with the `findings` field (f708c0a) and the flagged ids are
+split into touched, known-quiet and unknown. The diagnosis artifact for
+banking-extraction shows 8 of the 17 inputs above the best cut are among the
+unlabelled, which is consistent with them being touched and does not prove it.
+
+**Fix, two layers so attachment order cannot matter again.**
+`ActivationLog.persist_to` now merges with what is on disk before writing, so
+a log that never loaded the file cannot shrink it. `RetrievalFault.attach_store`
+loads on late attachment, and `stale_view` / `degraded_retrieval` take `store=`
+so the runner attaches at construction. Two tests reproduce the loss and the
+unsafe attachment order. `PromptFault` already took `store` at construction.
+
+**Urgent for the agent row**, recording under the old code: its session-0
+labels (11 inputs) survive only if the fix is pulled before the next session
+starts. The 05:00 task pulls `main` before launching.
+**Evidence:** session membership of unlabelled inputs, computed from the
+checkpoints; `tests/test_retrieval_faults.py` (resume and late-attach tests);
+`results/study/banking-extraction.7e1c3a40f5946fc8.diagnosis.json`.
+**Reopen if:** a store ever has fewer labelled inputs than its checkpoint has
+inputs after a single-session run, which would mean a second mechanism.

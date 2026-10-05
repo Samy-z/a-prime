@@ -11,6 +11,7 @@ nothing.
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 
 import pytest
@@ -312,3 +313,55 @@ def test_a_retrieval_fault_presents_as_an_ordinary_system_under_test():
     for inv in inputs:
         resp = fault.invoke(inv)
         assert resp.trace.model_id
+
+
+# --- labels survive a resume (BCH-018) -----------------------------------
+
+
+def _one_call_fault(p, store):
+    eid = p.entity_ids()[0]
+    chat = _tool_then_text("get_account", {"account_id": eid})
+    return stale_view(p, lambda tools: Cell(p, "summary", chat, "B", tools=tools),
+                      shapes=("lookup",), store=store)
+
+
+def test_a_resumed_session_keeps_the_labels_an_earlier_one_wrote(tmp_path):
+    """Session one labels in000; session two, a fresh wrapper on the same
+    store, labels in001. Both must be on disk afterwards. The first version
+    kept only in001."""
+    p = _pack()
+    store = tmp_path / "act.json"
+    first = _one_call_fault(p, store)
+    first.invoke(Invocation(input_id="in000", text="t"))
+    assert set(k.rpartition("#")[0] for k in json.loads(store.read_text())) == {"in000"}
+    second = _one_call_fault(p, store)
+    second.invoke(Invocation(input_id="in001", text="t"))
+    on_disk = {k.rpartition("#")[0] for k in json.loads(store.read_text())}
+    assert on_disk == {"in000", "in001"}
+    assert second.log.fired[("in000", 0)] in (True, False)  # loaded, not lost
+
+
+def test_a_store_attached_after_construction_is_loaded_and_merged(tmp_path):
+    """The shape the study runner had: wrapper built without a store, store
+    set afterwards. attach_store loads it; even a bare attribute set is now
+    safe because persist_to merges with the file."""
+    p = _pack()
+    store = tmp_path / "act.json"
+    store.write_text(json.dumps({"in000#0": True, "in000#1": True}), encoding="utf-8")
+    eid = p.entity_ids()[0]
+    chat = _tool_then_text("get_account", {"account_id": eid})
+    f = stale_view(p, lambda tools: Cell(p, "summary", chat, "B", tools=tools),
+                   shapes=("lookup",))
+    f.attach_store(store)
+    assert f.log.fired[("in000", 0)] is True
+    f.invoke(Invocation(input_id="in001", text="t"))
+    on_disk = json.loads(store.read_text())
+    assert "in000#0" in on_disk and "in001#0" in on_disk
+
+    # The unsafe order, for the record: attribute set, no load. Still merged.
+    g = stale_view(p, lambda tools: Cell(p, "summary", chat, "B", tools=tools),
+                   shapes=("lookup",))
+    g.store = store
+    g.invoke(Invocation(input_id="in002", text="t"))
+    on_disk = json.loads(store.read_text())
+    assert {"in000#0", "in001#0", "in002#0"} <= set(on_disk)

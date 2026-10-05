@@ -76,7 +76,13 @@ carries only its own, which is what a real regression looks like.
 
 **All three record activation through the same `ActivationLog`**, per
 `(input_id, sample_idx)`, persist it through the same `load_from` and
-`persist_to`, and share `_in_blast` rather than reimplementing it. Two notions
+`persist_to`, and share `_in_blast` rather than reimplementing it.
+`persist_to` merges with the file on disk before writing, because a store
+is append-only in effect: a resumed session never re-invokes the triples an
+earlier one finished, so their labels exist only on disk, and a wrapper that
+attached its store after construction once replaced them (BCH-018, 25 inputs
+lost). Pass `store=` to the factories, or call `attach_store()`, which loads;
+never set the attribute bare. Two notions
 of activation, or two implementations of blast radius, would diverge and make
 per-class and per-regime results incomparable across mechanisms. A first
 version of the retrieval wrapper logged per input only, which silently

@@ -261,12 +261,13 @@ def arms_for(job: CellJob):
     fmt = job.output_format
     a = Cell(pack, fmt, chat(), "A", tools=ToolSet(pack))
     ap = Cell(pack, fmt, chat(), "A_prime", tools=ToolSet(pack))
+    # The store goes in at construction so the wrapper loads what earlier
+    # sessions wrote. Attaching it afterwards skipped that load, and the first
+    # persist of a resumed session replaced the file: 25 inputs across the two
+    # banking cells lost their labels that way (BCH-018).
     b = stale_view(pack,
                    lambda tools: Cell(pack, fmt, chat(), "B", tools=tools),
-                   shapes=STALE_SHAPES)
-    # The wrapper persists its own labels now, per invocation, so a kill loses
-    # at most the triple in flight rather than the whole cell's ground truth.
-    b.store = job.paths()["activation"]
+                   shapes=STALE_SHAPES, store=job.paths()["activation"])
     return {"A": a, "A_prime": ap, "B": b}, b
 
 

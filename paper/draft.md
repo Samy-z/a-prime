@@ -971,7 +971,14 @@ system, an 8-billion-parameter model served locally and pinned by the digest
 of its weights. Forty inputs per system, six samples per cloud, three runs,
 a false-discovery budget of 0.10. Six cells of 240 triples each, 4,320 model
 calls, none of which errored. Per-input activation, recorded by the fault
-wrapper as each call was made, is the ground truth throughout.
+wrapper as each call was made, is the ground truth throughout, with one gap
+found while writing this section: in the two cells that were paused and
+resumed, a bug in how the resumed session reopened its label file erased the
+labels of the inputs recorded before the pause, 20 of 40 in banking
+extraction and 5 of 40 in banking summary. Those inputs are label-unknown and
+cannot be relabelled, because the label is a difference between two tool
+results and the recording keeps outputs, not tool arguments. Every count
+below for those two cells is over the labelled inputs, and says so.
 
 Two things to hold in mind while reading the numbers. These cells ran at six
 samples per cloud, not the twenty that section 3 calls the working minimum,
@@ -996,8 +1003,8 @@ checked.
 
 | | banking | logistics | hospitality |
 |---|---|---|---|
-| **summary** (prose) | 15 of 17 changed inputs caught; 19 flagged, 4 false | 11 of 14; 11 flagged, 0 false | 18 of 21; 21 flagged, 3 false |
-| **extraction** (JSON) | 0 of 11; nothing flagged | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
+| **summary** (prose) | 15 of 17 changed inputs caught, 5 inputs unlabelled; 19 flagged, 4 not known to have changed | 11 of 14; 11 flagged, 0 false | 18 of 21; 21 flagged, 3 false |
+| **extraction** (JSON) | 0 of 11, 20 inputs unlabelled; nothing flagged | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
 | **agent** (decision line) | [recording; 11 of 240 triples at this draft] | [recording] | [recording] |
 
 Each cell reads: inputs the fault actually touched and how many of them were
@@ -1025,34 +1032,41 @@ it happens.
 
 The same three domains that detect at 79 to 88 percent on prose split three
 ways on JSON. Logistics worked: 11 of 23 touched inputs caught, 11 flagged,
-none false. Banking flagged nothing, with 11 touched inputs, which is close
-enough to the ten-input floor of section 3 that a sizing miss cannot be ruled
-out. Hospitality is the sharp case: 25 of 40 inputs were touched by the fault,
-well above the floor, and nothing was flagged.
+none false. Banking flagged nothing, with 11 touched among the 20 inputs that
+kept a label, which is close enough to the ten-input floor of section 3 that a
+sizing miss cannot be ruled out, and with 20 inputs whose label is unknown.
+Hospitality is the sharp case: 25 of 40 inputs were touched by the fault, well
+above the floor, every input labelled, and nothing was flagged.
 
-The diagnosis has run, and it is not blindness. Reading each check's target
-scores against its decoy scores in both silent cells shows the touched inputs
-standing well clear of the baseline's own variation. What failed is the
-threshold. With six samples per cloud the statistic takes seven values, so the
-decoy scores pile onto a few of them, and in both cells a decoy or two landed
-on the top value, the one the touched inputs occupy. The best cut the
-estimator could make had one decoy above it in one cell, an estimate of
-0.111, and two decoys above it in the other, 0.176, both over the 0.100
-budget by the width of a single decoy. Logistics worked on the
-same format because its decoys happened not to reach the top value. So the
-format-shaped failure is a resolution failure: the change was seen and could
-not be reported, which is the same shape as the first end-to-end run in
-section 3, arrived at from the other side. The fix is finer statistics, which
-means more samples per cloud, and the next paragraph says what has been
-committed to.
+The diagnosis has run, it is written to a file beside each cell's recording
+(Appendix F), and it is not blindness. In hospitality, 18 of the 25 touched
+inputs score exactly 1.0 on the share-of-answers check, the highest value the
+statistic can take, and none of the 15 untouched inputs does. One decoy, the
+baseline against itself, also scores 1.0; it is there in the sorted decoy
+array, not inferred. The best cut the estimator could make therefore had 18
+inputs above it and that one decoy, an estimate of 0.111 against the 0.100
+budget. In banking, 9 of the 11 labelled touched inputs sit at or above the
+best cut of 0.667, none of the 9 labelled untouched inputs does, two decoys
+do, and the other 8 inputs above the cut are the ones whose label was lost;
+the estimate was 0.176. What failed in both cells is resolution. With six
+samples per cloud the statistic takes seven values, the decoys pile onto a few
+of them, and a single decoy on the top value puts the floor out of reach.
+Logistics worked on the same format because its decoys happened not to reach
+the top value. So the format-shaped failure is a resolution failure: the
+change was seen and could not be reported, which is the same shape as the
+first end-to-end run in section 3, arrived at from the other side. The fix is
+finer statistics, which means more samples per cloud, and the next paragraph
+says what has been committed to.
 
 ### The false-alarm budget, on the evidence so far
 
-Two of the three summary cells ran over the budget: 4 false among 19 flagged
-in banking, a realised rate of 0.21; 3 among 21 in hospitality, 0.14; none
-among 11 in logistics. Pooled across the row, 7 false in 51 flagged, 0.14,
-with a 95 percent interval from 0.07 to 0.26 that contains the 0.10 asked
-for. At roughly twenty flags per cell, a realised rate of 0.14 is not yet
+Two of the three summary cells ran over the budget: 4 flagged inputs not
+known to have changed among 19 in banking, a realised rate of at most 0.21,
+since 5 of that cell's inputs are label-unknown and the analysis that would
+say which inputs those 4 are has not yet been re-run; 3 among 21 in
+hospitality, 0.14, every input labelled; none among 11 in logistics. Pooled
+across the row, at most 7 in 51, 0.14, with a 95 percent interval from 0.07
+to 0.26 that contains the 0.10 asked for. At roughly twenty flags per cell, a realised rate of 0.14 is not yet
 distinguishable from an honest 0.10 with ordinary variation around it, and it
 is not yet distinguishable from a miscalibration either. The extraction cells
 that flagged anything flagged no false alarms, on 11 flags.
@@ -1546,18 +1560,25 @@ example is printed" and "the program prints it".
 
 ## Appendix F. The cells of section 8
 
-| cell | configuration hash | triples | sessions | detection time |
-|---|---|---|---|---|
-| banking-summary | `60ac20518858cf53` | 240 | 3 | 24.5 s |
-| logistics-summary | `164081630f20c414` | 240 | 1 | 30.2 s |
-| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 32.5 s |
-| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 21.5 s |
-| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 21.8 s |
-| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 32.8 s |
+| cell | configuration hash | triples | sessions | inputs labelled | detection time | diagnosis file |
+|---|---|---|---|---|---|---|
+| banking-summary | `60ac20518858cf53` | 240 | 3 | 35 of 40 | 24.5 s | |
+| logistics-summary | `164081630f20c414` | 240 | 1 | 40 | 30.2 s | |
+| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 40 | 32.5 s | |
+| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 20 of 40 | 21.5 s | `banking-extraction.7e1c3a40f5946fc8.diagnosis.json` |
+| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 40 | 21.8 s | |
+| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 40 | 32.8 s | `hospitality-extraction.418a3438efcfbb12.diagnosis.json` |
 
 Model `granite4.2:8b`, digest `f586c02fdecdf151`. A cell with more than one
 session was paused and resumed; the recorder resumes from its checkpoint, and
-no sample in any of the six was an errored call. Detection time is for the
+no sample in any of the six was an errored call. The two resumed cells lost
+the activation labels of their earlier sessions to the bug described in
+section 8; the fix is in the code that will record the remaining cells. A
+diagnosis file holds, for every check, the best cut the estimator could make,
+the counts of inputs and decoys above it, and the full sorted target and decoy
+scores, with the judging model's pinned revision inside and the recording's
+configuration hash in its name; one is written beside any cell that reports
+nothing. Detection time is for the
 analysis of one recorded cell with the judging model loaded; recording took
 hours per cell and is the binding cost, as section 7 says.
 
