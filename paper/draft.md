@@ -975,9 +975,17 @@ wrapper as each call was made, is the ground truth throughout.
 
 Two things to hold in mind while reading the numbers. These cells ran at six
 samples per cloud, not the twenty that section 3 calls the working minimum,
-because six was what fitted in the nights available; every recall figure here
-is therefore a lower bound on what twenty would give, and the share-of-answers
-statistic can take only seven distinct values at six samples. And the
+because six was what fitted in the nights available, and the choice had no
+decision behind it until this draft forced one. Six matters less for this
+fault than the power figures of section 3 suggest, and more for the threshold.
+The fault is close to all-or-nothing per input: of the 111 inputs it touched,
+101 fired on five or six of their six samples and 96 on all six, so a touched
+input moves its whole cloud rather than part of it, which is not the gradual
+shift those power figures were measured on. What six samples cost instead is
+resolution. The share-of-answers statistic can take only seven distinct values
+at six samples, the decoy scores land on the same seven, and the threshold
+is set from where the decoys stop. The section below on the JSON cells shows
+exactly what that costs. And the
 false-discovery rates below are only computable because the bench records
 which inputs the fault touched. No production user ever has that number. In
 production, the budget is the promise and the realised rate is unknowable,
@@ -1022,15 +1030,21 @@ enough to the ten-input floor of section 3 that a sizing miss cannot be ruled
 out. Hospitality is the sharp case: 25 of 40 inputs were touched by the fault,
 well above the floor, and nothing was flagged.
 
-We do not know why. The diagnosis, which reads each check's target scores
-against its decoy scores to tell a separated-but-unreported result from a
-blind one, needs the judging model on the machine that is now recording the
-third row, and it has not run. So the hospitality result is reported here as
-what it is: a measured hole, above the floor, with its diagnosis pending. What
-can be said from the files alone is that the same code, the same fault and the
-same model produced a clean detection in one domain and none in another on
-the same output format, so "JSON never works" is not the finding either. [To
-be completed when the diagnosis has run; expected with the third row.]
+The diagnosis has run, and it is not blindness. Reading each check's target
+scores against its decoy scores in both silent cells shows the touched inputs
+standing well clear of the baseline's own variation. What failed is the
+threshold. With six samples per cloud the statistic takes seven values, so the
+decoy scores pile onto a few of them, and in both cells a decoy or two landed
+on the top value, the one the touched inputs occupy. The best cut the
+estimator could make had one decoy above it in one cell, an estimate of
+0.111, and two decoys above it in the other, 0.176, both over the 0.100
+budget by the width of a single decoy. Logistics worked on the
+same format because its decoys happened not to reach the top value. So the
+format-shaped failure is a resolution failure: the change was seen and could
+not be reported, which is the same shape as the first end-to-end run in
+section 3, arrived at from the other side. The fix is finer statistics, which
+means more samples per cloud, and the next paragraph says what has been
+committed to.
 
 ### The false-alarm budget, on the evidence so far
 
@@ -1041,9 +1055,21 @@ with a 95 percent interval from 0.07 to 0.26 that contains the 0.10 asked
 for. At roughly twenty flags per cell, a realised rate of 0.14 is not yet
 distinguishable from an honest 0.10 with ordinary variation around it, and it
 is not yet distinguishable from a miscalibration either. The extraction cells
-that flagged anything flagged no false alarms, on 11 flags. Whether the
-budget holds is a question for the full matrix, and the third row is what will
-answer it. [To be completed with the agent row.]
+that flagged anything flagged no false alarms, on 11 flags.
+
+The same resolution problem that silenced two JSON cells is the likely driver
+here, from the other direction: with decoys on seven values, the cut the
+estimator settles on can sit a whole value too low as easily as a whole value
+too high. So the following is on record before the run that tests it. The
+summary row will be re-recorded at twenty samples per cloud, as a separate
+configuration beside this one. The prediction: recall moves modestly, since
+the fault is near-binary and was mostly seen already, and the realised
+false-alarm rates move towards the budget, because what twenty samples buy is
+decoy resolution rather than detection. If that row's recall leaves the
+interval of the six-sample row, the whole matrix is re-recorded at twenty. If
+it does not, the six-sample matrix stands as the transfer result and twenty
+samples are reserved for the measurements that need them. [Result of that
+run to be entered here.]
 
 ### Which checks carried the result, and why that is not a contradiction
 
@@ -1072,14 +1098,17 @@ which is the same reading the first end-to-end run gave.
 ### What is missing from this section
 
 - The agent row, three cells, recording at the time of writing. It completes
-  the matrix and is what the false-alarm question and the format-shaped
-  failure both need.
-- The diagnosis of the two JSON cells that flagged nothing.
+  the six-sample matrix.
+- The summary row at twenty samples per cloud, with the prediction above on
+  record before it runs.
 - Leave-one-system-out and leave-one-fault-out numbers. With one fault class
   recorded, leave-one-fault-out is undefined, and leave-one-system-out across
   three systems per row gives the interval above and no more.
 - The severity titration per fault class on real systems. The only
-  titration so far is on the synthetic system (section 5).
+  titration so far is on the synthetic system (section 5), and the fault used
+  here cannot drive one at any sample count, because it is near-binary per
+  input; a titration needs a fault with a severity knob, and at least twenty
+  samples per cloud.
 - The sealed holdout of real regressions, not yet collected.
 - Any second model. Every cell here was driven by one model, so this section
   describes that model, as section 4 described one judging model.
@@ -1535,5 +1564,5 @@ hours per cell and is the binding cost, as section 7 says.
 ---
 
 *Section 8 is drafted against two of three rows; its bracketed paragraphs
-fill when the agent row and the diagnosis land. The abstract's result stays
+fill when the agent row and the twenty-sample summary row land. The abstract's result stays
 blank until the matrix is complete.*

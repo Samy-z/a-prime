@@ -307,3 +307,34 @@ bound on k=20 and mode_share takes seven values. Stated in the paper.
 **Reopen if:** the agent row lands (completes the matrix and the FDR
 question); the extraction diagnosis runs (names the hole); a second model
 drives the cells (MTH-008 needs more systems than three per row).
+
+## STD-010 — DIAGNOSED (dated append, 2026-10-05)
+
+Two of the three reopen conditions above have fired.
+
+**The extraction hole is resolution, not blindness.** Diagnosed by the local
+session with `diagnose_channels.py` and the NLI model (HANDOFF §21, D25; the
+diagnosis output itself was not committed). Separation is strong in both
+silent cells. Best achievable cuts: 0.111 with one decoy at the top statistic
+value in one cell, 0.176 with two decoys in the other, against q=0.10. At k=6
+the mode-share statistic takes seven values, the decoys land on the same
+seven, and a decoy on the top value puts the floor out of reach. Same shape as
+ENG-007, from the other side.
+
+**The fault is near-binary per input, measured here from the committed
+activation stores.** Over the six analysed cells, 111 inputs were touched; 101
+fired on five or six of their six samples and 96 on all six (distribution of
+fired samples per touched input: 1:6, 3:2, 4:2, 5:1, 6:96, 7:4; the sevens are
+preflight calls sharing an input id). Instrument: count `hit` keys per
+`input_id` across `results/study/*.activation.json`, agent cell excluded. D25
+quotes 104 of 111 for the same quantity; the three-input difference is
+unresolved and does not change the reading. The k=20 power figures (MTH-018)
+were measured on gradual mix shifts and do not transfer to this fault; what k
+buys here is decoy resolution.
+
+**Pre-registered (D25):** the summary row is re-recorded at k=20 as a
+separate configuration (`run_study.py --k 20`). Prediction before the run:
+recall moves modestly; realised FDR moves towards the budget. Full k=20
+re-record only if that row's recall leaves the k=6 interval [0.72, 0.92].
+**Evidence:** HANDOFF §21; the activation stores; `paper/draft.md` §8.
+**Reopen if:** the k=20 summary row lands.
