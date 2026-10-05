@@ -152,3 +152,39 @@ def test_refusal_on_the_second_cell_still_writes_nothing(runner, monkeypatch):
     # at it is not.
     assert jobs[0].paths()["report"].exists()
     assert not jobs[1].paths()["report"].exists()
+
+
+# --- k and n are configuration, never constants to edit (D25) ------------
+
+
+def test_k_and_n_overrides_change_the_configuration_and_its_filenames(runner):
+    base = runner.make_job("banking", "summary", DIGEST, nli_rev="testrev")
+    runner.configure(k=20, n=30)
+    job = runner.make_job("banking", "summary", DIGEST, nli_rev="testrev")
+    assert runner.K == 20 and runner.N == 30
+    assert job.prov.params["k"] == 20 and job.prov.params["n_inputs"] == 30
+    assert len(job.inputs) == 30
+    assert job.triples == 30 * 20
+    # A different k is a different configuration: hash and files move.
+    assert job.prov.config_hash != base.prov.config_hash
+    assert job.paths()["checkpoint"] != base.paths()["checkpoint"]
+
+
+def test_overridden_k_reaches_the_recording_and_the_matrix(runner):
+    runner.configure(k=8)
+    job, _ = _lay_down_cell(runner, "banking", "summary", n_affected=12)
+    samples = job.paths()["checkpoint"].read_text(encoding="utf-8").count("\n")
+    assert samples == runner.N * 8 * 3
+    out = runner.RUNS / "matrix.json"
+    assert runner.analyse([job], None, None, DIGEST, out=out) == 0
+    m = json.loads(out.read_text(encoding="utf-8"))
+    assert m["k"] == 8 and m["rows"][0]["k"] == 8
+
+
+def test_defaults_are_the_k6_matrix_and_nonsense_values_are_refused(runner):
+    assert (runner.N, runner.K) == (40, 6)
+    with pytest.raises(ValueError, match="at least 2"):
+        runner.configure(k=1)
+    with pytest.raises(ValueError, match="at least 1"):
+        runner.configure(n=0)
+    assert (runner.N, runner.K) == (40, 6)

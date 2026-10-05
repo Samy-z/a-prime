@@ -127,6 +127,7 @@ Windows.
     python scripts/run_cell_detection.py --status   # progress of a paused run
     python scripts/run_cell_detection.py --stop     # stop one at the next triple
     python scripts/run_study.py --status            # the nine-cell factorial
+    python scripts/run_study.py --k 20 --only-format summary --go   # D25: a separate configuration
     python scripts/diagnose_channels.py     # why a channel reported nothing
     python scripts/capture_chat_fixtures.py # refresh the API test fixtures
 
@@ -187,6 +188,9 @@ on-screen notification. The serving process has stopped twice without logging
 a cause; the guards and the resume path cover it
 (`docs/knowledge/environment.md`).
 
-Not built: the extraction-failure diagnosis, the severity titration rerun,
-LOSO, the embedding style-stability gate, the Palworld adapter, F11, F2. The
-paper is drafted except §8 and the abstract's result.
+Not built: the severity titration rerun (needs k>=20 and a fault with a
+severity knob, bench METHODS), LOSO, the embedding style-stability gate, the
+Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
+extraction failure is diagnosed as decoy resolution at k=6, not blindness
+(STD-010 append, D25). The paper is drafted in every section; §8 against two
+of three rows; the abstract's result is blank until the matrix is complete.

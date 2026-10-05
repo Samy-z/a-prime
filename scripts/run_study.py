@@ -114,6 +114,28 @@ STALE_SHAPES = frozenset({"lookup", "search", "history", "verify"})
 N, K, Q = 40, 6, 0.10
 N_ENTITIES = 18
 
+
+def configure(n: int | None = None, k: int | None = None) -> None:
+    """Set the corpus size and samples per cloud for this invocation.
+
+    These are study configuration, never code (HANDOFF §10), and they are
+    hashed: a different k or n is a different configuration with its own
+    checkpoint filenames, which is intended (provenance.md). The defaults are
+    the k=6 matrix of STD-010; `--k 20` is the D25 re-recording of the summary
+    row, and it must not happen by editing the constants above.
+    """
+    global N, K
+    if n is not None:
+        if n < 1:
+            raise ValueError(f"n must be at least 1, got {n}")
+        N = int(n)
+    if k is not None:
+        if k < 2:
+            raise ValueError(
+                f"k must be at least 2, got {k}: one sample per cloud has no "
+                "within-cloud variation for the decoy arm to measure")
+        K = int(k)
+
 # Seconds per single invocation, measured on this machine against this model in
 # the nine-cell smoke run (results/cells_smoke.json). Used only for estimates,
 # but they are the difference between a planned night and a surprised morning.
@@ -285,7 +307,14 @@ def main() -> int:
                           "even with --go")
     ap_.add_argument("--yes", action="store_true",
                      help="proceed past --max-hours")
+    ap_.add_argument("--k", type=int, default=None,
+                     help=f"samples per cloud (default {K}). A different k is a "
+                          "different configuration: new config hash, new "
+                          "checkpoint files, nothing shared with the k=6 matrix")
+    ap_.add_argument("--n", type=int, default=None,
+                     help=f"inputs per cell (default {N}). Hashed, like --k")
     args = ap_.parse_args()
+    configure(n=args.n, k=args.k)
 
     RUNS.mkdir(parents=True, exist_ok=True)
     if args.stop:
