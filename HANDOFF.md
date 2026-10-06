@@ -917,3 +917,24 @@ is two-layered so that attachment order can never matter again. The lesson is
 the ENG-008 one a second time: every component behaved as written, the
 composition lost data, and nothing reported it, because a store with fewer
 labels than inputs looks like a store.
+
+## §21 — AMENDMENT (dated append, 2026-10-06)
+
+Two owner decisions taken 2026-10-06, both downstream of BCH-018:
+
+**banking-extraction will be re-recorded at k=20**, on a later night the
+owner picks, not scheduled yet. The cell is the right one to spend the hours
+on twice over: it is the cell whose zero is diagnosed as decoy resolution at
+seven statistic values, so k=20 tests that diagnosis directly and doubles as
+part of the D25 course; and it is the cell that lost 20 of 40 activation
+labels, so a fresh recording replaces the partial-label row instead of
+patching it. Cost arithmetic corrected against the plan's "about one summary
+cell": extraction invocations run 7.1 s, not 4.8 s, so 40 inputs x 3 arms x
+k=20 is about 4.7 hours, not 3.2.
+
+**The banking-agent cell was restarted clean** (commit 818baa2) rather than
+resumed. Its label store had been reduced to one key by the 2026-10-05
+relaunch preflight — the loss predates the BCH-018 warning — and resuming
+would have produced a row with 11 permanently unlabelled inputs. About 25
+minutes of GPU re-done, against a complete label set for the agent row. The
+dropped checkpoint and store remain in git history.
