@@ -65,6 +65,31 @@ another box serves the same `granite4.2:8b`, and it comes from `/api/tags`:
 model as "unresolved" into a config hash for several runs, which is a pin in
 name only.
 
+### The evening-to-night handover is automated from outside this repo
+
+The recurring slowdown has one root cause: granite needs 6.8 GB on an 8 GB
+card, the VRAM split is decided once at model load and never revisited while
+the model stays busy, and the owner's evening use (video in Opera GX) holds
+enough VRAM that a run started or resumed during the evening loads partially
+on CPU and stays 3-4x slow all night — even after the apps close.
+
+The owner's fix (2026-10-06) lives in their `Youtube_ad_skipper_fr` project
+(branch `idle-close`), which already watches the screen for ad buttons: when
+the screen stops changing AND the keyboard/mouse go untouched for 15 minutes
+— the "video over, owner asleep" state; a playing video never qualifies —
+it closes the browser tab and runs a machine-local hook,
+`on_idle_close.local.cmd` (gitignored there, not in any repo). The hook
+unloads granite (`ollama stop`), so the next load re-plans its split against
+the freed card, and fires the `aprime-factorial` scheduled task, whose
+collision guard makes a double-start impossible.
+
+Consequence for reading run logs: a recording may legitimately START in the
+middle of the night, minutes after a browser tab closed, rather than at the
+scheduled 05:00. The 05:00 firing then skips via the collision guard. Neither
+is an anomaly. If night runs are slow again, check that the skipper was
+actually running with `--close-idle-after` that evening before suspecting a
+new cause.
+
 ### The serving process stops without logging why
 
 Twice now (2026-09-30 about 01:53, 2026-10-05 about 15:05) the Ollama server
