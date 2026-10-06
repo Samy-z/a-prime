@@ -388,3 +388,35 @@ labelled-touched in banking is unchanged by five unknown inputs.
 against the checkpoints' session fields.
 **Reopen if:** phase 2 is re-run with findings (gives the banking-summary FDR
 as a number again), or the k=20 summary row lands.
+
+## STD-010 — FOURTH APPEND (2026-10-06): the banking-summary flags split; the FDR is a bracket, not a number
+
+Phase 2 re-run on all six cells with the `findings` field (store-replacement
+fix a47f340 in place, labels untouched by the re-run since it records
+nothing). Every headline number is unchanged; the matrix rows now carry the
+flagged input ids, which makes this split an offline join instead of a rerun.
+
+**banking-summary, 19 flagged:** 15 flags are on labelled-touched inputs
+(true positives). Of the 4 others, **1 is a confirmed false alarm** —
+`banking-summary-evaluate-022`, labelled quiet — and **3 are unlabelled**:
+`banking-summary-history-005`, `banking-summary-policy-002`,
+`banking-summary-search-001`, all among the 5 inputs whose session-0 labels
+were erased (BCH-018). Those 3 cannot be classified from data on disk; the
+labels are gone, not pending.
+
+So the realised FDR of this cell is a bracket: **[1/19, 4/19] = [0.05, 0.21]**,
+the lower bound if all 3 unlabelled flags were true detections, the upper if
+none were. The pooled summary row inherits it: **[4/51, 7/51] = [0.08, 0.14]**
+against the 0.10 budget — the pooled point estimate can no longer be stated
+as 0.14, only as inside a bracket that straddles the budget. Hospitality's 3
+false of 21 and logistics' 0 of 11 are exact; their labels are complete.
+
+The bracket collapses to a number only by re-recording the cell. The k=20
+summary row scheduled 2026-10-06 23:00 records banking-summary fresh with the
+fixed store code, so it answers the calibration question at k=20 regardless;
+the k=6 bracket stays a bracket.
+**Evidence:** `results/study/matrix.json` (rows with `findings`),
+`results/study/banking-summary.60ac20518858cf53.activation.json` (35 labelled
+inputs), the join of the two.
+**Reopen if:** banking-summary is re-recorded at k=6, or a copy of the lost
+label store surfaces.

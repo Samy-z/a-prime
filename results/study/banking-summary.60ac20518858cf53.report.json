@@ -2,23 +2,157 @@
   "cell": "banking-summary",
   "domain": "banking",
   "output_format": "summary",
-  "run_id": "20261005T145729Z",
+  "run_id": "20261006T001646Z",
   "config_hash": "60ac20518858cf53",
-  "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+  "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
   "git_dirty": false,
   "system": "granite4.2:8b",
   "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
   "sessions": 3,
-  "analysed_utc": "2026-10-05T14:58:27Z",
+  "analysed_utc": "2026-10-06T00:17:23Z",
   "n_inputs": 40,
   "k": 6,
   "q": 0.1,
   "activated": 17,
   "flagged": 19,
   "true_positives": 15,
+  "findings": [
+    {
+      "input_id": "banking-summary-evaluate-022",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-history-005",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-history-014",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-history-023",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-history-032",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-lookup-000",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-lookup-018",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-lookup-036",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-mixed-008",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-mixed-017",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-mixed-026",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-mixed-035",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-policy-002",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-search-001",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-search-010",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-search-019",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-search-028",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-search-037",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-summary-compute-030",
+      "channels": [
+        "mode_share"
+      ]
+    }
+  ],
   "realised_fdr": 0.21052631578947367,
   "recall": 0.8823529411764706,
-  "detect_s": 24.5,
+  "detect_s": 24.0,
   "cost": {
     "predicate_calls": 900,
     "clusterings": 80,

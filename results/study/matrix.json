@@ -9,23 +9,157 @@
       "cell": "banking-summary",
       "domain": "banking",
       "output_format": "summary",
-      "run_id": "20261005T145729Z",
+      "run_id": "20261006T001646Z",
       "config_hash": "60ac20518858cf53",
-      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
       "git_dirty": false,
       "system": "granite4.2:8b",
       "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
       "sessions": 3,
-      "analysed_utc": "2026-10-05T14:58:27Z",
+      "analysed_utc": "2026-10-06T00:17:23Z",
       "n_inputs": 40,
       "k": 6,
       "q": 0.1,
       "activated": 17,
       "flagged": 19,
       "true_positives": 15,
+      "findings": [
+        {
+          "input_id": "banking-summary-evaluate-022",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-history-005",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-history-014",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-history-023",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-history-032",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-lookup-000",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-lookup-018",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-lookup-036",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-mixed-008",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-mixed-017",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-mixed-026",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-mixed-035",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-policy-002",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-search-001",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-search-010",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-search-019",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-search-028",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-search-037",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "banking-summary-compute-030",
+          "channels": [
+            "mode_share"
+          ]
+        }
+      ],
       "realised_fdr": 0.21052631578947367,
       "recall": 0.8823529411764706,
-      "detect_s": 24.5,
+      "detect_s": 24.0,
       "cost": {
         "predicate_calls": 900,
         "clusterings": 80,
@@ -64,23 +198,112 @@
       "cell": "logistics-summary",
       "domain": "logistics",
       "output_format": "summary",
-      "run_id": "20261005T145729Z",
+      "run_id": "20261006T001646Z",
       "config_hash": "164081630f20c414",
-      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
       "git_dirty": false,
       "system": "granite4.2:8b",
       "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
       "sessions": 1,
-      "analysed_utc": "2026-10-05T14:58:57Z",
+      "analysed_utc": "2026-10-06T00:17:51Z",
       "n_inputs": 40,
       "k": 6,
       "q": 0.1,
       "activated": 14,
       "flagged": 11,
       "true_positives": 11,
+      "findings": [
+        {
+          "input_id": "logistics-summary-lookup-000",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-lookup-018",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-lookup-036",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-mixed-008",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-mixed-026",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-search-001",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-search-010",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-search-019",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-search-028",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-search-037",
+          "channels": [
+            "mode_share",
+            "nli_contradiction",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-summary-history-032",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        }
+      ],
       "realised_fdr": 0.0,
       "recall": 0.7857142857142857,
-      "detect_s": 30.2,
+      "detect_s": 28.0,
       "cost": {
         "predicate_calls": 1263,
         "clusterings": 80,
@@ -119,23 +342,167 @@
       "cell": "hospitality-summary",
       "domain": "hospitality",
       "output_format": "summary",
-      "run_id": "20261005T145729Z",
+      "run_id": "20261006T001647Z",
       "config_hash": "19ffac0bccf2ddd8",
-      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
       "git_dirty": false,
       "system": "granite4.2:8b",
       "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
       "sessions": 1,
-      "analysed_utc": "2026-10-05T14:59:30Z",
+      "analysed_utc": "2026-10-06T00:18:19Z",
       "n_inputs": 40,
       "k": 6,
       "q": 0.1,
       "activated": 21,
       "flagged": 21,
       "true_positives": 18,
+      "findings": [
+        {
+          "input_id": "hospitality-summary-compute-003",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-history-005",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-history-023",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-history-032",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-lookup-000",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-lookup-009",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-lookup-018",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-lookup-027",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-lookup-036",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-mixed-008",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-mixed-017",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-mixed-026",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-mixed-035",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-search-010",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-search-028",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-search-037",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-compute-012",
+          "channels": [
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-compute-021",
+          "channels": [
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-history-014",
+          "channels": [
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-policy-038",
+          "channels": [
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "hospitality-summary-search-001",
+          "channels": [
+            "novel_mode"
+          ]
+        }
+      ],
       "realised_fdr": 0.1428571428571429,
       "recall": 0.8571428571428571,
-      "detect_s": 32.5,
+      "detect_s": 27.9,
       "cost": {
         "predicate_calls": 1411,
         "clusterings": 80,
@@ -174,23 +541,24 @@
       "cell": "banking-extraction",
       "domain": "banking",
       "output_format": "extraction",
-      "run_id": "20261005T145729Z",
+      "run_id": "20261006T001647Z",
       "config_hash": "7e1c3a40f5946fc8",
-      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
       "git_dirty": false,
       "system": "granite4.2:8b",
       "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
       "sessions": 2,
-      "analysed_utc": "2026-10-05T14:59:51Z",
+      "analysed_utc": "2026-10-06T00:18:38Z",
       "n_inputs": 40,
       "k": 6,
       "q": 0.1,
       "activated": 11,
       "flagged": 0,
       "true_positives": 0,
+      "findings": [],
       "realised_fdr": null,
       "recall": 0.0,
-      "detect_s": 21.5,
+      "detect_s": 19.6,
       "cost": {
         "predicate_calls": 704,
         "clusterings": 80,
@@ -229,23 +597,102 @@
       "cell": "logistics-extraction",
       "domain": "logistics",
       "output_format": "extraction",
-      "run_id": "20261005T145729Z",
+      "run_id": "20261006T001647Z",
       "config_hash": "b541f3b106c5d06d",
-      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
       "git_dirty": false,
       "system": "granite4.2:8b",
       "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
       "sessions": 1,
-      "analysed_utc": "2026-10-05T15:00:13Z",
+      "analysed_utc": "2026-10-06T00:18:56Z",
       "n_inputs": 40,
       "k": 6,
       "q": 0.1,
       "activated": 23,
       "flagged": 11,
       "true_positives": 11,
+      "findings": [
+        {
+          "input_id": "logistics-extraction-compute-003",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-lookup-000",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-lookup-018",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-lookup-036",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-mixed-008",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-mixed-026",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-search-001",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-search-010",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-search-019",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-search-028",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        },
+        {
+          "input_id": "logistics-extraction-search-037",
+          "channels": [
+            "mode_share",
+            "novel_mode"
+          ]
+        }
+      ],
       "realised_fdr": 0.0,
       "recall": 0.4782608695652174,
-      "detect_s": 21.8,
+      "detect_s": 18.0,
       "cost": {
         "predicate_calls": 610,
         "clusterings": 80,
@@ -284,23 +731,24 @@
       "cell": "hospitality-extraction",
       "domain": "hospitality",
       "output_format": "extraction",
-      "run_id": "20261005T145730Z",
+      "run_id": "20261006T001647Z",
       "config_hash": "418a3438efcfbb12",
-      "git_commit": "26345e74e90e11abe1f2e9b63480dadf46ad81d9",
+      "git_commit": "a47f34053d5a9df0f8fc3cbcd514fca0ccece213",
       "git_dirty": false,
       "system": "granite4.2:8b",
       "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
       "sessions": 1,
-      "analysed_utc": "2026-10-05T15:00:46Z",
+      "analysed_utc": "2026-10-06T00:19:27Z",
       "n_inputs": 40,
       "k": 6,
       "q": 0.1,
       "activated": 25,
       "flagged": 0,
       "true_positives": 0,
+      "findings": [],
       "realised_fdr": null,
       "recall": 0.0,
-      "detect_s": 32.8,
+      "detect_s": 30.9,
       "cost": {
         "predicate_calls": 1319,
         "clusterings": 80,
