@@ -45,6 +45,18 @@ echo ================================================================ >> "%LOG%"
 echo START %DATE% %TIME%  cap %HOURS%h >> "%LOG%"
 echo ================================================================ >> "%LOG%"
 
+REM Collision avoidance, same rule as night-k20.cmd: if a recorder is already
+REM running, this firing steps aside rather than starting a second one against
+REM the same checkpoint. Not a cap — the running recorder is untouched, and
+REM the next scheduled firing picks up whatever is left. Added 2026-10-06
+REM after a slowed agent-row run made it possible for a session to still be
+REM recording when the next 05:00 arrived.
+tasklist /FI "IMAGENAME eq python.exe" 2>nul | find /I "python.exe" >nul
+if not errorlevel 1 (
+  echo SKIPPED: a recorder is already running, leaving it alone >> "%LOG%"
+  exit /b 0
+)
+
 ".venv\Scripts\python.exe" "scripts\run_study.py" --clear-stop >> "%LOG%" 2>&1
 
 ".venv\Scripts\python.exe" -u "scripts\run_study.py" --go --yes --stop-after-hours %HOURS% >> "%LOG%" 2>&1
