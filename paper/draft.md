@@ -978,7 +978,11 @@ labels of the inputs recorded before the pause, 20 of 40 in banking
 extraction and 5 of 40 in banking summary. Those inputs are label-unknown and
 cannot be relabelled, because the label is a difference between two tool
 results and the recording keeps outputs, not tool arguments. Every count
-below for those two cells is over the labelled inputs, and says so.
+below for those two cells is over the labelled inputs, and says so. The
+banking extraction cell will be recorded again at twenty samples per cloud
+and that recording replaces this one outright, so its row below is reported
+as it stands and not polished. The third row, recorded after the fix, carries
+complete labels.
 
 Two things to hold in mind while reading the numbers. These cells ran at six
 samples per cloud, not the twenty that section 3 calls the working minimum,
@@ -1003,8 +1007,8 @@ checked.
 
 | | banking | logistics | hospitality |
 |---|---|---|---|
-| **summary** (prose) | 15 of 17 changed inputs caught, 5 inputs unlabelled; 19 flagged, 4 not known to have changed | 11 of 14; 11 flagged, 0 false | 18 of 21; 21 flagged, 3 false |
-| **extraction** (JSON) | 0 of 11, 20 inputs unlabelled; nothing flagged | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
+| **summary** (prose) | 15 of 17 changed inputs caught, 5 inputs unlabelled; 19 flagged, 1 false, 3 of unknown label | 11 of 14; 11 flagged, 0 false | 18 of 21; 21 flagged, 3 false |
+| **extraction** (JSON) | 0 of 11, 20 inputs unlabelled; nothing flagged; to be re-recorded at twenty samples | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
 | **agent** (decision line) | [recording; 11 of 240 triples at this draft] | [recording] | [recording] |
 
 Each cell reads: inputs the fault actually touched and how many of them were
@@ -1060,13 +1064,16 @@ says what has been committed to.
 
 ### The false-alarm budget, on the evidence so far
 
-Two of the three summary cells ran over the budget: 4 flagged inputs not
-known to have changed among 19 in banking, a realised rate of at most 0.21,
-since 5 of that cell's inputs are label-unknown and the analysis that would
-say which inputs those 4 are has not yet been re-run; 3 among 21 in
-hospitality, 0.14, every input labelled; none among 11 in logistics. Pooled
-across the row, at most 7 in 51, 0.14, with a 95 percent interval from 0.07
-to 0.26 that contains the 0.10 asked for. At roughly twenty flags per cell, a realised rate of 0.14 is not yet
+One summary cell ran over the budget and one cannot be placed. In
+hospitality, where every input is labelled, 3 of 21 flagged inputs had not
+changed, a realised rate of 0.14. In logistics, none of 11. In banking, of 19
+flagged inputs 15 had changed, 1 had not, and 3 are among the five whose
+label was lost, so the cell's realised rate is somewhere between 1 in 19 and
+4 in 19, from 0.05 to 0.21, and the data cannot say where. Pooled across the
+row the same bracket runs from 4 in 51 to 7 in 51, 0.08 to 0.14, and the
+0.10 budget sits inside it; the 95 percent intervals on the two ends run
+from 0.03 to 0.19 and from 0.07 to 0.26. At roughly
+twenty flags per cell, a realised rate in that bracket is not yet
 distinguishable from an honest 0.10 with ordinary variation around it, and it
 is not yet distinguishable from a miscalibration either. The extraction cells
 that flagged anything flagged no false alarms, on 11 flags.
@@ -1115,6 +1122,8 @@ which is the same reading the first end-to-end run gave.
   the six-sample matrix.
 - The summary row at twenty samples per cloud, with the prediction above on
   record before it runs.
+- The banking extraction cell at twenty samples per cloud, which replaces its
+  six-sample row and with it the twenty-input label gap.
 - Leave-one-system-out and leave-one-fault-out numbers. With one fault class
   recorded, leave-one-fault-out is undefined, and leave-one-system-out across
   three systems per row gives the interval above and no more.
@@ -1573,7 +1582,8 @@ Model `granite4.2:8b`, digest `f586c02fdecdf151`. A cell with more than one
 session was paused and resumed; the recorder resumes from its checkpoint, and
 no sample in any of the six was an errored call. The two resumed cells lost
 the activation labels of their earlier sessions to the bug described in
-section 8; the fix is in the code that will record the remaining cells. A
+section 8; the fix is in the code that recorded every cell after them, and
+the banking extraction row is to be replaced by a twenty-sample recording. A
 diagnosis file holds, for every check, the best cut the estimator could make,
 the counts of inputs and decoys above it, and the full sorted target and decoy
 scores, with the judging model's pinned revision inside and the recording's
