@@ -51,8 +51,13 @@ REM the same checkpoint. Not a cap — the running recorder is untouched, and
 REM the next scheduled firing picks up whatever is left. Added 2026-10-06
 REM after a slowed agent-row run made it possible for a session to still be
 REM recording when the next 05:00 arrived.
-tasklist /FI "IMAGENAME eq python.exe" 2>nul | find /I "python.exe" >nul
-if not errorlevel 1 (
+REM
+REM The check matches the recorder's command line, NOT just python.exe: on
+REM 2026-10-07 the ad-skipper (also a python process) kept this guard
+REM tripped for eight hours, so the idle-closer's handover could never
+REM start a run. Any python that is not running run_study is not a recorder.
+powershell -NoProfile -Command "exit [int](@(Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -match 'run_study|run_cell_detection' }).Count -gt 0)"
+if errorlevel 1 (
   echo SKIPPED: a recorder is already running, leaving it alone >> "%LOG%"
   exit /b 0
 )

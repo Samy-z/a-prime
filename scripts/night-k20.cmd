@@ -23,14 +23,20 @@ set "PYTHONIOENCODING=utf-8"
 echo. >> "%LOG%"
 echo ================ START %DATE% %TIME% k=20 summary row ================ >> "%LOG%"
 
-tasklist /FI "IMAGENAME eq python.exe" 2>nul | find /I "python.exe" >nul
-if not errorlevel 1 (
-  echo SKIPPED: another python run is active >> "%LOG%"
-  start "" powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0notify.ps1" -Title "a-prime k=20 run skipped" -Message "Another run was still active at 23:00. Nothing started. Ping Claude."
+REM Matches the recorder's command line, not just python.exe: the ad-skipper
+REM is also a python process and must not trip this (2026-10-07).
+powershell -NoProfile -Command "exit [int](@(Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -match 'run_study|run_cell_detection' }).Count -gt 0)"
+if errorlevel 1 (
+  echo SKIPPED: another recorder is active >> "%LOG%"
+  start "" powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0notify.ps1" -Title "a-prime k=20 run skipped" -Message "A recorder was still active at 23:00. Nothing started. Ping Claude."
   exit /b 7
 )
 
-schtasks /Delete /TN "aprime-factorial" /F >> "%LOG%" 2>&1
+REM The daily 05:00 task used to be deleted here, on the assumption the k=6
+REM factorial would be complete by this run. It is not guaranteed to be
+REM (2026-10-07: the agent row is still recording), and the daily task's own
+REM guard makes it harmless while any recorder runs. It gets deleted by hand
+REM once the nine-cell matrix is done.
 
 git pull --ff-only >> "%LOG%" 2>&1
 
