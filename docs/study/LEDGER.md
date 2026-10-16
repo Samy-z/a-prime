@@ -571,3 +571,28 @@ justify, the reading is STD-010's and k=20 is the remedy.
 condition stands); the agent prompt is changed to put the decision first
 (paper §6 says it is kept as it is, so the decision-level reading would be a
 new instrument reading a new system).
+
+## STD-010 — FIFTH APPEND (2026-10-16): the "all six" count was 100 of 111, not 96; the nine-cell figures are 188 / 168 / 165
+
+Found while recomputing the firing fractions for the nine-cell paper
+section. The first append's "96 on all six" counted inputs whose activation
+keys sum to exactly six. The first input of a cell carries seven keys, `#0`
+to `#6` (second append: the preflight re-invokes it in-process and the store
+numbers that invocation too), and in the four cells where that input was
+touched (logistics-summary, hospitality-summary, logistics-extraction,
+hospitality-extraction) all seven keys are true, so the input fired on all
+six recorded samples and an exact-six count dropped it. Correct count over
+the six recorded keys, the seventh set aside: **100 of 111 on all six**; the
+101 on five or six of six is unaffected (a seventh true key cannot move an
+input across that line). The three touched inputs with fewer than six keys
+(label loss, BCH-018: banking-summary 1, banking-extraction 2) cannot be
+judged either way and are in neither numerator.
+
+Nine cells, same convention: 188 touched; 168 fired on five or six of six;
+165 on all six (agent row 77 / 67 / 65; per cell all-six: 15, 14, 21, 9, 19,
+22, 21, 20, 24). The paper's section 8 carries 188 / 168 / 165; its earlier
+draft carried 111 / 101 / 96 and is superseded. Instrument: for each touched
+input take the keys sorted by index, drop `#0` when there are seven, require
+six keys, count trues; `docs/study/METHODS.md`, "Known data traps".
+**Reopen if:** an activation store is found with seven keys on an input that
+is not the cell's first, or with a `#0` that is not the preflight.

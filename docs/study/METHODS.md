@@ -30,3 +30,19 @@ domains, the detector flagged changed inputs at FDR q against A-prime decoys and
 detected injected faults down to severity s per fault class; performance on
 unseen systems is expected within the stated interval. See MTH-008 for why that
 interval is wide.
+
+## Known data traps
+
+- **Seven activation keys on a cell's first input.** The preflight re-invokes
+  the first input in-process before recording, and the per-sample activation
+  store numbers that invocation too, so that input carries `#0` to `#6` where
+  every other input carries `#0` to `#5`. Count per-sample firing over the six
+  recorded keys: drop `#0` when there are seven. An exact-six count silently
+  drops a fully fired input (STD-010 fifth append: 96 reported where 100 was
+  right). Inputs with fewer than six keys lost labels (BCH-018) and cannot be
+  judged for "fired on all six"; keep them out of both numerators and say so.
+- **`cost.samples_clustered` below 4·k·n is errored calls, not dedup.**
+  `Recording.clouds` drops a sample whose call errored, and A is counted in
+  both arm pairs, so the shortfall is 2·A + A′ + B errored samples (STD-011
+  first append). Exact duplicates are still clustered; they collapse in
+  `distinct_after_normalisation`, not here.

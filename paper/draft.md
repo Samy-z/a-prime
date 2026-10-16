@@ -1004,7 +1004,7 @@ decision behind it until the first draft of this section forced one. Six
 matters less for this fault than the power figures of section 3 suggest, and
 more for the threshold. The fault is close to all-or-nothing per input: of
 the 188 inputs it touched across the nine cells, 168 fired on five or six of
-their six samples and 158 on all six, so a touched input moves its whole
+their six samples and 165 on all six, so a touched input moves its whole
 cloud rather than part of it, which is not the gradual shift those power
 figures were measured on. The agent format is the exception in degree, 67 of
 its 77 touched inputs, because an agent decides on each run which tools to
