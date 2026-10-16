@@ -56,7 +56,7 @@ normalisation) are the mechanism, or a coincidence of it.
 ### 2. Rewrite section 8 and Appendix F of `paper/draft.md` against the full matrix
 
 **The claim shape is ratified as the two-question paper (STD-012, HANDOFF
-§23); write to it.** The registered transfer question keeps the title and is
+§24); write to it.** The registered transfer question keeps the title and is
 answered at its width: yes on summary, three of three domains, per-system
 success bounded below at 0.29; unresolved below the certification floor
 elsewhere at k=6. The format-and-k structure is the section's second finding

@@ -268,16 +268,19 @@ design before the result exists.
 ## §8 Results
 
 **Rewritten 2026-10-16 against the complete nine-cell k=6 matrix (STD-010,
-STD-011); the k=20 rows and the agent-row diagnosis are bracketed, and the
-agent paragraph carries the decision-level reading of STD-011's first
-append.** The LOSO/LOFO comparison and the
+STD-011) in the two-question shape (STD-012): opens with the variance
+partition (format 88 percent, domain 3 percent of the spread in recall), the
+registered question answered at its width, the format-and-k finding labelled
+post hoc, the k=6 sizing slip disclosed in bold above the table; all five
+silent cells classified under MTH-025 (resolution-limited); the k=20 rows
+bracketed.** The LOSO/LOFO comparison and the
 severity titration per fault type remain downstream of the full factorial. The section is written now as a table of what each
 result will be backed by, so that the draft cannot quietly promote a
 constructed mechanism to a measured result when the numbers arrive.
 
 | result | status | backing when it exists |
 |---|---|---|
-| transfer matrix, 3 domains x 3 formats | **measured at k=6**: nine cells (STD-010, STD-011). Summary row transfers (44 of 52, 0.72 to 0.92); five of six non-prose cells silent, two diagnosed as resolution, three pending the NLI diagnosis; four of nine systems reported anything. k=20 summary row recording (D25) | `results/study/matrix.json`, per-row provenance; analysis runs 20261015T205513Z and 20261015T205514Z at de23b8c; the three `.decisions.json` files for the agent paragraph |
+| transfer matrix, 3 domains x 3 formats | **measured at k=6**: nine cells (STD-010, STD-011). Summary row transfers (44 of 52, 0.72 to 0.92); five of six non-prose cells silent, all five resolution-limited under MTH-025 (agent best estimates 0.25 / 0.25 / 0.375 with decoys as wide as the targets on most inputs); four of nine systems reported anything. k=20 summary row recording (D25) | `results/study/matrix.json`, per-row provenance; analysis runs 20261015T205513Z and 20261015T205514Z at de23b8c; the three `.decisions.json` files for the agent paragraph |
 | random / LOSO / LOFO / LOSO x LOFO side by side | `GAP`; LOFO undefined with one fault class (STD-010) | same |
 | severity titration per fault class, semantic path | partial: six faults on the stub (ENG-004) | the factorial, per class |
 | FDR control on ground truth | **measured**: 0.101 or below against 0.10 (MTH-018) | `tests/test_pipeline.py` sweep |

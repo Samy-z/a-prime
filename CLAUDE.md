@@ -181,12 +181,15 @@ base F5; per-input activation as ground truth; q = 0.10). Summary row: recall
 0 / 0.48 / 0, the two zeros diagnosed as decoy resolution at six samples, not
 blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
 26 / 25 / 26 of 40 inputs touched and every channel silent** (STD-011). Its
-NLI diagnosis is blocked on the cloud instance, whose network policy denies
-the model host (STD-011 first append, HANDOFF §23); it falls to the GPU
-machine, three one-minute commands listed there. The model-free half is
-done: at the level of the decision the agent's own run-to-run variation is
-as wide as the fault's effect (`scripts/agent_decision_variation.py`,
-`results/study/*.decisions.json`). The
+diagnosis ran on the GPU machine (the cloud instance cannot reach the model
+host, STD-011 first append, HANDOFF §23): **resolution-limited in all three
+cells under the frozen criterion MTH-025** (best estimates 0.25 / 0.25 /
+0.375; 4 / 4 / 8 touched inputs above 0 / 0 / 2 decoys), with decoys as wide
+as the fired targets on most inputs, as the decision-level reading expected
+(STD-011 second append; `scripts/agent_decision_variation.py`). The paper is
+the two-question paper (STD-012, HANDOFF §24): the registered transfer
+question answered at its width, the format-and-k structure a declared
+post-hoc finding with the k=20 row as its confirmatory arm. The
 banking-summary realised FDR stays a bracket, [0.05, 0.21], at k=6 (STD-010
 fourth append).
 
@@ -204,5 +207,6 @@ Not built: the severity titration rerun (needs k>=20 and a fault with a
 severity knob, bench METHODS), LOSO, the embedding style-stability gate, the
 Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
 paper is drafted in every section; section 8 and Appendix F describe the
-nine-cell k=6 matrix (2026-10-16) with the k=20 rows and the agent diagnosis
-bracketed; the abstract's result stays blank until the k=20 summary row lands.
+nine-cell k=6 matrix in the two-question shape (2026-10-16), silent cells
+diagnosed, the k=20 rows bracketed; the abstract's result stays blank until
+the k=20 summary row lands.
