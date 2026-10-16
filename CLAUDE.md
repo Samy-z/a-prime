@@ -85,6 +85,15 @@ on-ramp. See HANDOFF §11.
 - **Staging** — each seat stages its own files by explicit path. Read the diff
   before committing.
 - **Documentation threshold** — HANDOFF gets substantial changes only.
+- **No study-shaping parameter outside a dated entry.** k=6 entered the study
+  undocumented and is the only rail leak on record (HANDOFF §21). Sizing
+  choices are methods decisions.
+- **A thesis migration is an amendment, never a drift.** Claim-surface
+  changes get dated declarations naming what prompted them; STD-012 is the
+  template.
+- **Runtime state is data.** Anything that cannot be regenerated (label
+  stores, partial checkpoints) is committed the moment it exists, not at the
+  next milestone. Both label losses were this lesson (BCH-018).
 - **Study constraints are configuration, never code.** The study controls
   variables the tool must still expose. `think=False` is uniform across the
   study pool so that measured differences cannot come from thinking
