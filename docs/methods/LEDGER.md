@@ -690,3 +690,41 @@ against. A document quoting both should say which rule each follows.
 **Evidence:** `results/blind_spot_map.json` for the map's counts; the
 `results_global` blocks in the two raw probe files for the published ones;
 both from the same `scores` arrays.
+
+## MTH-025 — The resolution-vs-blindness criterion, frozen before the agent diagnosis runs (2026-10-16)
+
+A zero-flag cell has so far been classified by reading its diagnosis by hand
+(STD-010: the two extraction zeros called decoy resolution). The 2026-10-16
+framing audit found the trap in leaving that judgment informal: once "the
+estimator could not certify it" is an available reading, every zero can be
+relabelled as resolution after the fact, and the reading becomes
+unfalsifiable. The criterion is therefore frozen now, BEFORE
+`scripts/diagnose_channels.py` runs on the three agent cells, using only
+fields the script already emits, with the script at its current commit as the
+instrument — any later change to the script reopens the classification rather
+than silently updating it.
+
+Per cell: take, across channels, the channel with the lowest best-achievable
+FDR estimate. In priority order:
+
+1. **Blindness** — no channel has `mean_target_fired_minus_decoy` greater
+   than zero. The statistics do not order touched inputs above the decoys;
+   more data at this k does not fix the channel.
+2. **Resolution-limited** — the best channel's separation is positive and
+   its `best_estimate` is above q. The statistic sees the change and ranks
+   touched inputs above decoys; the decoy order statistics cannot certify a
+   set at this k and n. (The extraction precedent: best estimates 0.111 and
+   0.176 against q = 0.10, with 17-18 targets above 1-2 decoys.)
+3. **Selection defect** — the best estimate is at or under q yet the report
+   flagged nothing. The pipeline lost a reportable set; this is a bug, not a
+   finding.
+
+Decoy width is reported alongside, not thresholded: when the decoy range
+covers the fired-target range, that is the system's own variation masking the
+effect, and the entry says so with the two ranges quoted.
+
+**Evidence:** `src/aprime/fdr.py` `best_achievable`; the two committed
+extraction diagnosis artifacts; the framing audit's bias finding
+(2026-10-16, owner-ratified).
+**Reopen if:** the agent diagnosis produces a cell the three rules cannot
+classify, or diagnose_channels.py changes.

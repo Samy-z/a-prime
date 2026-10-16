@@ -984,3 +984,49 @@ Why the brief lives in the repository rather than in a chat: the two sessions
 share nothing but git. A brief in the tree arrives with the data it describes,
 at the commit it describes, and the answer comes back by the same road
 (`docs/knowledge/environment.md`, "Coming back").
+
+## §23 — The framing audit, two ratifications, and the comparator direction (2026-10-16)
+
+The owner asked two questions: should the paper be reframed from "does
+label-free regression detection transfer across domains" to "how much
+information about systems and their differences can be mined from outputs
+alone"; and should a-prime grow an end-to-end comparator (generate inputs
+from a usage description, run many candidate systems on the local GPU,
+store outputs, measure inference performance, compare dozens of systems).
+
+A nine-agent audit read everything — the full draft, this file end to end,
+the ledgers, fdr.py/stats.py/clustering.py, the completed matrix — and four
+critics argued the reframe, the defence, the bias audit and a cold read.
+Findings that drove the decisions: the transfer framing is load-bearing in
+exactly five sentences of the draft; domain explains almost none of the
+matrix variance while format and k explain nearly all; the deeper framing's
+between-systems half has zero measurements because all nine cells run one
+model and A-prime calibrates within-system variance only; and the agent-row
+silence was about to be classifiable as "resolution" with no frozen
+criterion, which would have made that reading unfalsifiable.
+
+Ratified by the owner, same day:
+
+1. **The two-question paper** (STD-012): keep the registered transfer
+   question, answer it at its width; promote the format-and-k structure to a
+   declared post-hoc second finding with the k=20 row as its confirmatory
+   arm; disclose the k=6 sizing slip in the paper body; the deeper question
+   becomes the second study's thesis, requiring a cross-model cell with a
+   proper null (B-prime arm — a recorder design task, triple-atomicity is
+   built around three arms).
+2. **MTH-025**: the zero-classification criterion (blindness / resolution /
+   selection defect) frozen before the agent diagnosis runs, bound to fields
+   diagnose_channels.py already emits.
+
+Opened, not settled: where the comparator lives. The owner's position is
+that a-prime is the right name and the comparator belongs in this
+repository; the local session's position is same-repo is workable only
+behind hard guardrails (an import boundary enforced by a test, its own
+seat and ledger family, never a commit touching both the comparator and
+src/aprime). Input generation from a usage description is ratified as the
+first comparator piece regardless of placement. Audit quality notes worth
+keeping: the paper scored clarity 8, rigor 7, novelty 7, usefulness 8 on a
+cold read against the reader contract, with a ten-item fix list handed to
+the cloud brief; the process graded A-minus with one standing lesson —
+study-shaping parameters are methods decisions, no sizing choice outside a
+dated ledger entry (the k=6 leak, §21).
