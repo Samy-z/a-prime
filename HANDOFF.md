@@ -1066,3 +1066,54 @@ cold read against the reader contract, with a ten-item fix list handed to
 the cloud brief; the process graded A-minus with one standing lesson —
 study-shaping parameters are methods decisions, no sizing choice outside a
 dated ledger entry (the k=6 leak, §21).
+
+## §25 — The estimator compared floats, not values; what moved and what is owed (2026-10-16)
+
+A reader of the hospitality-agent diagnosis noticed that its headline (8
+targets above 2 decoys at cut 0.833333) disagreed with its own sorted arrays
+(13 targets and 9 decoys at or above 5/6). The cause is in `fdr.py`, not in
+the diagnosis: `tv_distance` sums over a set, so 5/6 arrives as either of two
+adjacent floats depending on the clouds, and `np.unique` plus an exact `>=`
+turned one cut into two, with every score on the lower float counted as below
+the upper one. The live `select` had the same defect, so every report written
+before today could have flagged a set whose tied decoys went uncounted.
+
+**Decision: round to a fixed precision rather than compare with a tolerance.**
+Nine decimals, applied once at the entry of every public function and used for
+`np.unique`, the comparisons and the reported threshold. A tolerance would have
+left two candidate cuts per value and a non-transitive equality; a fixed
+rounding makes "same value" an equivalence relation, is idempotent, and
+survives being applied again by a caller. Nine sits between the six the
+artifacts store and the 1e-16 of the noise. The one obligation it creates is
+that membership against a returned threshold must go through `discoveries`,
+since a raw `>=` against a rounded threshold would split ties the other way;
+`select_stratified` was the one in-tree caller and now does.
+
+**The correction runs one way**, which is what made this safe to land without
+the GPU: the old candidate cuts contained every value-consistent cut with all
+of its targets and some of its decoys, so after the fix flagged counts can only
+fall and best-achievable estimates can only rise. Nothing silent becomes loud;
+nothing recorded was understated. Measured without a model: the hospitality
+headline becomes 0.4 at the top value with 5 above 1, tying `novel_mode`, and
+the MTH-025 classification of all three agent cells is unchanged (amendment
+appended); the README's worked example had carried the same artefact on its
+dispersion line since 2026-10-04 and now reads 13 above 3; the hospitality
+decision-level estimate moved 0.4 to 0.6; the titration did not move; the
+MTH-018 envelope moved by at most 0.075 on the same seeds and its realised FDR
+fell. ENG-010 holds the numbers.
+
+**Owed to the GPU machine** (STD-011 third append lists the commands): the
+five diagnosis files, then the k=6 analysis stage for the nine `report.json`
+files and `matrix.json`, where the summary row's recall and
+logistics-extraction's 0.48 can fall and the five zeros stay zeros. The paper's
+§8 hospitality sentence and its section 8 table follow those files; the
+abstract was already waiting on the k=20 row. The k=20 checkpoints are raw
+samples and are untouched.
+
+**Standing lesson.** The grep-before-investigate discipline would not have
+found this: the number was in a committed file, produced by the function the
+report shares, and consistent with itself. What found it was reading the
+instrument's output against the instrument's input in the same record. A
+diagnosis file that carries its arrays is auditable in a way a headline is not,
+and that is an argument for keeping the arrays in every artifact that quotes a
+cut.

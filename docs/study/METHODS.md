@@ -50,3 +50,17 @@ interval is wide.
   both arm pairs, so the shortfall is 2·A + A′ + B errored samples (STD-011
   first append). Exact duplicates are still clustered; they collapse in
   `distinct_after_normalisation`, not here.
+- **A diagnosis file's arrays hold labelled inputs only; its headline used
+  all of them.** `targets_fired` and `targets_quiet` together cover the
+  inputs that have an activation label, while `best_estimate`, `best_cut`,
+  `targets_above` and `decoys_above` were computed over every target. The
+  two agree only where every input is labelled (all three agent cells,
+  hospitality-extraction). banking-extraction labels 20 of 40, so re-deriving
+  its headline from its arrays gives 9/2 where the file says 17/2 and that
+  difference is coverage, not a defect (STD-011 third append).
+- **Headline numbers in files written before 2026-10-16 counted float ties
+  as two cuts** (ENG-010). The arrays in the same files are stored at six
+  places and are tie-collapsed, so `best_achievable` over them gives the
+  value-consistent figure, subject to the coverage trap above. Any such number
+  can only have overstated separation; the GPU rerun list is in STD-011 third
+  append.

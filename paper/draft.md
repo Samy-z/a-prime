@@ -1725,7 +1725,7 @@ with its best estimate and the counts behind it.
 ```
 checks  (each judged against its own baseline-vs-baseline scores; none votes)
   mode_share (answer mix)                   28 flagged   short outputs: 28 flagged above 0.583, estimated false-discovery rate 0.07
-  dispersion (spread)                        0 flagged   short outputs: 6 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 4 more would have cleared it
+  dispersion (spread)                        0 flagged   short outputs: partly separated: at the best cut 13 input(s) above against 3 baseline score(s), estimate 0.31 against q=0.1. More samples per input or more inputs would sharpen this
   novel_mode (new answers)                  13 flagged   short outputs: 13 flagged above 0.500, estimated false-discovery rate 0.08
   nli_contradiction (contradiction)        skipped: no NLI model supplied
   nli_directional (information direction)  skipped: no NLI model supplied
@@ -1737,8 +1737,9 @@ searched for, and in plain words. Each line carries one of four readings. A
 check that flagged gives its threshold and the estimated false-discovery rate
 among what it flagged. A check that separated the arms but fell short of the
 floor says how many inputs stood above every baseline score and how many more
-would have cleared it; the spread check here saw six, four short. A check with
-partial separation gives the counts at its best cut. A check with no
+would have cleared it. A check with partial separation gives the counts at its
+best cut; the spread check here had 13 inputs above 3 baseline scores, an
+estimate of 0.31 against the budget of 0.10. A check with no
 separation says that the new system's scores sit inside the old system's own
 variation, and that the report cannot tell whether nothing changed or the
 check cannot see this kind of change. A check that did not run says so and

@@ -70,7 +70,7 @@ a-prime report
 
 checks  (each judged against its own baseline-vs-baseline scores; none votes)
   mode_share (answer mix)                   28 flagged   short outputs: 28 flagged above 0.583, estimated false-discovery rate 0.07
-  dispersion (spread)                        0 flagged   short outputs: 6 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 4 more would have cleared it
+  dispersion (spread)                        0 flagged   short outputs: partly separated: at the best cut 13 input(s) above against 3 baseline score(s), estimate 0.31 against q=0.1. More samples per input or more inputs would sharpen this
   novel_mode (new answers)                  13 flagged   short outputs: 13 flagged above 0.500, estimated false-discovery rate 0.08
   nli_contradiction (contradiction)        skipped: no NLI model supplied
   nli_directional (information direction)  skipped: no NLI model supplied
@@ -86,11 +86,12 @@ flagged inputs  (which checks fired, and their scores)
   ...
 ```
 
-Note the `dispersion` line. That check saw six inputs stand out from the
-baseline's own variation, four short of the ten it needs before it can report
-anything, and it said so rather than lowering its bar until something appeared.
-A tool that always finds something is not measuring anything. The ten is
-explained under honest limits below.
+Note the `dispersion` line. At the best cut that check could make, 13 inputs
+stood above the baseline's own scores, but 3 of those scores stood with them,
+which puts the estimated false-alarm rate at 31% against the 10% budget. The
+check said so rather than lowering its bar until something appeared. A tool
+that always finds something is not measuring anything. The floor of ten that
+the rules line refers to is explained under honest limits below.
 
 ## What we found, including the parts that did not work
 

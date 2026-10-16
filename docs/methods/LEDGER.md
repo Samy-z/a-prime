@@ -728,3 +728,78 @@ extraction diagnosis artifacts; the framing audit's bias finding
 (2026-10-16, owner-ratified).
 **Reopen if:** the agent diagnosis produces a cell the three rules cannot
 classify, or diagnose_channels.py changes.
+
+## MTH-025 — AMENDMENT (dated append, 2026-10-16): the instrument changed under the freeze; the classification re-derived and unchanged
+
+`scripts/diagnose_channels.py` is unmodified, but it calls
+`fdr.best_achievable`, and that function changed on 2026-10-16 (ENG-010: scores
+compared as values rounded to nine places, so a decoy tying a cut on the other
+float of the same value is counted). The instrument named by this entry is the
+script together with `fdr.py`; the entry's reopen clause is read as covering
+both, and this append is the reopening. The three rules and their precedence
+are not touched.
+
+Re-derived from the committed `.diagnosis.json` arrays, which are stored at
+six places and so already hold the value-consistent partition (instrument: the
+command in STD-011 third append; fields `targets_fired + targets_quiet`
+against `decoys`, `best_achievable` on each channel):
+
+| cell | best channel(s) | best estimate | targets/decoys above | separation | classification |
+|---|---|---|---|---|---|
+| banking-agent | mode_share, novel_mode | 0.250 at cut 1.0 | 4/0 | +0.120, +0.158 | resolution-limited, unchanged |
+| logistics-agent | mode_share, novel_mode, nli_contradiction | 0.250 at cut 1.0 | 4/0 | +0.13 to +0.20 | resolution-limited, unchanged |
+| hospitality-agent | mode_share, novel_mode | **0.400 at cut 1.0** (was 0.375 at 0.833) | **5/1** (3 fired, 2 quiet; was 8/2) | +0.126, +0.085 | resolution-limited, unchanged |
+
+Rule 1 still fails in every cell (positive separation on at least one
+channel); rule 2 still applies (0.25, 0.25, 0.40 > q = 0.10); no cell is a
+selection defect. The mean-separation field is unaffected by ties. In
+hospitality the best cut now admits one decoy, so no touched input there
+stands above every decoy; the "4 to 8 fired inputs separate" sentence in
+STD-011 second append reads 4, 4 and 0 above every decoy, with hospitality's
+best cut admitting 3 fired and 2 quiet inputs against one decoy.
+
+The two extraction precedents: hospitality-extraction re-derives unchanged
+(0.111 at 1.0, 18/1). banking-extraction cannot be re-derived from its file,
+because its arrays hold only the 20 labelled inputs' targets while the
+headline used all 40 (`docs/study/METHODS.md`, known data traps); its 0.176
+at 0.667 with 17/2 stands as recorded until the GPU rerun, and can only rise.
+
+**Evidence:** the five committed `.diagnosis.json` arrays; ENG-010;
+`tests/test_fdr_ties.py`. The GPU rerun of all five diagnosis files is owed
+and is expected to reproduce this table (STD-011 third append).
+**Reopen if:** the rerun's hospitality-agent `mode_share` headline is not
+0.4 at 1.0 with 5/1, or banking-extraction's moves across q.
+
+## MTH-018 — AMENDMENT (dated append, 2026-10-16): the envelope re-measured on the tie-consistent estimator
+
+ENG-010 changed how the estimator counts ties, and the stub's mode-share
+statistic takes values on the grid m/k, where ties are the rule. Re-measured
+with the same protocol (400 inputs, 40 changed, q = 0.10, mean of five seeds,
+`mode_share` perturbation; seeds 100 to 104, `_run` from
+`tests/test_pipeline.py`) before and after the fix on the same seeds:
+
+| k | sev 0.3 | sev 0.6 | sev 0.9 | realised FDR at sev 0.6, mean (before / after) |
+|---|---|---|---|---|
+| 10 | 0.00 / 0.00 | 0.175 / 0.175 | 0.78 / 0.77 | 0.058 / 0.058 |
+| 20 | 0.00 / 0.00 | 0.785 / 0.71 | 0.99 / 0.985 | 0.060 / 0.063 |
+| 40 | 0.145 / 0.14 | 0.975 / 0.975 | 1.00 / 1.00 | 0.100 / 0.092 |
+
+Two things to read off it. The fix moves power only downward and by at most
+0.075 (k=20, severity 0.6), as the one-directional argument in ENG-010
+predicts, and the realised FDR falls where it was closest to the budget
+(k=40: 0.100 to 0.092 at severity 0.6, 0.098 to 0.090 at 0.9). And today's
+stub on these seeds does not reproduce the 2026-09-24 table to the digit
+either before or after the fix (k=10 at severity 0.6 reads 0.175 against the
+table's 0.08; the preflight added since shifts the stub's draw, ENG-009), so
+the table above is the current envelope and the entry's table is the one the
+conclusions were first drawn from. All three conclusions stand: k=10 is not
+enough for a moderate shift (0.175 against 0.71 at k=20); the severity floor
+at 0.3 is unchanged (0.00, 0.00, 0.14); failure is all-or-nothing per run
+(k=10, severity 0.6 flagged [0, 0, 31, 0, 13] across the five seeds).
+`tests/test_pipeline.py` asserts the gaps and the control bound and passes on
+both sides of the fix.
+**Evidence:** the sweep script and its two JSON outputs are session
+artifacts, not committed; the protocol is the four lines above and
+`tests/test_pipeline.py::_run`.
+**Reopen if:** a sweep on these seeds gives k=20 at severity 0.6 below 0.5
+or realised FDR above 0.12 in any cell.

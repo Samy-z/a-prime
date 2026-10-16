@@ -399,53 +399,56 @@ already described one pass, and the detector stage to be faster by whatever
 share of its 2.7 s the two discarded passes were. The counts did not move; the
 work did.
 
-## ENG-010 — Equal scores are split by floating-point noise in `best_achievable` and `select` (2026-10-16)
+## ENG-010 — Tied scores on adjacent floats counted as two cuts, understating the decoys at a tie
+**Date:** 2026-10-16
+**Finding:** `select`, `best_achievable` and `estimate_fdr` iterated
+`np.unique(targets)` and compared with an exact `>=`. `stats.tv_distance` is
+`0.5 * sum(abs(...))` over a set of keys, so the same rational value lands on
+adjacent floats depending on summation order: 5/6 is `0.8333333333333333` from
+one pair of clouds and `0.8333333333333334` from another (both forms occur for
+clouds of four to six, order-independently; `tests/test_fdr_ties.py`). At the
+upper form every score on the lower form, target or decoy alike, counted as
+below the cut, so a decoy tying a target's cut by value went uncounted and the
+estimate at that cut was understated.
+**Found twice, independently, the same day:** by this fork fixing the
+estimator, and by the study seat's adversarial pass over the paper's
+agent-row figures (main, 339100c), which recorded the defect before this
+fix existed.
 
-Found by the study seat while verifying the paper's agent-row figures
-against the committed diagnosis files; the fix is the engine seat's and, by
-MTH-025, a methods decision, so this entry records and does not patch.
+**Measured on committed artifacts, all without a model.** In
+`hospitality-agent.2cea59ca300a6358.diagnosis.json`, `mode_share` recorded
+best 0.375 at cut 0.833333 with 8 targets above 2 decoys, while its own sorted
+arrays hold 13 targets (9 fired, 4 quiet) and 9 decoys at or above 5/6: the
+value-consistent estimate at that cut is 10/13 = 0.769, and the best cut is
+1.0 with 5 targets (3 fired, 2 quiet) above 1 decoy, 0.4. In the stub demo
+(`scripts/demo_detect.py`, 300 inputs, k=12) the dispersion check read "6
+inputs above every baseline-vs-baseline score, 4 short of the floor"; counted
+as values it is 13 above 3, estimate 0.31, so the README's one worked example
+carried the artefact since 2026-10-04. The hospitality-agent decision-level
+best estimate (`agent_decision_variation.py`) moved from 0.4 (5 above 1) to
+0.6 (5 above 2); banking-agent and logistics-agent did not move. The 24
+exact-match titration rows did not move. The MTH-018 envelope on the same
+seeds moved by at most 0.075 (k=20, severity 0.6: 0.785 to 0.71) and its
+realised FDR fell (MTH-018 amendment).
 
-**The defect.** `stats.tv_distance` sums `0.5 * |pa - pb|` over modes, and
-the same fraction comes out as different floats depending on the order and
-number of terms: over 20,000 random pairs of six-sample clouds, 1/6 appears
-as `0.16666666666666663`, `...666` and `...669`; 5/6 as `0.8333333333333333`
-and `...334`; 1/3, 1/2 and 2/3 likewise in two forms each. `fdr.best_achievable`
-and `fdr.select` take candidate cuts from `np.unique(targets)` and count
-`targets >= t` and `decoys >= t` exactly, so scores that are equal in value
-land on different sides of a cut according to their last bit.
+**Fix.** Every public function in `fdr.py` rounds scores to
+`SCORE_DECIMALS = 9` before `np.unique` and before every comparison;
+`discoveries` and `select_stratified` compare the same way, so membership is
+never tested with a raw `>=` against a returned threshold. **The correction is
+one-directional**: the old candidate set contained every value-consistent cut
+with all its targets but possibly fewer decoys, so after the fix flagged counts
+can only fall and best-achievable estimates can only rise. Every report and
+diagnosis written before this entry therefore overstates at worst.
 
-**Observed consequence.** `results/study/hospitality-agent.2cea59ca300a6358.diagnosis.json`,
-channel mode_share: `best_estimate 0.375, best_cut 0.833333, targets_above 8,
-decoys_above 2`. On the file's own six-decimal arrays, scores at or above
-0.833333 are 9 fired targets, 4 quiet targets and 9 decoys (0.769), and at
-1.0 they are 3 fired, 2 quiet and 1 decoy (estimate 0.4). No value-consistent
-cut yields 8 above 2; the 8/2 is the upper-float subset of the 5/6 bucket.
-`best_achievable` run on the six-decimal arrays returns `BestCut(0.4, 1.0,
-5, 1)`, the same as the file's novel_mode row. Note also that `targets_above`
-counts all 40 targets, quiet included (the file's nli_directional row has 40
-above with 26 fired), so a "targets above" count is not a "touched inputs
-above" count; the two quiet inputs at 1.0 are among the 5.
-
-**What is and is not affected.** The MTH-025 classification of the three
-agent cells stands (hospitality best 0.4 > 0.10 with separation +0.126;
-banking and logistics 0.25 at cut 1.0, 4 fired above 0 decoys, where no tie
-is at issue). The STD-011 second append's table row for hospitality (0.375,
-8/2) and its "except the top grid value" are the file's tally, corrected in
-STD-011's third append; the paper reports the value-consistent figures and
-Appendix F says why. **Not yet known:** whether `fdr.select` split a tie at a
-decoy cut in any of the nine matrix cells and so moved a flagged set. At k=6
-every partition score is a multiple of 1/6, so ties are the norm, not the
-exception.
-
-**Instrument:** the random-composition probe (20,000 pairs through
-`tv_distance`, grouped by `round(v, 6)`); `best_achievable` on the file's
-arrays; `grep -n '>= t' src/aprime/fdr.py`.
-**Proposed fix, for the engine and methods seats:** round partition scores to
-nine decimals (or compute shares as exact fractions) before any `>=`
-comparison in `fdr.py`, add a test that scores equal to nine decimals are
-counted together at every cut, then re-run phase 2 on the nine k=6 cells and
-diff every flagged set against `results/study/matrix.json` before the paper
-quotes any re-analysed count. MTH-025 says the change reopens the
-zero-classification; it is expected to confirm it.
-**Reopen if:** the fix lands (record the per-cell diff of flagged sets here);
-or a tie is shown to have moved a flagged set in a committed cell.
+**Confidence: three independent derivations** (the arithmetic on the committed
+arrays, the regression test on real clouds, the stub demo before and after).
+**Evidence:** `src/aprime/fdr.py` (`SCORE_DECIMALS`, `_scores`);
+`tests/test_fdr_ties.py`; the hospitality-agent diagnosis arrays;
+`results/study/hospitality-agent.2cea59ca300a6358.decisions.json` (regenerated
+with this entry); README demo block before and after. Owed to the GPU machine:
+the five `.diagnosis.json` files and the nine `report.json` files plus
+`matrix.json` (STD-011 third append).
+**Reopen if:** a statistic produces values that differ by more than 1e-9 and
+are meant to tie, or two genuinely different scores within 1e-9 are meant to
+be told apart; or a selection is found to differ between `select` and
+`discoveries` on the same arrays.
