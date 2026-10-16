@@ -692,3 +692,26 @@ about k.
 `results/study/<cell>.<hash>.decisions.json` (first append); MTH-025.
 **Reopen if:** an agent cell is recorded at k=20, or a second model drives
 the agent format.
+
+## STD-011 — THIRD APPEND (2026-10-16): the hospitality tally in the second append is a floating-point tie split; the classification stands
+
+The second append's hospitality-agent row, `mode_share 0.375 at cut 0.833,
+8/2`, and its "covering the fired-target range except the top grid value"
+are the diagnosis file's own tally, and that tally splits equal scores by
+their last binary digit (ENG-010). Value-consistent reading of the same
+file: at the top value 1.0, 5 targets above 1 decoy, estimate 0.4, and the
+5 are 3 fired and 2 quiet (the `targets_above` field counts all 40 targets);
+at 5/6, 13 above 9, 0.769. In hospitality the decoys reach 1.0 on both
+mode_share and novel_mode, so no fired input stands clear of every decoy
+there; the cell is not blind under MTH-025 rule 1 because mode_share's mean
+separation is +0.126, and it is resolution-limited under rule 2 because
+0.4 > 0.10. Banking and logistics are unaffected: cut 1.0, 4 fired above 0
+decoys, 0.25, quiet maxima below the cut. The first append's expectation
+(decoys as wide as the fired targets) is confirmed more strongly, not less:
+in hospitality the width leaves nothing clear.
+
+The paper's section 8 carries the value-consistent figures and Appendix F
+states the file's tally beside them. **Evidence:** the hospitality diagnosis
+file's sorted arrays; `fdr.best_achievable` on those arrays; ENG-010's probe.
+**Reopen if:** ENG-010's fix lands and the re-run diagnosis differs from this
+reading.

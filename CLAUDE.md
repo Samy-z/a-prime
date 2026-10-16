@@ -184,9 +184,14 @@ blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
 diagnosis ran on the GPU machine (the cloud instance cannot reach the model
 host, STD-011 first append, HANDOFF §23): **resolution-limited in all three
 cells under the frozen criterion MTH-025** (best estimates 0.25 / 0.25 /
-0.375; 4 / 4 / 8 touched inputs above 0 / 0 / 2 decoys), with decoys as wide
-as the fired targets on most inputs, as the decision-level reading expected
-(STD-011 second append; `scripts/agent_decision_variation.py`). The paper is
+0.4, the hospitality file's 0.375 being a floating-point tie split; 4 / 4 /
+0 touched inputs above every decoy; hospitality not blind on mean separation
+alone, +0.126), with decoys as wide as the fired targets on most inputs, as
+the decision-level reading expected (STD-011 second and third appends;
+`scripts/agent_decision_variation.py`). The tie split is an instrument
+defect in `fdr.best_achievable` and `fdr.select`, recorded for the engine
+and methods seats; it may touch the matrix's flagged sets and is not patched
+mid-study. The paper is
 the two-question paper (STD-012, HANDOFF §24): the registered transfer
 question answered at its width, the format-and-k structure a declared
 post-hoc finding with the k=20 row as its confirmatory arm. The

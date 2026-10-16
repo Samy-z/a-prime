@@ -70,8 +70,8 @@ describes a drop in output quality. Every one is an error rate, a latency, an
 availability or an authentication or billing failure. One provider's own
 month-long quality degradation, which affected up to 16 percent of requests on
 one surface, was never a status incident; it surfaced as an engineering blog
-post after the fact. Status pages have no category for this class of
-failure, which is why none of the 118 incidents describes one.
+post after the fact. A drop in output quality has no heading to appear
+under on either page, and none appeared.
 
 Hard failures are caught in minutes and silent ones are not. In the
 written-up cases we could find with a documented timeline, a sycophancy regression in a
@@ -1007,9 +1007,13 @@ and wherever it recurs. How much certifiable information about a change one
 sample carries is governed by the output format, through how varied the
 wording is, and by the number of samples per cloud, and almost not at all by
 the domain. The share of samples in a cell that are distinct after
-normalisation runs from 35 to 62 percent on the two single-call formats and
-from 71 to 86 on the agent format, and the row order of detection follows
-it. The confirmatory arm of that finding is the twenty-sample summary row,
+normalisation is 35 to 46 percent on JSON, 49 to 62 on prose and 71 to 86 on
+the agent format, and the two silent rows sit at the two ends of that range.
+What the ends share is that the second baseline run's scores crowd the few
+values a six-sample statistic can take: on JSON because the few distinct
+answers let a baseline run land wholly on one answer and then wholly on
+another, on the agent format because almost every answer is distinct and the
+baseline moves on nearly every input. The confirmatory arm of that finding is the twenty-sample summary row,
 with its prediction written down before it ran, in the paragraphs on the
 false-alarm budget.
 
@@ -1097,9 +1101,11 @@ domain where JSON worked, and banking and hospitality each detect at the top
 of the prose row and nowhere else. The rest of this section takes the format
 effect apart row by row; it is the post-hoc finding of the opening, and is
 read as such. Counted by system, which section 7 made the unit of evidence, the detector reported changed inputs on four of the nine
-systems and nothing on five. Four of nine bounds the per-system success rate
-between 0.14 and 0.79 at 95 percent confidence, computed the exact way small
-counts of systems call for, which bounds nothing useful,
+systems and nothing on five. Four of nine puts the per-system success rate somewhere between 0.14 and
+0.79, the range that would contain the true rate in 95 of 100 repeats of a
+study this size, computed directly from the binomial distribution because
+with nine systems the usual approximation is unreliable. That bounds nothing
+useful,
 and the row structure says why: the four are the three prose systems and one
 JSON system, so a per-format reading is the most this matrix supports.
 
@@ -1111,9 +1117,9 @@ percent in hospitality (18 of 21). Pooled, 44 of 52, with a 95 percent interval
 from 72 to 92 percent. Nothing in the detector was tuned to any of these three
 domains; every threshold was set by each system's own second baseline run.
 The width of the claim is set by the unit of evidence, which is the system:
-three systems succeeded, and three successes out of three bound the
-per-system success rate below at 0.29 at 95 percent confidence, so the row
-says that transfer across these three domains happened and cannot yet say
+three systems succeeded, and three successes out of three say only that
+the per-system success rate is above 0.29, the lower end of the same kind of
+range, so the row says that transfer across these three domains happened and cannot yet say
 how often it happens. Within that width, for one fault class, one model and
 one output format, the paper's title question has the answer yes.
 
@@ -1159,33 +1165,42 @@ five of the six cells that do not produce prose reported nothing.
 Whether a silent cell is blind or merely under-resolved was decided by a
 rule written down before the agent diagnosis ran, so that the reading could
 not be chosen after the fact. A cell that reports nothing is read in a fixed
-order. It is blind if no check places the touched inputs above the second
-baseline run's scores at all, which more data at the same sample count
-cannot fix. It is resolution-limited if some check does but the lowest
-false-alarm estimate any cut can achieve is still above the budget: the
-change is seen and ranked, and the baseline-against-baseline scores cannot
-certify a set of ten at this sample count. It is a defect if that estimate
-is at or under the budget and nothing was reported anyway. The order matters
+order. It is blind if on every check the touched inputs score no higher on
+average than the second baseline run's scores, which more data at the same
+sample count cannot fix. It is resolution-limited if on some check they do
+score higher on average but the lowest false-alarm estimate any cut can
+achieve is still above the budget: the change is seen, and the
+baseline-against-baseline scores cannot certify a set of ten at this sample
+count. It is a defect if that estimate is at or under the budget and nothing
+was reported anyway. The spread of the second baseline run's scores is
+reported next to the verdict and does not change it. The order matters
 because once "the estimator could not certify it" is an available reading,
 every silence can be called resolution afterwards.
 
 Under that rule all three agent cells are resolution-limited, and none is
 blind. In banking, the share-of-answers and new-answers checks place 4
 touched inputs above every decoy, at the top value the statistic can take,
-for a best estimate of 0.25 against the 0.10 budget. Logistics is the same,
-4 above none and 0.25, and there the contradiction check separates the same
-four. In hospitality the share-of-answers check places 8 touched inputs
-above all but 2 decoys, an estimate of 0.375. Where these cells differ from
-the JSON pair is the width of the decoys. In the JSON cells 17 and 18 touched
-inputs stood above one or two decoys. Here the decoys, the second baseline
-run scored against the first, span 0 to 0.83 in banking and logistics and
-the full 0 to 1 in hospitality, which covers the touched inputs' range
-except the top value, so only 4 to 8 of the 25 or 26 touched inputs separate
-at all, and the floor needs ten clear of every decoy. The system's own
-variation covers the fault's effect on most inputs, and the rule still reads
-resolution rather than blindness because blindness requires that no check
-separates, and two do, on a minority. The three diagnosis files are named in
-Appendix F.
+for a best estimate of 0.25 against the 0.10 budget. In logistics the same
+two checks place 4 touched inputs above every decoy, again 0.25, and there
+the contradiction check also places four touched inputs above every decoy.
+In hospitality no touched input stands clear of every decoy: the
+share-of-answers check puts 5 inputs on the top value, 3 of them touched and
+2 not, above 1 decoy, an estimate of 0.4, and the cell escapes the blind
+reading only because its touched inputs score higher on average than the
+decoys do, by 0.13 on that check. Where these cells differ from the JSON
+pair is the width of the decoys. In the JSON cells 17 and 18 inputs stood
+above one or two decoys, in banking 9 of the 17 known to be touched and the
+other 8 among the inputs whose label was lost. Here the decoys, the second
+baseline run scored against the first, span 0 to 0.83 in banking and
+logistics, leaving only the top value clear, and the full 0 to 1 in
+hospitality, leaving nothing clear. So four touched inputs in banking and
+four in logistics stand above every decoy, none does in hospitality, and the
+floor needs ten. The system's own variation covers the fault's effect on
+most inputs, and the rule still reads resolution rather than blindness
+because blindness requires that no check orders the touched inputs above the
+decoys even on average, and in every cell at least one does. The three
+diagnosis files are named in Appendix F, with a note on how the hospitality
+figures were read from them.
 
 Two readings that need no judging model say why the decoys are so wide.
 
@@ -1203,8 +1218,8 @@ baseline run at the greatest possible distance from the first on 22, 17 and
 25 of the 40 inputs: without paraphrase merging the two baseline runs already
 share no answer on about half the inputs, and a threshold has nothing left to
 separate. So whatever resolution the shipped detector has in the agent cells
-comes from the judging model's merging, and how far that merging went is what
-the pending diagnosis measures.
+comes from the judging model's merging, and the diagnosis above shows how
+little that merging restored: four separated inputs per cell at best.
 
 The decision itself moves about as much on its own as the fault moves it. An
 agent cell's output is meant to be a decision, approve, decline or escalate,
@@ -1232,9 +1247,11 @@ two identical runs.
 For a user of an agent, the decision is the output that matters, and on this
 fault it stayed inside the system's own variation. A check over the wording
 cannot be expected to report at a 10 percent budget what the decision itself
-does not show, unless the rationale changed where the decision did not, and
-that is the question the judging model answered above: it did, on a minority
-of inputs. Before the diagnosis ran, the expectation written down from these
+does not show, unless the rationale changed where the decision did not. The
+judging-model checks separated four inputs in banking, four in logistics and
+none in hospitality; whether those are inputs whose decision held is not
+something the stored diagnosis can say, because it keeps scores and not
+which input each score belongs to. Before the diagnosis ran, the expectation written down from these
 two readings was that the decoys would be as wide as the touched inputs, and
 that is what it found for most inputs. [At twenty samples per cloud the
 statistic takes 21 values rather than 7, which should pull the decoys at
@@ -1505,8 +1522,9 @@ point was considered and cut.
 
 Every detector result in this paper traces to a run identifier and a
 configuration hash, written into the results file that holds it; the
-diagnosis and decision files of Appendix F carry the recording's hash in
-their name and the judging model's revision inside. The hash covers the
+diagnosis files of Appendix F carry the recording's hash in their name and
+the judging model's revision inside, and the decision files the hash in
+their name alone, having used no model. The hash covers the
 instrument revisions, the sample count, the budget, the fault, the seed policy
 and a fingerprint of the inputs. A figure computed from other results names
 the runs it was computed from; the blind-spot map prints its three source runs
@@ -1816,7 +1834,13 @@ diagnosis file holds, for every check, the best cut the estimator could make,
 the counts of inputs and decoys above it, and the full sorted target and decoy
 scores, with the judging model's pinned revision inside and the recording's
 configuration hash in its name; one is written beside any cell that reports
-nothing. A decisions file, written for an agent cell by a script in
+nothing. The counts above a cut in the hospitality agent file read 8 inputs
+above 2 decoys at a cut of 0.83, an estimate of 0.375; that tally separates
+scores that are equal in value but differ in their last binary digit, and
+with equal scores counted together the best cut is the top value, 5 inputs
+above 1 decoy, 0.4, which is what section 8 reports. The verdict is the same
+either way, and the tally is recorded as a defect of the instrument in the
+repository. A decisions file, written for an agent cell by a script in
 the repository that needs no model, holds the per-input decision distances of
 section 8 for candidate against baseline and for baseline against second
 baseline, the majority-decision changes, and the exact-match reading of the

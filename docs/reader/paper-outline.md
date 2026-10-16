@@ -138,8 +138,10 @@ The method section. Mostly **constructed**, with one **measured** validation.
   why "reproducible" does not mean "identical seeds".
 - Per-shape thresholds: the 5% false-alarm cut varied by a factor of eighty
   across four output shapes, so one threshold is wrong for at least two of
-  them (MTH-013). Define stratum. Note honestly that every run so far pooled
-  into one stratum (engine STATE, "not built").
+  them (MTH-013). Define stratum. Note honestly that until the nine-cell
+  matrix every run pooled into one stratum; in the matrix five cells fitted
+  one shape of thirty or more its own threshold and no cell had two such
+  shapes (§3 and §9 limit 15 say so).
 - **Measured:** on a synthetic system with known ground truth, asking for 10%
   false alarms gave 10.1% or less across nine cells (MTH-018), and 3.4% with
   28 of 30 changed inputs caught on the demo (`scripts/demo_detect.py`,
@@ -280,7 +282,7 @@ constructed mechanism to a measured result when the numbers arrive.
 
 | result | status | backing when it exists |
 |---|---|---|
-| transfer matrix, 3 domains x 3 formats | **measured at k=6**: nine cells (STD-010, STD-011). Summary row transfers (44 of 52, 0.72 to 0.92); five of six non-prose cells silent, all five resolution-limited under MTH-025 (agent best estimates 0.25 / 0.25 / 0.375 with decoys as wide as the targets on most inputs); four of nine systems reported anything. k=20 summary row recording (D25) | `results/study/matrix.json`, per-row provenance; analysis runs 20261015T205513Z and 20261015T205514Z at de23b8c; the three `.decisions.json` files for the agent paragraph |
+| transfer matrix, 3 domains x 3 formats | **measured at k=6**: nine cells (STD-010, STD-011). Summary row transfers (44 of 52, 0.72 to 0.92); five of six non-prose cells silent, all five resolution-limited under MTH-025 (agent best estimates 0.25 / 0.25 / 0.4 tie-consistent, with decoys as wide as the targets on most inputs; four touched inputs clear of every decoy in banking and logistics, none in hospitality); four of nine systems reported anything. k=20 summary row recording (D25) | `results/study/matrix.json`, per-row provenance; analysis runs 20261015T205513Z and 20261015T205514Z at de23b8c; the three `.decisions.json` files for the agent paragraph |
 | random / LOSO / LOFO / LOSO x LOFO side by side | `GAP`; LOFO undefined with one fault class (STD-010) | same |
 | severity titration per fault class, semantic path | partial: six faults on the stub (ENG-004) | the factorial, per class |
 | FDR control on ground truth | **measured**: 0.101 or below against 0.10 (MTH-018) | `tests/test_pipeline.py` sweep |
@@ -330,8 +332,9 @@ The section with the clearest use to the reader, so it is written for them
     the same domain (BCH-017).
 14. The rules' decoy prune has not been exercised on a realistic system
     (ENG-005); a tight rule can be tipped by a draw (ENG-009).
-15. The pooled stratum: every run so far had fewer than thirty inputs per
-    output shape, so the per-shape machinery is tested and never stressed
+15. The pooled stratum: five of the nine k=6 cells had one baseline shape of thirty or more and
+   fitted it its own threshold; no cell had two, so one per-shape threshold
+   has never been compared against another
     (engine STATE, MTH-024).
 16. Everything is English and template-generated (`probes.md` limits).
 
