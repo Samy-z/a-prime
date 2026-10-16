@@ -46,3 +46,17 @@ detail. Report it as prominently as any other choice.
 | Set | Sealed on | Opened on | Opened by |
 |---|---|---|---|
 | Real-regression holdout | not yet collected | — | — |
+
+## Queued question — the cross-system null (opened 2026-10-16, gates paper two)
+
+A vs A-prime calibrates one system against its own variance. A vs B is two
+systems with two self-variances, and no entry yet says whose null certifies
+the comparison. Candidate design is four arms (A, A-prime, B, B-prime) with
+the combination rule to be argued and frozen BEFORE any cross-model triple is
+recorded; the recorder's triple-atomicity generalises with it. The stored-
+baseline regime (version bump: baseline recorded weeks before the candidate,
+interleaving impossible) is part of the same question, and the STD-008
+negative control - score a system against itself across a time gap, expect
+nothing - is its first instrument: period-one arms already exist in the k=6
+and k=20 recordings; the period-two re-record needs a thin runner and about
+an hour of GPU.

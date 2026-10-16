@@ -56,6 +56,7 @@ Each family also keeps `STATE.md` (what is live or frozen now) and
 | `bench` | `BCH-###` | Systems under test and the fault harness. Domain cells, knowledge packs, fault injection, per-input activation instrumentation, dedup, base-rate control. |
 | `study` | `STD-###` | Execution and analysis. Run provenance, LOSO/LOFO, the transfer matrix, the blind-spot map. |
 | `reader` | `RDR-###` | Outward-facing artifacts: README, the paper, dataset cards. **Forbidden from assuming project context** — must be able to read an artifact cold, having opened no other file. Owns the audience contract in `docs/reader/METHODS.md`. |
+| `compare` | `CMP-###` | The comparator: input generation from a usage description, multi-system scheduling, output store, inference performance, comparison reporting. Same repo behind four guardrails: public API only (boundary test), own ledgers, no commit touching both it and `src/aprime/`, rails do not cross. See `docs/compare/METHODS.md`. |
 
 **`engine` and `bench` are deliberately separate seats.** The seat that tunes
 the detector must not be the seat that seeds the faults. This is a validity

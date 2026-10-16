@@ -1117,3 +1117,21 @@ instrument's output against the instrument's input in the same record. A
 diagnosis file that carries its arrays is auditable in a way a headline is not,
 and that is an argument for keeping the arrays in every artifact that quotes a
 cut.
+## §24 — AMENDMENT (dated append, 2026-10-16): the open items closed, and the k=20 row passes its pre-registered test
+
+Owner ratifications, same day as the entry: the four comparator guardrails
+stand and the seat is scaffolded (`docs/compare/`, the family row in
+CLAUDE.md); paper two's pre-registration starts now, gated on the
+cross-system null design queued in the methods STATE (four arms, combination
+rule frozen before any cross-model triple); the D10 pool is the candidate
+set, already on disk, with one commissioned refresh — a search for a recent
+agentic-branded small model worth adding, extend-or-not decided after the
+research, not before. The STD-008 drift negative control is the
+pre-registration's first instrument.
+
+Recorded with this append because it lands mid-discussion: the k=20 summary
+row completed and passed its D25 test — pooled recall 51 of 56 touched
+(0.91), inside the pre-registered [0.72, 0.92]; realised false flags 3 of 54
+(0.056) against the 0.10 budget, labels complete in all three cells. The
+full k=20 re-record contingency does not trigger. The reading against the
+prediction and the paper's section 8 are the cloud session's, per its brief.
