@@ -938,3 +938,49 @@ relaunch preflight — the loss predates the BCH-018 warning — and resuming
 would have produced a row with 11 permanently unlabelled inputs. About 25
 minutes of GPU re-done, against a complete label set for the agent row. The
 dropped checkpoint and store remain in git history.
+
+## §22 — The matrix is complete; the agent row is silent; the chain paused for the GPU (2026-10-16)
+
+The owner's one-shot night chain (`scripts/night-chain.ps1`, committed
+2026-10-15 22:51, a 23 h window from 22:54) ran stage 1 to the end:
+logistics-agent resumed at 70 triples and finished at 00:45, hospitality-agent
+recorded its 240 triples in 188 minutes and finished at 03:52, phase 2
+analysed all nine cells and wrote the matrix at 03:59. Stage 2, the k=20
+summary row (the D25 test, §21), started at 03:59:46 and had banking-summary
+at 654 of 800 triples when the owner asked for the GPU back at 06:10.
+`run_study.py --stop` paused it at the triple boundary with exit 2, the chain
+ended itself as designed, and the model was unloaded. Stage 3 never started.
+The 05:00 daily firing stepped aside on the collision guard, as built.
+
+What the night settled. The k=6 matrix is complete, and the agent row flags
+nothing in any domain with 25 to 26 of 40 inputs touched (STD-011). Read with
+STD-010: at six samples the detector is silent on five of the six non-prose
+cells, and the one pair that was diagnosed was resolution, not blindness. The
+format effect is therefore the headline of the k=6 matrix, and the k=20 row is
+the test of whether it is a sample-size effect. The §21 prediction stands
+unchanged and on record: recall on the summary row moves modestly at k=20,
+and the expected mechanism is decoy resolution and threshold calibration.
+
+Decisions taken 2026-10-16, the owner's:
+
+1. Pause, not abandon. The stop flag stays set until the chain is rerun.
+   Everything recorded is committed with this entry, the k=20 banking-summary
+   checkpoint included, so that 654 triples exist on more than one disk.
+2. The agent-row diagnosis (`scripts/diagnose_channels.py` over the three
+   agent cells) and the rewrite of the paper's section 8 and Appendix F
+   against the full matrix go to the cloud session. It has no GPU and needs
+   none for either: the diagnosis needs the NLI model and the committed
+   recordings, nothing else. The brief is `docs/study/cloud-trial-tasks.md`,
+   rewritten for this hand-off; the first list from 2026-10-04 is done and
+   lives in git history.
+3. `CLAUDE.md` and the study and reader STATE files now say nine of nine. The
+   paper's own status footnote still says two of three rows, on purpose: a
+   half-edited results section would be worse than a dated one, and the cloud
+   session replaces it whole.
+4. `results/study/STUDY.STOP`, the runner's pause flag, is now gitignored. It
+   is runtime state and would have gone into this commit otherwise.
+
+Why the brief lives in the repository rather than in a chat: the two sessions
+share nothing but git. A brief in the tree arrives with the data it describes,
+at the commit it describes, and the answer comes back by the same road
+(`docs/knowledge/environment.md`, "Coming back").

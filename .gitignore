@@ -34,3 +34,6 @@ docs/study/REVIEW-*.md
 
 # Unattended run logs. Appended to by scripts/overnight.cmd.
 logs/
+
+# The study runner's live pause flag (run_study.py --stop). Runtime state, never a commit.
+results/study/STUDY.STOP

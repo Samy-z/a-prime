@@ -172,25 +172,33 @@ the headline transfer numbers**; it is reported separately. See HANDOFF §3.
 
 ## Where things stand
 
-**Six of nine cells are recorded, analysed and pushed**: the summary and
-extraction rows, one fault class (stale knowledge base, F5), per-input
-activation as ground truth. First matrix in `results/study/matrix.json`.
-Headline so far: detection transfers across all three domains on the summary
-format (recall 79-88%), and fails silently in two of three domains on
-extraction — hospitality flagged nothing with 25 of 40 inputs changed. That
-failure is undiagnosed; `diagnose_channels.py` answers it and needs the GPU.
-Realised FDR ran hot in two summary cells (0.21, 0.14 against the 0.10
-budget); too few cells yet to call that calibration.
+**The k=6 matrix is complete: nine of nine cells recorded, analysed and
+written to `results/study/matrix.json` on 2026-10-16** (analysis runs
+20261015T205513Z and 20261015T205514Z; one fault class, the stale knowledge
+base F5; per-input activation as ground truth; q = 0.10). Summary row: recall
+0.88 / 0.79 / 0.86 for banking / logistics / hospitality. Extraction row:
+0 / 0.48 / 0, the two zeros diagnosed as decoy resolution at six samples, not
+blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
+26 / 25 / 26 of 40 inputs touched and every channel silent** (STD-011). Its
+diagnosis has not been run: `scripts/diagnose_channels.py` needs the NLI model
+and no GPU, and is assigned to the cloud session together with the paper's
+section 8 (HANDOFF §22, `docs/study/cloud-trial-tasks.md`). The
+banking-summary realised FDR stays a bracket, [0.05, 0.21], at k=6 (STD-010
+fourth append).
 
-The agent row (~10h) records via a daily 05:00 scheduled task, uncapped — the
-owner stops runs, timers do not (`scripts/overnight.cmd`). A break fires an
-on-screen notification. The serving process has stopped twice without logging
-a cause; the guards and the resume path cover it
-(`docs/knowledge/environment.md`).
+The D25 test is under way. The one-shot night chain (`scripts/night-chain.ps1`)
+finished the matrix at 03:59 and started the k=20 summary row; banking-summary
+was paused at 654 of 800 triples at 06:10 on the owner's request, the GPU
+being needed elsewhere, with the stop flag set and the checkpoint committed.
+Still to record: the rest of that cell (about 35 min), logistics-summary and
+hospitality-summary at k=20 (about 3.2 h each), the banking-extraction k=20
+re-record (about 4.7 h). Resume by rerunning the chain with a window; it
+clears the flag and skips what is done. The 05:00 daily task runs only the
+k=6 stage, which is now a few minutes of analysis.
 
 Not built: the severity titration rerun (needs k>=20 and a fault with a
 severity knob, bench METHODS), LOSO, the embedding style-stability gate, the
 Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
-extraction failure is diagnosed as decoy resolution at k=6, not blindness
-(STD-010 append, D25). The paper is drafted in every section; §8 against two
-of three rows; the abstract's result is blank until the matrix is complete.
+paper is drafted in every section; section 8 and Appendix F still describe
+two of three rows and are the cloud session's next task; the abstract's
+result stays blank until the k=20 summary row lands.

@@ -420,3 +420,50 @@ the k=6 bracket stays a bracket.
 inputs), the join of the two.
 **Reopen if:** banking-summary is re-recorded at k=6, or a copy of the lost
 label store surfaces.
+
+## STD-011 — The agent row at k=6: nothing flagged in any domain, with the fault touching 25-26 of 40 inputs (2026-10-16)
+
+Recorded 2026-10-06 (banking, restarted clean, HANDOFF §21 amendment) and
+the night of 2026-10-15/16 (logistics resumed at 70 triples, hospitality from
+zero); analysed in run 20261015T205514Z against the matrix code at `de23b8c`
+with a dirty tree that held results only.
+
+| cell | config hash | touched | flagged | distinct samples after normalisation | predicate calls | detection |
+|---|---|---|---|---|---|---|
+| banking-agent | `04b75acf8f69d4ec` | 26 of 40 | 0 | 785 of 944 | 2,300 | 67 s |
+| logistics-agent | `4bc58937db555622` | 25 of 40 | 0 | 674 of 956 | 1,955 | 66 s |
+| hospitality-agent | `2cea59ca300a6358` | 26 of 40 | 0 | 824 of 958 | 2,666 | 80 s |
+
+Every channel reports zero in every agent cell: mode_share, dispersion,
+novel_mode, nli_contradiction, nli_directional; embedding skipped with no
+embedder supplied, as in all nine cells. Labels are complete in all three
+(the BCH-018 fix predates every agent session; banking-agent was restarted
+clean for exactly this).
+
+**What the finding is.** At six samples the detector is silent on the agent
+format in three of three domains, so the format effect that STD-010 found on
+extraction (two of three silent) is complete on agent: five of the six
+non-prose cells report nothing. The transfer question for this format is
+unanswered at k=6, not answered negatively: a zero-flag cell means no check
+found a threshold it could justify at the budget, and STD-010's diagnosis
+showed that this can be decoy resolution rather than blindness.
+
+**What the data on disk suggests, untested.** Agent outputs are far more
+diverse after normalisation than the other formats: 70 to 86 percent of a
+cell's samples are distinct, against 35 to 62 percent for the summary and
+extraction cells (`cost.distinct_after_normalisation` in the matrix rows).
+With six samples per cloud and most samples unique, the share-of-answers and
+new-answer statistics carry almost no mass per mode and the decoy scores crowd
+the same few values, which is the STD-010 mechanism in a harsher regime. This
+is a hypothesis until `scripts/diagnose_channels.py` is run on the three
+cells; it needs the NLI model and no system under test. Also unexplained: 944,
+956 and 958 of 960 samples entered clustering in the three cells, against 960
+in every summary and extraction cell; the diagnosis should say which samples
+were dropped and why.
+
+**Evidence:** `results/study/matrix.json` rows 7 to 9; the three `.jsonl`
+checkpoints and `.activation.json` stores named by the hashes above;
+`logs/chain.log` (uncommitted) for the timings.
+**Reopen if:** the diagnosis is run on the agent cells (expected to reclassify
+this as resolution, blindness or wide decoys); or an agent cell is recorded at
+k=20; or a second model drives the agent format.

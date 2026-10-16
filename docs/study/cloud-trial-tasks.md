@@ -1,108 +1,89 @@
 # Work for a machine with no GPU
 
-**Written 2026-10-04 for a Claude Code cloud session running on free trial
-credit that expires 2026-11-05, 8:59 AM GMT+1.** After that date this file describes nothing
-real and should be deleted.
-
-**It goes stale fast.** It was already a day out of date the first time it was
-read, because D19 had been decided in the meantime. Check `HANDOFF.md` for
-anything dated after this file before trusting the task order below.
+**Rewritten 2026-10-16 for the Claude Code cloud session (trial credit expires
+2026-11-05, 8:59 AM GMT+1).** The 2026-10-04 list is done, items 1 to 6; it
+lives in git history. This is the second hand-off. **Check `HANDOFF.md` for
+anything dated after this file before trusting it**: the first version was a
+day out of date the first time it was read.
 
 If you are reading this on a machine that has a GPU and a running Ollama, you
 are not the audience. Go to `CLAUDE.md` and the per-family `STATE.md` files.
 
-## The constraint that produced this list
+## What changed since the first hand-off
 
-Recording needs the system under test, which is Ollama serving
-`granite4.2:8b` on the owner's PC. A cloud environment has no GPU and the trial
-credit is Claude usage, not compute. So **no new study data can be produced
-here**, and anything that needs a recording is out of scope.
+- The k=6 matrix is complete: nine cells in `results/study/matrix.json`,
+  analysed 2026-10-16 (HANDOFF §22, STD-010, STD-011). The agent row flags
+  nothing in any of the three domains with 25 to 26 of 40 inputs touched.
+- The k=20 summary row, the pre-registered D25 test (HANDOFF §21), is being
+  recorded on the owner's GPU and is paused: banking-summary at 654 of 800
+  triples, checkpoint `results/study/banking-summary.5aa2e096752e8c38.jsonl`.
+  Do not wait for it. Write against the k=6 matrix and bracket what the k=20
+  row will change, as section 8 already does for its gaps.
+- Every result file carries its run id, configuration hash and commit; the
+  matrix rows were analysed at `de23b8c` with a dirty tree holding results
+  only. Quote those, not the chain log, which is gitignored.
 
-If you try anyway, the preflight stops you in about a second and says the server
-is unreachable. That is working correctly, not a problem to solve.
+## The constraint, unchanged
 
-What a fresh clone *can* do: run the 218 tests in five seconds, read every
-recording already committed under `results/`, re-run
-`scripts/diagnose_channels.py` against them, and all documentation and analysis
-work.
+Recording needs the system under test, which is Ollama serving `granite4.2:8b`
+on the owner's PC. **No new study data can be produced here.** The preflight
+says so in about a second if you try. Everything below reads committed files.
 
-## The list, in the order the owner agreed
+What this machine can do: run the test suite in seconds, read every recording
+under `results/`, run `scripts/diagnose_channels.py` (it needs the NLI judge,
+which downloads from the Hub and runs on CPU in minutes, and no system under
+test), and all documentation and analysis work.
 
-### Already decided, do not redo
+## Tasks, in the order the owner agreed
 
-**D19 is ratified** as of 2026-10-04. The paper is written for somebody who
-ships LLM systems and might use the tool: software literacy assumed, everything
-else defined including the statistics. See HANDOFF §16. An earlier version of
-this file listed choosing that reader as task one.
+### 1. Diagnose the agent row (STD-011's first reopen condition)
 
-**D24 is ratified.** The README becomes a front door pointing at the paper, but
-**not until the paper exists**, and the honest-limits headlines stay in the
-README regardless. See HANDOFF §17 for what moves and what does not.
+Run `scripts/diagnose_channels.py` over the three agent cells:
+banking-agent `04b75acf8f69d4ec`, logistics-agent `4bc58937db555622`,
+hospitality-agent `2cea59ca300a6358`. Read the script's own docstring for how
+to classify what it prints: targets above the decoys is a power or sample-size
+problem, targets among the decoys is blindness, decoys as wide as targets is
+the system's own variation. Write the three `.diagnosis.json` files beside the
+cells, as was done for the two extraction cells, and append to STD-011 with
+the classification and the numbers. Two side questions belong in the same
+append: why 944, 956 and 958 of 960 samples entered clustering in these cells
+(`cost.samples_clustered`) when every other cell had 960; and whether the
+distinctness figures in STD-011 (70 to 86 percent of samples unique after
+normalisation) are the mechanism, or a coincidence of it.
 
-### 1. The blind-spot map — DONE 2026-10-04 (STD-009)
+### 2. Rewrite section 8 and Appendix F of `paper/draft.md` against the full matrix
 
-Highest value on this list. It is a declared figure for the paper, and **the
-data is already in the repository**: four probe runs totalling 1.3 MB under
-`results/probes_*.json`. Nothing to measure, only to analyse and draw.
+Section 8 opens with "This section is partial by design" and a two-row table
+with the agent row bracketed. Replace that framing: three rows recorded at six
+samples; the agent row paragraph, new, written in the register of the
+extraction paragraph and carrying task 1's diagnosis; the format effect as the
+k=6 headline (five of six non-prose cells silent, one pair diagnosed as
+resolution); "What is missing" updated so the k=20 rows read as recording
+rather than missing; the provenance line updated to runs 20261015T205513Z and
+20261015T205514Z and the commit; Appendix F to nine rows with the agent cells'
+sessions (2, 2, 1), label completeness (40 of 40 in all three) and detection
+times (67 s, 66 s, 80 s). Keep the D19 reader (HANDOFF §16) and the register of
+section 1: a statistic is explained where it is used, nothing is compressed
+into a name. Leave the abstract's [RESULT] blank; it fills with the k=20 row.
+Bracket, do not guess, what k=20 will change. Then update the paper's closing
+status footnote and the paper row of `docs/reader/STATE.md`.
 
-It also turns the README's honest-limits section from prose into a figure, and
-those limits are the most-cited part of the document so far.
+### 3. Run `scripts/check_prose.py` on the rewritten section and act on it
 
-**Do not run `scripts/run_probes.py`.** It downloads four models and needs real
-compute, and it would regenerate data that is already committed. On a machine
-with no GPU it will either fail or grind for hours producing what is already
-sitting in `results/`. Read those files.
+It is advisory. The owner reads about two thirds of the paper on screen and
+confirmed the register; a results section that drifts from it will be noticed.
 
-### 2. The provenance knowledge doc — DONE 2026-10-04
+### 4. Not yet
 
-`src/aprime/provenance.py` exists and works. `docs/knowledge/provenance.md` does
-not exist, and `docs/study/STATE.md` still lists run provenance as a GAP with
-the note that no number enters the paper before it exists.
+The README front door (D24) is gated on the paper existing: not now. The
+leave-one-out numbers need the k=20 rows. Nothing that records.
 
-That is a same-commit-rule violation from earlier work: code landed without its
-layer-2 doc. Cheap to fix, and it clears a stated blocker on the paper.
+## Hand-back
 
-### 3. The detector's report format — DONE 2026-10-04 (HANDOFF §19)
-
-Marked GAP in `docs/engine/STATE.md`. The detector currently prints whatever
-`Report.text()` produces. It needs a format a reader can act on.
-
-### 4. F2, prompt regression — DONE 2026-10-04 (BCH-016)
-
-I previously recorded this as blocked on needing a system with an editable
-prompt. That was wrong: `Cell.system_prompt()` exists, so the cells have one.
-Buildable and unit-testable with no GPU, against the captured fixtures in
-`tests/fixtures/ollama_chat.json`.
-
-### 5. F11, retrieval degradation — DONE 2026-10-04 (BCH-017)
-
-Returning the wrong rows rather than older ones. The current `_shift` in
-`cells/tools.py` serves older content of the same shape, which is staleness and
-already covered by F5. Degradation needs its own handler. Code plus tests, no
-GPU.
-
-### 6. ENG-003 — DONE 2026-10-04, except the live re-measurement (see the ENG-003 append)
-
-Clustering is recomputed three times per comparison. Logged as pressure rather
-than fixed. The fix is code, and it can be verified against a recording already
-on disk, so the cost claim can be re-measured here.
-
-## Explicitly not here
-
-- The nine-cell factorial, or any slice. Needs the GPU.
-- Re-running the severity titration. The two files on disk are from the
-  exact-match era and ENG-002 records that run as a saturated instrument rather
-  than a result.
-- Shape-stratified thresholds used for real. The code exists; every run so far
-  pooled into one stratum because no output format had 30 inputs.
-- The transfer matrix and the leave-one-out validation. Both sit downstream of
-  the factorial.
-- A hosted-model comparison. Deferred on cost, see HANDOFF §15 and its two
-  amendments. Nothing to build until the owner gives a go.
-
-## Before the trial ends
-
-Anything written into `.agents/` is gitignored and will be lost when the
-instance goes, except the two research documents that are committed as
-exceptions. If you create a dossier there and it is worth keeping, say so
-explicitly rather than assuming it travels. See `docs/knowledge/environment.md`.
+Commit and push on `main` unless the change is large enough to want a review,
+in which case a branch named `cloud/2026-10-16-<task>` and say so in the
+commit. The owner's local session pulls, runs `python -m pytest tests/ -q`
+with the GPU machine's environment, and continues the k=20 recording. The
+`.agents/` directory is gitignored and dies with the instance: if a dossier
+there is worth keeping, say so in HANDOFF rather than assuming it travels
+(`docs/knowledge/environment.md`).
