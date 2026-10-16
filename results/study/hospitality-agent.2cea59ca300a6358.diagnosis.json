@@ -9,10 +9,10 @@
  "nli_revision": "6f5cf0a2b59cabb106aca4c287eed12e357e90eb",
  "channels": {
   "mode_share": {
-   "best_estimate": 0.375,
-   "best_cut": 0.833333,
-   "targets_above": 8,
-   "decoys_above": 2,
+   "best_estimate": 0.4,
+   "best_cut": 1.0,
+   "targets_above": 5,
+   "decoys_above": 1,
    "mean_target_fired_minus_decoy": 0.126,
    "targets_fired": [
     0.0,
