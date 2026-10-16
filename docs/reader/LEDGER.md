@@ -411,3 +411,20 @@ and with words like "completely" attached.
 following this entry.
 **Reopen if:** a fourth document starts quoting the same numbers, at which point
 the manual reconciliation stops being tractable.
+
+## RDR-010 — The subtitle: name the borrow exactly (2026-10-16)
+
+Owner-ratified. The paper keeps its registered title question word for word
+and gains the subtitle: "Certifying behaviour change from outputs alone,
+with false-discovery control borrowed from proteomics." Chosen over "a decoy
+baseline borrowed from proteomics" because the borrow is the selection
+arithmetic, not the decoy construction: proteomics builds decoys by
+reversing sequences, while this method's null is a second genuine run, which
+inherits the real comparison's dependence structure instead of
+approximating it. The subtitle must not say "across tools": cross-system
+transfer is the second study's unearned claim. Section 3's lineage framing
+already matches; the title block is the reader seat's to update.
+**Evidence:** the owner's wording discussion, 2026-10-16; paper section 3's
+proteomics-as-lineage passage.
+**Reopen if:** the second study lands cross-system results, which would
+re-open the subtitle's scope.

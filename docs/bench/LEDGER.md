@@ -593,3 +593,23 @@ checkpoints; `tests/test_retrieval_faults.py` (resume and late-attach tests);
 `results/study/banking-extraction.7e1c3a40f5946fc8.diagnosis.json`.
 **Reopen if:** a store ever has fewer labelled inputs than its checkpoint has
 inputs after a single-session run, which would mean a second mechanism.
+
+## BCH-019 — The 2026 pool refresh: researched, and the pool stands (2026-10-16)
+
+The owner commissioned a renewed search for a recent agentic-branded
+open-weight model worth adding to the D10 pool, decided after the research
+rather than before. Four web-grounded sweeps (releases, Ollama ecosystem,
+tool-use benchmarks, credibility) found no 2026 candidate in the 7-9B,
+8 GB-Ollama class that clears every bar. The two near-misses each fail a
+different hard one: Ornith 9B is a Qwen3.5-lineage fine-tune with documented
+tool-call breakage on this exact serving stack; LFM2.5-8B-A1B measures below
+the pool incumbents on independent tool-use scores and carries an unresolved
+72-point vendor-vs-independent benchmark gap. The pool incumbents are
+confirmed current: qwen3.5:9b remains the 8 GB-tier agent default in 2026
+guides and Qwen3.6 ships no 9B. Owner decision, 2026-10-16: the pool is not
+extended.
+**Evidence:** `.agents/bench-pool-refresh-2026-10.md` (committed, the third
+research exception), with source URLs per claim.
+**Reopen if:** the dossier's watch conditions fire — a dense sub-10B
+Nemotron, a Qwen3.6 9B, an LFM2.5 revision with independent tool-use scores
+— or the GPU budget changes, which re-admits the 30B-A3B MoE class.
