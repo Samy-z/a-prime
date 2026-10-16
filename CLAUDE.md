@@ -129,6 +129,7 @@ Windows.
     python scripts/run_study.py --status            # the nine-cell factorial
     python scripts/run_study.py --k 20 --only-format summary --go   # D25: a separate configuration
     python scripts/diagnose_channels.py     # why a channel reported nothing
+    python scripts/agent_decision_variation.py results/study/<cell>.<hash>.jsonl  # agent cells, no model
     python scripts/capture_chat_fixtures.py # refresh the API test fixtures
 
 `src/aprime/net.py` must be imported and `enable_os_truststore()` called before
@@ -180,9 +181,12 @@ base F5; per-input activation as ground truth; q = 0.10). Summary row: recall
 0 / 0.48 / 0, the two zeros diagnosed as decoy resolution at six samples, not
 blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
 26 / 25 / 26 of 40 inputs touched and every channel silent** (STD-011). Its
-diagnosis has not been run: `scripts/diagnose_channels.py` needs the NLI model
-and no GPU, and is assigned to the cloud session together with the paper's
-section 8 (HANDOFF §22, `docs/study/cloud-trial-tasks.md`). The
+NLI diagnosis is blocked on the cloud instance, whose network policy denies
+the model host (STD-011 first append, HANDOFF §23); it falls to the GPU
+machine, three one-minute commands listed there. The model-free half is
+done: at the level of the decision the agent's own run-to-run variation is
+as wide as the fault's effect (`scripts/agent_decision_variation.py`,
+`results/study/*.decisions.json`). The
 banking-summary realised FDR stays a bracket, [0.05, 0.21], at k=6 (STD-010
 fourth append).
 
@@ -199,6 +203,6 @@ k=6 stage, which is now a few minutes of analysis.
 Not built: the severity titration rerun (needs k>=20 and a fault with a
 severity knob, bench METHODS), LOSO, the embedding style-stability gate, the
 Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
-paper is drafted in every section; section 8 and Appendix F still describe
-two of three rows and are the cloud session's next task; the abstract's
-result stays blank until the k=20 summary row lands.
+paper is drafted in every section; section 8 and Appendix F describe the
+nine-cell k=6 matrix (2026-10-16) with the k=20 rows and the agent diagnosis
+bracketed; the abstract's result stays blank until the k=20 summary row lands.
