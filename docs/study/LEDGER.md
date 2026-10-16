@@ -643,3 +643,52 @@ meantime.
 second model inverts the format gradient; or the second study's cross-model
 null design shows the within-system decoy arm was carrying more of the
 argument than this entry assumes.
+## STD-011 — SECOND APPEND (2026-10-16): the diagnosis, run on the GPU machine; all three agent cells classify as resolution-limited under MTH-025, with the decoy width the first append expected
+
+Run locally because the cloud instance cannot reach the model hosts (first
+append). `scripts/diagnose_channels.py` unmodified since the MTH-025 freeze;
+the three `.diagnosis.json` artifacts are committed beside their checkpoints
+with this entry.
+
+Per MTH-025, taking each cell's lowest best-achievable estimate:
+
+| cell | best channel(s) | best estimate | targets/decoys above | separation | classification |
+|---|---|---|---|---|---|
+| banking-agent | mode_share, novel_mode | 0.250 at cut 1.0 | 4/0 | +0.120, +0.158 | resolution-limited |
+| logistics-agent | mode_share, novel_mode, nli_contradiction | 0.250 | 4/0 | +0.13 to +0.20 | resolution-limited |
+| hospitality-agent | mode_share | 0.375 at cut 0.833 | 8/2 | +0.126 | resolution-limited |
+
+Rule 1 (blindness) fails in every cell: mode_share and novel_mode order a
+subset of touched inputs above every decoy. Rule 2 applies: the best
+estimates (0.25, 0.25, 0.375) all exceed q = 0.10. No cell is a selection
+defect.
+
+**The decoy width, reported as MTH-025 requires, is where these cells differ
+from the extraction pair.** Extraction's near-miss had 17-18 targets above
+1-2 decoys (estimates 0.111-0.176). Here decoys span 0 to 0.833 in banking
+and logistics and the full 0 to 1.0 in hospitality, covering the fired-target
+range except the top grid value — so only 4 to 8 of 25-26 fired inputs
+separate at all, and the floor needs ten clean of every decoy. The first
+append's expectation (decoys as wide as the fired targets, the system's own
+variation) is confirmed for the majority of inputs; the frozen precedence
+still lands on resolution-limited because rule 1 requires that NO channel
+separates, and two do, on a minority. Both readings are in the artifacts.
+The nli_directional channel carries nothing here (banking 0.72 with negative
+separation; hospitality 40 targets and 40 decoys above its best cut).
+
+Consistent with the first append's decision-level reading: the fault moves
+the agent's decisions about as much as the system moves its own between two
+baseline runs, and the text-level separation that does exist lives on a
+minority of inputs.
+
+**Expectation for an agent cell at k=20, filed before any such run exists:**
+the grid refines from 7 to 21 values, which should pull the 0.833-decoys off
+the top and improve the estimates; whether ten or more fired inputs separate
+cleanly is the open question, because the binding count here is separating
+inputs, not grid fineness. If a k=20 agent cell still cannot reach budget,
+that is a statement about information per agent output at this fault, not
+about k.
+**Evidence:** the three committed `.diagnosis.json` artifacts;
+`results/study/<cell>.<hash>.decisions.json` (first append); MTH-025.
+**Reopen if:** an agent cell is recorded at k=20, or a second model drives
+the agent format.
