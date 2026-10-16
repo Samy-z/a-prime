@@ -11,6 +11,7 @@
 .agents/*
 !.agents/bench-taxonomy-research.md
 !.agents/bench-model-survey.md
+!.agents/bench-pool-refresh-2026-10.md
 
 # Python
 __pycache__/
