@@ -92,7 +92,13 @@ applies, next to every check:
 The number behind the first two readings is the lowest false-discovery
 estimate any cut achieves, with the counts of inputs and baseline scores above
 that cut. `scripts/diagnose_channels.py` prints the same number from the same
-function, with the score distributions beside it.
+function, with the score distributions beside it. Since 2026-10-16 that
+function counts scores as values rounded to nine places, so two inputs at a
+mode-share distance of 5/6 tie whichever float each arrived on; before that a
+tie could split and a check could read as "n above every baseline score" when
+some baseline scores sat level with those inputs (ENG-010,
+`docs/knowledge/decoy-fdr.md`). Reports written before that date can overstate
+a separation and never understate one.
 
 For an agent cell, `scripts/agent_decision_variation.py` is the half of that
 diagnosis that needs no model. It reads the decision token (APPROVE, DECLINE,

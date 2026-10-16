@@ -54,6 +54,14 @@ These silently invalidate a result rather than failing loudly.
 - **Label noise by construction** — a fault labelled at the cell level is wrong
   for every input the fault never touched. Per-input activation instrumentation
   is mandatory; label positive only where the fault fired.
+- **Float ties in grid-valued statistics** — a mode-share distance of 5/6 is
+  `0.8333333333333333` from one pair of clouds and `0.8333333333333334` from
+  another, and anything that sorts, uniques or compares raw floats will split a
+  tie and count the lower form as below the cut. Compare as values: `fdr.py`
+  rounds to nine places at every entry point (ENG-010), and any new estimator
+  or re-derivation over stored scores must do the same before counting. The
+  split is one-directional, so a pre-fix number overstates separation and
+  never understates it.
 
 ## Recommended statistics (as of 2026-09-24)
 

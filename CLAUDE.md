@@ -183,10 +183,15 @@ blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
 26 / 25 / 26 of 40 inputs touched and every channel silent** (STD-011). Its
 diagnosis ran on the GPU machine (the cloud instance cannot reach the model
 host, STD-011 first append, HANDOFF §23): **resolution-limited in all three
-cells under the frozen criterion MTH-025** (best estimates 0.25 / 0.25 /
-0.375; 4 / 4 / 8 touched inputs above 0 / 0 / 2 decoys), with decoys as wide
-as the fired targets on most inputs, as the decision-level reading expected
-(STD-011 second append; `scripts/agent_decision_variation.py`). The paper is
+cells under the frozen criterion MTH-025** (best estimates 0.25 / 0.25 / 0.4
+at the top value; 4 / 4 / 3 touched inputs there above 0 / 0 / 1 decoys), with
+decoys as wide as the fired targets on most inputs, as the decision-level
+reading expected (STD-011 second append; `scripts/agent_decision_variation.py`).
+The hospitality figure was recorded as 0.375 with 8 above 2 until the
+estimator's tie handling was fixed on 2026-10-16 (ENG-010, HANDOFF §25): the
+five diagnosis files, the nine per-cell report files and
+`results/study/matrix.json` await a GPU rerun on which flagged counts can only
+fall (STD-011 third append). The paper is
 the two-question paper (STD-012, HANDOFF §24): the registered transfer
 question answered at its width, the format-and-k structure a declared
 post-hoc finding with the k=20 row as its confirmatory arm. The

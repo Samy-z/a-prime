@@ -7,7 +7,9 @@
 - `recorder.py` — interleaved three-arm replay. `docs/knowledge/recorder.md`.
 - `dedup.py` — exact and normalised input dedup. Semantic near-dup is a gap.
 - `stats.py`, `fdr.py` — mode-share statistics and target-decoy selection.
-  `docs/knowledge/decoy-fdr.md`.
+  `docs/knowledge/decoy-fdr.md`. Scores compared as values rounded to nine
+  places since 2026-10-16 (ENG-010); membership through `fdr.discoveries`,
+  never a raw `>=` against a threshold.
 - `normalize.py`, `clustering.py` — output normalisation and semantic mode
   clustering, which is what lets every statistic above apply to free text.
   `docs/knowledge/mode-clustering.md`. Equivalence threshold 0.7 (MTH-020).

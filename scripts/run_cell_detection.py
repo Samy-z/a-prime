@@ -107,8 +107,9 @@ STALE_SHAPES = frozenset({"lookup", "search", "history", "verify"})
 
 # Sizing follows from the FDR estimator rather than from taste. The
 # Barber-Candes correction makes the estimate (1 + decoys_above) / targets_above
-# (fdr.py:52), so even with zero decoys above the threshold the best achievable
-# estimate is 1/targets_above. At q=0.10 nothing can be reported until ten
+# (`estimate_fdr` in fdr.py), so even with zero decoys above the threshold the
+# best achievable estimate is 1/targets_above. At q=0.10 nothing can be
+# reported until ten
 # inputs are selected, so at least ten inputs must genuinely have changed, and
 # with activation rate `a` the corpus must be at least 10/a. The first run had
 # a=0.17 and n=12, where flagging anything was arithmetically impossible

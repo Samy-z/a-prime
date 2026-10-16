@@ -57,10 +57,10 @@
   },
   "decoys_zero": 15,
   "targets_fired_zero": 3,
-  "best_estimate": 0.4,
+  "best_estimate": 0.6,
   "best_cut": 0.6667,
   "targets_above": 5,
-  "decoys_above": 1,
+  "decoys_above": 2,
   "majority_flips": {
    "A_vs_A_prime": 8,
    "A_vs_B_fired": 9,

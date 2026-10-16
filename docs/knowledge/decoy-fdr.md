@@ -24,6 +24,40 @@ threshold report an FDR of zero off no evidence.
 No null model, no distributional assumption, no p-values. Any statistic works
 provided larger means more different.
 
+## Ties are compared as values, not as floats
+
+`tv_distance` is `0.5 * sum(abs(...))` over a set of mode keys, so the same
+rational value can arrive on two adjacent floats depending on the summation
+order: 5/6 is `0.8333333333333333` from one pair of clouds and
+`0.8333333333333334` from another. Until 2026-10-16 the estimator compared raw
+floats, `np.unique` produced two cuts where there was one, and at the upper cut
+every score on the lower float, target or decoy alike, counted as below it
+(ENG-010). Every public function in `fdr.py` (`estimate_fdr`, `select`,
+`discoveries`, `best_achievable`, `select_stratified`) now rounds its inputs
+to `SCORE_DECIMALS = 9` places before `np.unique` and before every comparison,
+and thresholds are reported at that precision. Nine decimals is three orders
+below what the artifacts store (six) and seven above the float noise that
+caused it (about 1e-16); no channel resolves a difference below 1e-6.
+
+- **Membership goes through `discoveries`.** A raw `targets >= sel.threshold`
+  compares a 9-place threshold against unrounded scores and reintroduces the
+  split in the other direction. `select_stratified` uses `discoveries` for the
+  same reason.
+- **The correction runs one way.** A cut the old code evaluated with some tied
+  decoys missing is a cut the new code evaluates with all of them, and the old
+  candidate set contained every value-consistent cut. So flagged counts can
+  only fall and best-achievable estimates can only rise; a report or diagnosis
+  written before the fix overstates at worst, never understates.
+- **What it moved**, each re-derived without a model: the hospitality-agent
+  `mode_share` diagnosis from 0.375 at cut 5/6 with 8 targets above 2 decoys to
+  0.4 at cut 1.0 with 5 above 1 (STD-011 third append); the stub demo's
+  dispersion line from "6 above every baseline score, 4 short of the floor" to
+  "13 above 3 baseline scores, estimate 0.31" (README and paper appendix
+  refreshed); the hospitality-agent decision-level best estimate from 0.4 to
+  0.6 (`.decisions.json` regenerated). The 24 exact-match titration rows did
+  not move. Regression test: `tests/test_fdr_ties.py`, built from real clouds
+  through the real statistic.
+
 ## Statistics currently implemented
 
 Clouds are distributions over modes, never a point with a radius (MTH-005).
@@ -81,6 +115,15 @@ seeds was [0.0, 0.0, 0.55, 0.0, 0.325]: either a qualifying threshold exists or
 none does. Averaging across runs hides that a given run may return nothing at
 all, so a single deployment's result should be read as a draw from this, not as
 a point estimate.
+
+**Re-measured 2026-10-16 on the tie-consistent estimator** (ENG-010; same
+protocol, seeds 100 to 104, today's stub, which the 2026-09-24 sweep's seeds do
+not reproduce to the digit either way). Before and after the fix on the same
+seeds: k=10 severity 0.9 0.78 to 0.77; k=20 severity 0.6 0.785 to 0.71; k=20
+severity 0.9 0.99 to 0.985; k=40 severity 0.3 0.145 to 0.14; the other five
+cells unchanged. Realised FDR, mean of five seeds, is at or below 0.092 in
+every cell after the fix (0.100 before). All three conclusions above stand;
+the test asserts the gaps, not the figures (MTH-018 amendment).
 
 ## Known gaps
 

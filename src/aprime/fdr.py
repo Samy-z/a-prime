@@ -26,6 +26,31 @@ from typing import Sequence
 
 import numpy as np
 
+# Scores are compared as values, not as floats. A mode-share distance of 5/6
+# comes out as 0.8333333333333333 from one pair of clouds and as
+# 0.8333333333333334 from another, because the summation order differs, and an
+# exact comparison then sees two cuts where there is one: at the upper one every
+# score sitting on the lower float, target or decoy alike, counts as below the
+# cut. That understates the decoys at a tie and overstates the separation; it
+# moved a committed diagnosis from 0.4 to 0.375 (ENG-010). So every function
+# below rounds its scores to this many decimals before any comparison or
+# `np.unique`. Nine is three orders below what the artifacts store (six) and
+# seven above the noise that caused it (about 1e-16). Thresholds are reported
+# at the same precision.
+SCORE_DECIMALS = 9
+
+
+def _scores(x) -> np.ndarray:
+    """Scores as values: rounded to `SCORE_DECIMALS` so that ties compare equal."""
+    return np.round(np.asarray(x, dtype=float), SCORE_DECIMALS)
+
+
+def _estimate(targets: np.ndarray, decoys: np.ndarray, t: float) -> float:
+    """`estimate_fdr` on arrays already passed through `_scores`."""
+    n_t = int((targets >= t).sum())
+    n_d = int((decoys >= t).sum())
+    return (1 + n_d) / max(n_t, 1)
+
 
 @dataclass(frozen=True)
 class Selection:
@@ -46,10 +71,11 @@ def estimate_fdr(targets: np.ndarray, decoys: np.ndarray, t: float) -> float:
     matters most in exactly the regime we care about — few discoveries — where
     omitting it lets a single lucky threshold report an FDR of zero off no
     evidence at all.
+
+    Ties count: a score equal to `t` as a value is at or above it whichever
+    float form it arrived in (`SCORE_DECIMALS`).
     """
-    n_t = int((targets >= t).sum())
-    n_d = int((decoys >= t).sum())
-    return (1 + n_d) / max(n_t, 1)
+    return _estimate(_scores(targets), _scores(decoys), float(_scores(t)))
 
 
 def select(targets: np.ndarray, decoys: np.ndarray, q: float = 0.10) -> Selection:
@@ -58,16 +84,20 @@ def select(targets: np.ndarray, decoys: np.ndarray, q: float = 0.10) -> Selectio
     Returns an empty selection rather than a bad one when no threshold
     qualifies. A detector that reports nothing is telling the truth; a detector
     that lowers its bar until it finds something is not.
+
+    Candidate cuts are the distinct target scores as values (`SCORE_DECIMALS`),
+    so a decoy tying a cut by value is counted at that cut. Test membership
+    against the result with `discoveries`, never with a raw `>=`.
     """
-    targets = np.asarray(targets, dtype=float)
-    decoys = np.asarray(decoys, dtype=float)
+    targets = _scores(targets)
+    decoys = _scores(decoys)
     if targets.size == 0:
         return Selection(float("inf"), 0, float("nan"), q)
 
     best: Selection | None = None
     # Descending: each candidate admits one more target than the last.
     for t in np.unique(targets)[::-1]:
-        fdr = estimate_fdr(targets, decoys, t)
+        fdr = _estimate(targets, decoys, t)
         if fdr <= q:
             n = int((targets >= t).sum())
             if best is None or n > best.n_discoveries:
@@ -78,7 +108,8 @@ def select(targets: np.ndarray, decoys: np.ndarray, q: float = 0.10) -> Selectio
 
 
 def discoveries(targets: np.ndarray, sel: Selection) -> np.ndarray:
-    return np.asarray(targets, dtype=float) >= sel.threshold
+    """Which targets the selection admits, compared as values like `select`."""
+    return _scores(targets) >= float(_scores(sel.threshold))
 
 
 @dataclass(frozen=True)
@@ -106,15 +137,17 @@ class BestCut:
 def best_achievable(targets: np.ndarray, decoys: np.ndarray) -> BestCut | None:
     """The cut with the lowest estimated FDR, or None with no targets.
 
-    Ties go to the cut admitting more targets, matching `select`.
+    Ties in the estimate go to the cut admitting more targets, matching
+    `select`. Ties in score are compared as values (`SCORE_DECIMALS`): one cut
+    per distinct value, with every target and decoy at that value counted.
     """
-    targets = np.asarray(targets, dtype=float)
-    decoys = np.asarray(decoys, dtype=float)
+    targets = _scores(targets)
+    decoys = _scores(decoys)
     if targets.size == 0:
         return None
     best: BestCut | None = None
     for t in np.unique(targets)[::-1]:
-        est = estimate_fdr(targets, decoys, t)
+        est = _estimate(targets, decoys, t)
         n_t = int((targets >= t).sum())
         n_d = int((decoys >= t).sum())
         if best is None or est < best.estimate:
@@ -190,6 +223,6 @@ def select_stratified(
         m = np.array([e == name for e in effective])
         sel = select(targets[m], decoys[m], q)
         per[name] = sel
-        flagged[m] = targets[m] >= sel.threshold
+        flagged[m] = discoveries(targets[m], sel)
     return StratifiedSelection(per_stratum=per, flagged=flagged,
                                strata=tuple(effective))
