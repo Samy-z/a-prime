@@ -184,8 +184,9 @@ the headline transfer numbers**; it is reported separately. See HANDOFF §3.
 
 **The k=6 matrix is complete: nine of nine cells recorded, analysed and
 written to `results/study/matrix.json` on 2026-10-16** (analysis runs
-20261015T205513Z and 20261015T205514Z; one fault class, the stale knowledge
-base F5; per-input activation as ground truth; q = 0.10). Summary row: recall
+20261016T141703Z to 05Z at f56af52, the tie-consistent rerun of the night
+pass 20261015T205513Z/14Z with every flag count unchanged; one fault class,
+the stale knowledge base F5; per-input activation as ground truth; q = 0.10). Summary row: recall
 0.88 / 0.79 / 0.86 for banking / logistics / hospitality. Extraction row:
 0 / 0.48 / 0, the two zeros diagnosed as decoy resolution at six samples, not
 blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
@@ -197,10 +198,11 @@ at the top value; 4 / 4 / 3 touched inputs there above 0 / 0 / 1 decoys), with
 decoys as wide as the fired targets on most inputs, as the decision-level
 reading expected (STD-011 second append; `scripts/agent_decision_variation.py`).
 The hospitality figure was recorded as 0.375 with 8 above 2 until the
-estimator's tie handling was fixed on 2026-10-16 (ENG-010, HANDOFF §25): the
+estimator's tie handling was fixed on 2026-10-16 (ENG-010, HANDOFF §25); the
 five diagnosis files, the nine per-cell report files and
-`results/study/matrix.json` await a GPU rerun on which flagged counts can only
-fall (STD-011 third append). The paper is
+`results/study/matrix.json` were regenerated on the GPU machine the same day
+and every flag count held (STD-011 fourth append, 48fa3ee); the paper's
+section 8 and Appendix F cite the rerun. The paper is
 the two-question paper (STD-012, HANDOFF §24): the registered transfer
 question answered at its width, the format-and-k structure a declared
 post-hoc finding with the k=20 row as its confirmatory arm. The

@@ -975,10 +975,12 @@ second finding, one this study generated rather than set out to test, which
 is marked as such wherever it appears. A second configuration, at twenty
 samples per cloud, is recording as this draft is written; it is the test of
 that second finding, and the sentences that depend on it are marked.
-Everything here comes from one analysis pass, run on the night of 15 to 16
-October over all nine cells, and from nine per-cell result files, each
-carrying its run identifier, configuration hash and the code revision that
-produced it.
+Everything here comes from one analysis pass, run on 16 October over all
+nine cells after a correction to how the estimator counts tied scores, and
+from nine per-cell result files, each carrying its run identifier,
+configuration hash and the code revision that produced it. A first pass the
+night before, with the uncorrected estimator, had flagged the same number of
+inputs in every cell.
 
 ### What explains the matrix
 
@@ -1199,8 +1201,7 @@ floor needs ten. The system's own variation covers the fault's effect on
 most inputs, and the rule still reads resolution rather than blindness
 because blindness requires that no check orders the touched inputs above the
 decoys even on average, and in every cell at least one does. The three
-diagnosis files are named in Appendix F, with a note on how the hospitality
-figures were read from them.
+diagnosis files are named in Appendix F.
 
 Two readings that need no judging model say why the decoys are so wide.
 
@@ -1351,15 +1352,12 @@ which is the same reading the first end-to-end run gave.
 - Any second model. Every cell here was driven by one model, so this section
   describes that model, as section 4 described one judging model.
 
-Every number above traces to analysis runs `20261015T205513Z` and
-`20261015T205514Z`, the two identifiers the one pass stamped a second apart,
-as written to the matrix file, to the nine per-cell configuration hashes
-listed in Appendix F, and to code revision `de23b8c`, with a working tree
-that differed from it only by result files. One per-cell file, banking
-summary, carries a later analysis of the same recording on its own, run
-`20261016T041749Z`, with every count identical; Appendix F says so. The
-decision-level numbers trace to the three files Appendix F names beside the
-agent cells.
+Every number above traces to analysis runs `20261016T141703Z`,
+`20261016T141704Z` and `20261016T141705Z`, the identifiers one pass stamped
+a second apart, as written to the matrix file and to the nine per-cell files,
+to the nine configuration hashes listed in Appendix F, and to code revision
+`f56af52` with a clean working tree. The decision-level numbers trace to the
+three files Appendix F names beside the agent cells.
 
 ---
 
@@ -1804,22 +1802,22 @@ example is printed" and "the program prints it".
 
 | cell | configuration hash | triples | sessions | inputs labelled | detection time | diagnosis file |
 |---|---|---|---|---|---|---|
-| banking-summary | `60ac20518858cf53` | 240 | 3 | 35 of 40 | 32.4 s | |
-| logistics-summary | `164081630f20c414` | 240 | 1 | 40 of 40 | 34.9 s | |
-| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 40 of 40 | 37.0 s | |
-| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 20 of 40 | 23.6 s | `banking-extraction.7e1c3a40f5946fc8.diagnosis.json` |
-| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 40 of 40 | 21.9 s | |
-| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 40 of 40 | 32.4 s | `hospitality-extraction.418a3438efcfbb12.diagnosis.json` |
-| banking-agent | `04b75acf8f69d4ec` | 240 | 2 | 40 of 40 | 67.1 s | `banking-agent.04b75acf8f69d4ec.diagnosis.json`, `banking-agent.04b75acf8f69d4ec.decisions.json` |
-| logistics-agent | `4bc58937db555622` | 240 | 2 | 40 of 40 | 66.4 s | `logistics-agent.4bc58937db555622.diagnosis.json`, `logistics-agent.4bc58937db555622.decisions.json` |
-| hospitality-agent | `2cea59ca300a6358` | 240 | 1 | 40 of 40 | 79.9 s | `hospitality-agent.2cea59ca300a6358.diagnosis.json`, `hospitality-agent.2cea59ca300a6358.decisions.json` |
+| banking-summary | `60ac20518858cf53` | 240 | 3 | 35 of 40 | 22.4 s | |
+| logistics-summary | `164081630f20c414` | 240 | 1 | 40 of 40 | 24.9 s | |
+| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 40 of 40 | 24.2 s | |
+| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 20 of 40 | 17.2 s | `banking-extraction.7e1c3a40f5946fc8.diagnosis.json` |
+| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 40 of 40 | 15.6 s | |
+| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 40 of 40 | 27.6 s | `hospitality-extraction.418a3438efcfbb12.diagnosis.json` |
+| banking-agent | `04b75acf8f69d4ec` | 240 | 2 | 40 of 40 | 60.4 s | `banking-agent.04b75acf8f69d4ec.diagnosis.json`, `banking-agent.04b75acf8f69d4ec.decisions.json` |
+| logistics-agent | `4bc58937db555622` | 240 | 2 | 40 of 40 | 60.1 s | `logistics-agent.4bc58937db555622.diagnosis.json`, `logistics-agent.4bc58937db555622.decisions.json` |
+| hospitality-agent | `2cea59ca300a6358` | 240 | 1 | 40 of 40 | 72.7 s | `hospitality-agent.2cea59ca300a6358.diagnosis.json`, `hospitality-agent.2cea59ca300a6358.decisions.json` |
 
 Model `granite4.2:8b`, digest `f586c02fdecdf151`. All nine cells were
-analysed in one pass between 01:53 and 01:59 UTC on 16 October 2026; the
-table and the matrix file carry that pass. The banking summary per-cell file beside its recording carries a
-later analysis of the cell on its own, run `20261016T041749Z` at 04:18 UTC,
-with every count and every flagged input identical and a detection time of
-25.5 s. Recording time, summed over the calls that returned, was 0.8 to 0.9
+analysed in one pass between 14:17 and 14:22 UTC on 16 October 2026, after
+the estimator's handling of tied scores was corrected; the table, the matrix
+file and the nine per-cell files carry that pass, and a first pass the night
+before, between 01:53 and 01:59 UTC, had flagged the same number of inputs in
+every cell. Recording time, summed over the calls that returned, was 0.8 to 0.9
 hours per summary cell, 1.2 to 7.6 per extraction cell and 3.1 to 12.8 per
 agent cell, with pauses on top. A cell with more than one session was
 paused and resumed, and the recorder resumes from its checkpoint. Seventeen
@@ -1835,13 +1833,12 @@ diagnosis file holds, for every check, the best cut the estimator could make,
 the counts of inputs and decoys above it, and the full sorted target and decoy
 scores, with the judging model's pinned revision inside and the recording's
 configuration hash in its name; one is written beside any cell that reports
-nothing. The counts above a cut in the hospitality agent file read 8 inputs
-above 2 decoys at a cut of 0.83, an estimate of 0.375; that tally separates
-scores that are equal in value but differ in their last binary digit, and
-with equal scores counted together the best cut is the top value, 5 inputs
-above 1 decoy, 0.4, which is what section 8 reports. The verdict is the same
-either way, and the tally is recorded as a defect of the instrument in the
-repository. A decisions file, written for an agent cell by a script in
+nothing. Before the correction, the estimator counted scores that are equal in value
+but differ in their last binary digit as two cuts, and the hospitality agent
+file then read 8 inputs above 2 decoys at a cut of 0.83, an estimate of
+0.375. Regenerated, it reads 5 inputs above 1 decoy at the top value, 0.4,
+which is what section 8 reports, and the four other diagnosis files came
+back unchanged. The verdict was the same either way. A decisions file, written for an agent cell by a script in
 the repository that needs no model, holds the per-input decision distances of
 section 8 for candidate against baseline and for baseline against second
 baseline, the majority-decision changes, and the exact-match reading of the
