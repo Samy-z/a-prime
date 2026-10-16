@@ -267,15 +267,17 @@ design before the result exists.
 
 ## §8 Results
 
-**Drafted 2026-10-05 against two of three rows (STD-010); the agent row and
-the extraction diagnosis are bracketed.** The LOSO/LOFO comparison and the
+**Rewritten 2026-10-16 against the complete nine-cell k=6 matrix (STD-010,
+STD-011); the k=20 rows and the agent-row diagnosis are bracketed, and the
+agent paragraph carries the decision-level reading of STD-011's first
+append.** The LOSO/LOFO comparison and the
 severity titration per fault type remain downstream of the full factorial. The section is written now as a table of what each
 result will be backed by, so that the draft cannot quietly promote a
 constructed mechanism to a measured result when the numbers arrive.
 
 | result | status | backing when it exists |
 |---|---|---|
-| transfer matrix, 3 domains x 3 formats | **partial**: summary and extraction rows measured (STD-010); agent row recording | `results/study/matrix.json`, per-row provenance (75081ad) |
+| transfer matrix, 3 domains x 3 formats | **measured at k=6**: nine cells (STD-010, STD-011). Summary row transfers (44 of 52, 0.72 to 0.92); five of six non-prose cells silent, two diagnosed as resolution, three pending the NLI diagnosis; four of nine systems reported anything. k=20 summary row recording (D25) | `results/study/matrix.json`, per-row provenance; analysis runs 20261015T205513Z and 20261015T205514Z at de23b8c; the three `.decisions.json` files for the agent paragraph |
 | random / LOSO / LOFO / LOSO x LOFO side by side | `GAP`; LOFO undefined with one fault class (STD-010) | same |
 | severity titration per fault class, semantic path | partial: six faults on the stub (ENG-004) | the factorial, per class |
 | FDR control on ground truth | **measured**: 0.101 or below against 0.10 (MTH-018) | `tests/test_pipeline.py` sweep |

@@ -20,8 +20,24 @@ Everything the study needs to be audited and continued, except the hardware:
 | `requirements.txt` | the five direct dependencies, added 2026-10-03 because nothing could rebuild the venv before that |
 
 So a fresh clone can run the tests, read every recording, re-run
-`diagnose_channels.py`, and do all documentation and analysis work. That is most
-of what a machine without a GPU can usefully do here.
+`diagnose_channels.py` where the model host is reachable, and do all
+documentation and analysis work. That is most of what a machine without a GPU
+can usefully do here.
+
+### The cloud instance cannot reach the model host (found 2026-10-16)
+
+The Claude Code cloud environment's network policy answers 403 to CONNECT for
+`huggingface.co`, `cdn-lfs.huggingface.co`, `hf-mirror.com` and
+`download.pytorch.org`. `pypi.org` and `files.pythonhosted.org` are open, so
+`requirements.txt` installs there in a few minutes (the PyPI torch build, 5.5
+GB, CPU only), and then anything that loads a judge fails at
+`from_pretrained` with no cache on disk. Consequence: the tests, every
+recording, `agent_decision_variation.py` and all writing work run there;
+`diagnose_channels.py`, `run_probes.py` and `fit_clustering.py` do not. Fix,
+if wanted: the owner adds the two Hugging Face hosts under the environment's
+allowed domains (the cloud environment menu in the session's title bar, then
+Edit, Network access); otherwise the judge-dependent commands stay with the
+GPU machine, which has the cache (STD-011 first append, HANDOFF §23).
 
 ## What the repository does not carry, and must not
 

@@ -1,0 +1,198 @@
+{
+ "checkpoint": "banking-agent.04b75acf8f69d4ec.jsonl",
+ "k": 6,
+ "n_inputs": 40,
+ "fired": 26,
+ "quiet": 14,
+ "q": 0.1,
+ "live": {
+  "samples": 720,
+  "errored_dropped": 12,
+  "empty_kept": 5,
+  "finish_reasons": {
+   "max_steps": 79,
+   "stop": 514,
+   "length": 115,
+   "None": 12
+  }
+ },
+ "decision": {
+  "tokens_per_arm": {
+   "A": {
+    "DECLINE": 59,
+    "NONE": 29,
+    "APPROVE": 114,
+    "ESCALATE": 34
+   },
+   "A_prime": {
+    "DECLINE": 60,
+    "APPROVE": 115,
+    "NONE": 32,
+    "ESCALATE": 30
+   },
+   "B": {
+    "DECLINE": 48,
+    "NONE": 38,
+    "APPROVE": 122,
+    "ESCALATE": 27
+   }
+  },
+  "targets_fired": {
+   "n": 26,
+   "min": 0.0,
+   "median": 0.1667,
+   "max": 0.8
+  },
+  "targets_quiet": {
+   "n": 14,
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.6
+  },
+  "decoys": {
+   "n": 40,
+   "min": 0.0,
+   "median": 0.1667,
+   "max": 0.8333
+  },
+  "decoys_zero": 17,
+  "targets_fired_zero": 11,
+  "best_estimate": 0.6667,
+  "best_cut": 0.6,
+  "targets_above": 3,
+  "decoys_above": 1,
+  "majority_flips": {
+   "A_vs_A_prime": 7,
+   "A_vs_B_fired": 3,
+   "A_vs_B_quiet": 2,
+   "inputs": 40,
+   "fired": 26,
+   "quiet": 14
+  },
+  "scores": {
+   "targets": [
+    0.5,
+    0.1667,
+    0.1667,
+    0.0,
+    0.0,
+    0.6667,
+    0.0,
+    0.0,
+    0.5,
+    0.0,
+    0.3333,
+    0.5,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.1667,
+    0.0,
+    0.3333,
+    0.1667,
+    0.6,
+    0.1667,
+    0.3333,
+    0.1667,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.1667,
+    0.1667,
+    0.1667,
+    0.1667,
+    0.0,
+    0.0,
+    0.0,
+    0.8,
+    0.0,
+    0.2,
+    0.1667
+   ],
+   "decoys": [
+    0.1667,
+    0.5,
+    0.25,
+    0.1667,
+    0.0,
+    0.3333,
+    0.0,
+    0.0,
+    0.5,
+    0.0,
+    0.1667,
+    0.4,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.8333,
+    0.1667,
+    0.3333,
+    0.1667,
+    0.5,
+    0.3333,
+    0.0,
+    0.1667,
+    0.1667,
+    0.0,
+    0.0,
+    0.5,
+    0.0,
+    0.1667,
+    0.1667,
+    0.0,
+    0.3333,
+    0.0,
+    0.0,
+    0.1667,
+    0.3333,
+    0.1667
+   ]
+  }
+ },
+ "exact_match": {
+  "cost": {
+   "predicate_calls": 0,
+   "clusterings": 80,
+   "samples_clustered": 944,
+   "distinct_after_normalisation": 785
+  },
+  "short_clouds": 6,
+  "channels": {
+   "mode_share": {
+    "flagged": 0,
+    "best_estimate": 0.8519,
+    "best_cut": 1.0,
+    "targets_above": 27,
+    "decoys_above": 22,
+    "decoys_at_top_value": 22,
+    "targets_fired_at_top_value": 23
+   },
+   "dispersion": {
+    "flagged": 0,
+    "best_estimate": 0.75,
+    "best_cut": 0.1333,
+    "targets_above": 8,
+    "decoys_above": 5,
+    "decoys_at_top_value": 0,
+    "targets_fired_at_top_value": 0
+   },
+   "novel_mode": {
+    "flagged": 0,
+    "best_estimate": 0.8519,
+    "best_cut": 1.0,
+    "targets_above": 27,
+    "decoys_above": 22,
+    "decoys_at_top_value": 22,
+    "targets_fired_at_top_value": 23
+   }
+  },
+  "within_cloud_distinct_fraction_mean": 0.8875
+ }
+}

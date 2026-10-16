@@ -467,3 +467,107 @@ checkpoints and `.activation.json` stores named by the hashes above;
 **Reopen if:** the diagnosis is run on the agent cells (expected to reclassify
 this as resolution, blindness or wide decoys); or an agent cell is recorded at
 k=20; or a second model drives the agent format.
+
+## STD-011 — FIRST APPEND (2026-10-16): the NLI diagnosis is blocked on the cloud instance; the two side questions settled without it; a decision-level reading on record
+
+Written on the Claude Code cloud instance. Its network policy answers 403 to
+CONNECT for `huggingface.co`, `cdn-lfs.huggingface.co`, `hf-mirror.com` and
+`download.pytorch.org`; `pypi.org` and `files.pythonhosted.org` are open. The
+pinned stack installs from PyPI in a few minutes (torch 2.14.0 PyPI build,
+transformers 5.17.0, 5.5 GB, CPU) and `scripts/diagnose_channels.py` then
+fails at `AutoTokenizer.from_pretrained` with no model on disk and no cache.
+**The three agent `.diagnosis.json` files are therefore not written by this
+append, and the classification (resolution / blindness / wide decoys) stays
+open.** Two ways to close it, the owner's choice: add `huggingface.co` and
+`cdn-lfs.huggingface.co` to the cloud environment's allowed domains and rerun
+task 1 of `docs/study/cloud-trial-tasks.md`; or on the GPU machine
+
+    python scripts/diagnose_channels.py results/study/banking-agent.04b75acf8f69d4ec.jsonl
+    python scripts/diagnose_channels.py results/study/logistics-agent.4bc58937db555622.jsonl
+    python scripts/diagnose_channels.py results/study/hospitality-agent.2cea59ca300a6358.jsonl
+
+about a minute each with the model loaded, and commit the three files.
+
+**Side question 1, settled: the missing samples are errored calls, dropped by
+`Recording.clouds`.** `recorder.Recording.clouds` keeps a sample only when
+`error is None`. `load_checkpoint` keeps the last write per (triple, arm) and
+drops only triples where all three arms errored (ENG-008); a triple with one
+or two errored arms is complete, and its errored arm contributes no sample.
+The agent cells are the only cells with errored calls: banking-agent 12 live
+errored samples (A 4, A′ 3, B 5), logistics-agent 3 (one per arm),
+hospitality-agent 2 (both B). `cost.samples_clustered` counts A in both arm
+pairs, so the shortfall is 2·A + A′ + B: 2·4+3+5 = 16 → 944; 2+1+1 = 4 → 956;
+2 → 958. Six, three and two inputs ran on clouds of four or five
+(`Report.short_clouds`). The errors are the serving process's: `HTTP Error
+500` (banking 10 of 21 raw records, logistics 3, hospitality 2), `WinError
+10061` connection refused (banking 10; the stop without a logged cause,
+`docs/knowledge/environment.md`), one `WinError 10054` reset. banking-agent's
+checkpoint holds 729 records: triples `lookup-036#5`, `search-037#0` and
+`search-037#1` died with all three arms errored in session 0 (2026-10-06) and
+were recorded again in session 1, the dead-triple path working as built;
+21 − 9 = 12 errored samples remain live inside triples that had a good arm.
+Ten further samples (banking 5, logistics 3, hospitality 2) came back empty
+with no error (`finish_reason: length`, one `max_steps`); they enter
+clustering as the empty string and form a mode of their own.
+`finish_reason: max_steps` on 79, 157 and 282 of 720 live samples: the agent
+hit its step cap and the output is whatever it had, the format's behaviour as
+kept (paper §6, "What the first live run found"). Median call latency 62.7 s,
+15.4 s and 16.1 s against 4.0 s for banking-summary.
+
+**Side question 2: distinctness is the regime, not a coincidence, and the
+judge's merging is the only resolution these cells have.** Three readings,
+all without the judge; instrument `scripts/agent_decision_variation.py`,
+output `results/study/<cell>.<hash>.decisions.json` for the three agent cells
+(committed with this append).
+
+1. *Exact distinctness bounds modes from above.* 785 of 944, 674 of 956 and
+   824 of 958 clustered samples are distinct after normalisation (83, 70, 86
+   percent) against 35 to 62 percent in the six other cells (matrix rows);
+   within a cloud of six, mean distinct fraction 0.89, 0.76, 0.90
+   (`exact_match.within_cloud_distinct_fraction_mean`).
+2. *With no predicate the decoys saturate.* The shipped exact-match
+   configuration (`detect(predicate=None)`) puts mode_share and novel_mode
+   decoys at the top value 1.0 on 22, 17 and 25 of 40 inputs; best achievable
+   estimates 0.852, 0.720, 0.812, all at cut 1.0
+   (`exact_match.channels.*`). The same instrument on banking-summary and
+   hospitality-extraction: 4 and 5 of 40 decoys at the top value (run, not
+   committed; the decision block is void for a non-agent cell). Under exact
+   matching the two baseline runs share no answer on about half the agent
+   inputs, so every bit of resolution the shipped detector has here is the
+   NLI predicate merging paraphrases. How far it merged: the greedy clustering
+   makes between m(m−1)/2 + (d−m) and m(m−1)/2 + (d−m)·m predicate calls for
+   d distinct strings ending in m modes, so the recorded `predicate_calls`
+   (2,300 / 1,955 / 2,666 over 80 clusterings, d known per clustering from
+   the checkpoint) is consistent with 3.5 to 7.7, 3.1 to 6.8 and 3.9 to 8.3
+   modes per clustering of twelve samples, against 1.9 to 4.6 for
+   banking-summary and 2.9 to 5.1 for hospitality-extraction (derived, not
+   measured; the diagnosis files will carry the measured partition).
+3. *At the decision level the decoys are as wide as the targets.* Decision
+   token (APPROVE / DECLINE / ESCALATE, first occurrence, case-sensitive)
+   scored with `stats.tv_distance`, candidate vs baseline (target) and
+   baseline vs second baseline (decoy): decoy median 0.1667 in all three
+   cells, max 0.8333 / 0.6667 / 0.6667; target-on-fired median 0.1667 /
+   0.1667 / 0.25, max 0.80 / 0.6667 / 0.8333; decoys at exactly 0: 17 / 19 /
+   15 of 40; best achievable 0.667 / 0.50 / 0.40. Majority decision differs
+   A vs A′ on 7 / 7 / 8 of 40 inputs; A vs B on 3 of 26, 11 of 25, 9 of 26
+   fired inputs and 2 of 14, 5 of 15, 1 of 14 quiet ones. In banking-agent
+   the fault changed the decision less often than the system changed its own
+   between two identical runs. This is the docstring's third class, measured
+   on the one part of an agent's output that needs no judge; the rationale
+   text is the judge's question and stays open.
+
+**Expectation on record before the diagnosis runs.** Decoys spread as wide
+as the fired targets on mode_share and novel_mode (the system's own
+variation of the fault's size), best estimate well above 0.10 with several
+decoys above the best cut, unlike STD-010's single decoy on the top value. If
+instead the fired targets stand above the decoys at a cut the budget cannot
+justify, the reading is STD-010's and k=20 is the remedy.
+
+**Evidence:** the three `.decisions.json` files;
+`scripts/agent_decision_variation.py` and `tests/test_agent_decision_variation.py`;
+`results/study/matrix.json` rows 7 to 9; the three checkpoints (error and
+`finish_reason` fields; the duplicated triples).
+**Reopen if:** the diagnosis files are written (STD-011's first reopen
+condition stands); the agent prompt is changed to put the decision first
+(paper §6 says it is kept as it is, so the decision-level reading would be a
+new instrument reading a new system).

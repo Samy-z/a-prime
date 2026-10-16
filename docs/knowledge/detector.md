@@ -94,6 +94,19 @@ estimate any cut achieves, with the counts of inputs and baseline scores above
 that cut. `scripts/diagnose_channels.py` prints the same number from the same
 function, with the score distributions beside it.
 
+For an agent cell, `scripts/agent_decision_variation.py` is the half of that
+diagnosis that needs no model. It reads the decision token (APPROVE, DECLINE,
+ESCALATE; first occurrence, case-sensitive) out of every sample and scores it
+with the same mode-share distance, candidate against baseline and baseline
+against second baseline, counts majority-decision flips, and runs the three
+partition statistics under exact matching as the other end of the reading.
+It writes `<cell>.<hash>.decisions.json` beside the checkpoint. On the three
+agent cells at k=6 the decoys were as wide as the targets at the decision
+level, in every domain (STD-011 first append). Errored calls never enter a
+cloud, because `Recording.clouds` keeps a sample only when `error is None`;
+that is why `cost.samples_clustered` can fall below 4·k·n (A is counted in
+both arm pairs) and why a report can list short clouds.
+
 Three more things the report states because nothing in the numbers would:
 
 - **How many samples each arm really had.** The header gives the samples per

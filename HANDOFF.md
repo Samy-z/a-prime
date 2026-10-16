@@ -984,3 +984,39 @@ Why the brief lives in the repository rather than in a chat: the two sessions
 share nothing but git. A brief in the tree arrives with the data it describes,
 at the commit it describes, and the answer comes back by the same road
 (`docs/knowledge/environment.md`, "Coming back").
+
+## §23 — The agent-row diagnosis is blocked on the cloud instance; a decision-level instrument stands in (2026-10-16)
+
+The cloud environment's network policy denies the Hugging Face hosts and
+PyTorch's index while leaving PyPI open, so the judge cannot be fetched: the
+pinned stack installs from PyPI and `diagnose_channels.py` fails at the model
+download with no cache on disk. Task 1 of `docs/study/cloud-trial-tasks.md`
+is therefore half done. Settled without the judge (STD-011 first append): the
+16, 4 and 2 missing samples are errored calls that `Recording.clouds` drops;
+the distinctness figures are the regime rather than a coincidence; and at the
+decision level the agent's own run-to-run variation is as wide as the fault's
+effect, in all three domains. Open: the classification itself.
+
+Why an instrument rather than a paragraph. The standing discipline is "ask
+for the instrument, not the summary", and an agent cell has a part of its
+output the judge never reads on its own: the decision. So
+`scripts/agent_decision_variation.py` scores the decision with the detector's
+own mode-share distance, candidate against baseline and baseline against
+second baseline, and writes `<cell>.<hash>.decisions.json` beside the
+checkpoint under the recording's hash; the exact-match partition statistics
+ride along as the other end of the reading. It outlives this blockage: it is
+the question to ask of any agent cell whose rationale varies more than its
+verdict.
+
+Decisions the owner has to take:
+
+1. Either add `huggingface.co` and `cdn-lfs.huggingface.co` to the cloud
+   environment's allowed domains (the torch stack is already installed in the
+   instance's scratch space and dies with it), or run the three
+   `diagnose_channels.py` commands in STD-011's first append on the GPU
+   machine. The expectation for what they show is on record there.
+2. The paper's section 8 and Appendix F are rewritten against the nine-cell
+   k=6 matrix with the diagnosis and the k=20 rows bracketed; the agent
+   paragraph carries the decision-level reading in the register of the JSON
+   paragraph. The classification sentence fills from the diagnosis files when
+   they exist, nothing else in the section depends on them.
