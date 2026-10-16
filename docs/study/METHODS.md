@@ -41,6 +41,10 @@ interval is wide.
   drops a fully fired input (STD-010 fifth append: 96 reported where 100 was
   right). Inputs with fewer than six keys lost labels (BCH-018) and cannot be
   judged for "fired on all six"; keep them out of both numerators and say so.
+  An input whose only surviving key is `#0` (`lookup-000` in banking-summary
+  and banking-extraction) is labelled by the preflight invocation alone: its
+  touched status is the preflight's, not a recorded sample's, and at most one
+  of banking-summary's 15 true positives rests on it.
 - **`cost.samples_clustered` below 4·k·n is errored calls, not dedup.**
   `Recording.clouds` drops a sample whose call errored, and A is counted in
   both arm pairs, so the shortfall is 2·A + A′ + B errored samples (STD-011

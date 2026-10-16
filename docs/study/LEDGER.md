@@ -521,7 +521,7 @@ output `results/study/<cell>.<hash>.decisions.json` for the three agent cells
 (committed with this append).
 
 1. *Exact distinctness bounds modes from above.* 785 of 944, 674 of 956 and
-   824 of 958 clustered samples are distinct after normalisation (83, 70, 86
+   824 of 958 clustered samples are distinct after normalisation (83, 71, 86
    percent) against 35 to 62 percent in the six other cells (matrix rows);
    within a cloud of six, mean distinct fraction 0.89, 0.76, 0.90
    (`exact_match.within_cloud_distinct_fraction_mean`).

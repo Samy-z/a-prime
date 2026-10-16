@@ -115,7 +115,8 @@ is likely to be wrong when it says so. It does this without knowing what your
 outputs mean. The method is a tool; the contribution we care more about is the
 study attached to it, which asks whether detection built on one domain still
 works when moved to another. Nobody has published an answer to that, and the
-study is designed so that the answer, when it comes, can be no.
+study is designed so that the answer can be no; section 8 reports what it has
+said so far.
 
 ---
 
@@ -280,7 +281,7 @@ eight, with no decoy above the cut in any of them, which is as clean a
 separation as the method can produce. Nine is one short of ten, so the best
 estimate was `1 / 9 = 0.111`, just over the budget of `0.100`, and the report
 said nothing. The report now says why, next to each check
-(section 8).
+(Appendix D).
 
 The `s` term is set by how finely a check can score. With four samples per
 cloud, the share-of-answers check can only take the values 0, ¼, ½, ¾ and 1, so
@@ -322,9 +323,11 @@ wrong for at least two of them. So the tool sorts inputs by the shape of the
 baseline's output, short answer, JSON, list or prose, and calibrates each shape
 on its own decoys. A shape with fewer than thirty inputs is pooled with the
 others rather than given a threshold fitted to too little, which also means
-the `1 / q` floor applies per shape. In every run so far there were fewer than
-thirty inputs per shape, so the per-shape machinery is exercised and has never
-been stressed.
+the `1 / q` floor applies per shape. Before the nine-cell matrix of section 8
+every run had fewer than thirty inputs per shape; in the matrix five of the
+nine cells had thirty or more in one shape and fitted that shape its own
+threshold, with the rest pooled, and no cell has yet had two shapes of thirty,
+so one per-shape threshold has never been compared against another.
 
 ### Does the promise hold?
 
@@ -747,7 +750,10 @@ is kept as it is.
 ### The models
 
 Four locally served models from four labs, two of them with different
-architectures, all under a permissive licence. They were chosen for family
+architectures, all under a permissive licence. The nine cells of section 8
+were all driven by one of them, the 8-billion-parameter model Appendix F
+names; the other three are the pool for the second-model row that section 8
+lists as missing. They were chosen for family
 diversity rather than capability, because capability did not discriminate:
 every 8-billion-parameter model tested drove a chained two-step tool loop 12
 times out of 12, and the one 3-billion-parameter model failed a quarter of the
@@ -931,7 +937,9 @@ Detection is cheap and recording is not. On the first run against a real
 system, recording took 589 seconds and detection 10. At the working minimum of
 twenty samples per cloud and three runs, one system in one domain and format
 is 1,800 model calls for thirty inputs, and a chained tool-calling format
-costs about three and a half times a summarising one. Three things keep that
+costs about three and a half times a summarising one. [Measured in section 8
+at six samples: three and a half to fifteen times, by domain, and eight and a
+half across the row.] Three things keep that
 tractable: calls for one input are grouped so a server with prompt caching
 pays the shared prefix once per input rather than once per call, which on the
 measured hardware is the difference between weeks and hours; runs checkpoint
@@ -970,21 +978,26 @@ configuration hash and the code revision that produced it.
 
 Nine systems: the summary, JSON extraction and agent formats, each in the
 three domains. One fault class: a stale knowledge base, injected as the four
-readable tools serving older rows of the right record. One model behind every
+tools that read from it serving older rows of the right record. One model behind every
 system, an 8-billion-parameter model served locally and pinned by the digest
 of its weights. Forty inputs per system, six samples per cloud, three runs, a
-false-discovery budget of 0.10. Nine cells of 240 triples each, 6,480 model
-calls. Seventeen of those calls returned an error from the serving process
-instead of an output, every one of them in the agent row, where a call is a
-multi-step run with tools that took 15 to 63 seconds at the median against 4
-for a summary. The comparison for an input with an errored call runs on the
-five or four samples that came back, and three triples in the banking agent
-cell whose three calls all failed were recorded again when the cell resumed.
-No other cell lost a call.
+false-discovery budget of 0.10. Nine cells of 240 triples each, a triple being
+the three calls for one input and one sample, one per run; 6,480 model calls
+kept, of 6,489 made: three triples in the banking agent cell failed on
+all three calls at the first attempt and were recorded again when the cell
+resumed. Seventeen of the calls kept returned an error from the serving
+process instead of an output, every one of them in the agent row, where a
+call is a multi-step run with tools whose typical duration (the median) was
+15 to 63 seconds against 4 for a summary. The comparison for an input with an errored call
+runs on the five or four samples that came back. No other cell lost a call.
+Five of the nine cells put thirty or more inputs into one output shape, the
+number at which section 3 said a shape gets a threshold of its own, so in
+those five that shape was calibrated on its own decoys and the remaining
+inputs were pooled; in the other four, every input shared one threshold.
 
-Per-input activation, recorded by the fault wrapper as each call was made, is
-the ground truth throughout, with one gap found while the first version of
-this section was written: in the two cells that were paused and resumed
+Whether the fault actually fired on each input, recorded by the code that
+injects it as each call was made, is the ground truth throughout, with one
+gap found while the first version of this section was written: in the two cells that were paused and resumed
 before the fix, a bug in how the resumed session reopened its label file
 erased the labels of the inputs recorded before the pause, 20 of 40 in
 banking extraction and 5 of 40 in banking summary. Those inputs are
@@ -993,7 +1006,7 @@ between two tool results and the recording keeps outputs, not tool arguments.
 Every count below for those two cells is over the labelled inputs, and says
 so. The banking extraction cell will be recorded again at twenty samples per
 cloud and that recording replaces this one outright, so its row below is
-reported as it stands and not polished. The seven other cells carry complete
+reported as it stands, label gap included. The seven other cells carry complete
 labels, the two agent cells that were paused and resumed among them, because
 the fix landed before any agent cell was recorded.
 
@@ -1007,15 +1020,16 @@ the 188 inputs it touched across the nine cells, 168 fired on five or six of
 their six samples and 165 on all six, so a touched input moves its whole
 cloud rather than part of it, which is not the gradual shift those power
 figures were measured on. The agent format is the exception in degree, 67 of
-its 77 touched inputs, because an agent decides on each run which tools to
-call, and the stale read happens only on the runs that make it. What six
+its 77 touched inputs against 101 of 111 in the other six cells, because an
+agent decides on each run which tools to call, and the stale read happens
+only on the runs that make it. What six
 samples cost instead is resolution. The share-of-answers statistic can take
 only seven distinct values at six samples, the decoy scores, those of the
 second baseline run against the first, land on the same seven, and the
 threshold is set from where the decoys stop. The paragraphs on the JSON cells
 show exactly what that costs. And the false-discovery rates
-below are only computable because the bench records which inputs the fault
-touched. No production user ever has that number. In production, the budget
+below are only computable because the test harness records which inputs the
+fault touched. No production user ever has that number. In production, the budget
 is the promise and the realised rate is unknowable, which is why a validation
 like this one is the only place the promise can be checked.
 
@@ -1040,7 +1054,8 @@ else. The format effect is the finding of the six-sample matrix, and the rest
 of this section takes it apart. Counted by system, which section 7 made the
 unit of evidence, the detector reported changed inputs on four of the nine
 systems and nothing on five. Four of nine bounds the per-system success rate
-between 0.14 and 0.79 at 95 percent confidence, which bounds nothing useful,
+between 0.14 and 0.79 at 95 percent confidence, computed the exact way small
+counts of systems call for, which bounds nothing useful,
 and the row structure says why: the four are the three prose systems and one
 JSON system, so a per-format reading is the most this matrix supports.
 
@@ -1083,8 +1098,10 @@ do, and the other 8 inputs above the cut are the ones whose label was lost;
 the estimate was 0.176. What failed in both cells is resolution. With six
 samples per cloud the statistic takes seven values, the decoys pile onto a few
 of them, and a single decoy on the top value puts the floor out of reach.
-Logistics worked on the same format because its decoys happened not to reach
-the top value. So the format-shaped failure is a resolution failure: the
+Logistics worked on the same format because no decoy reached the cut: eleven
+inputs flagged at a budget of 0.10 leaves no room for a decoy at or above it,
+by the arithmetic of section 3. So the format-shaped failure is a resolution
+failure: the
 change was seen and could not be reported, which is the same shape as the
 first end-to-end run in section 3, arrived at from the other side. The fix is
 finer statistics, which means more samples per cloud, and the paragraphs on
@@ -1100,21 +1117,21 @@ of those five that have been diagnosed failed on resolution rather than on
 sight.
 
 The agent cells have not had that diagnosis at this draft. [It needs the
-judging model and no system under test, and the machine this section was
-rewritten on was not allowed to reach the host the model downloads from; the
-three diagnosis files are to be written beside the recordings, as the JSON
-ones were, and this paragraph finished from them.] What the recordings say
+judging model and no system under test, and could not be run where this
+section was rewritten; the three diagnosis files are to be written beside the
+recordings, as the JSON ones were, and this paragraph finished from them.] What the recordings say
 without the judging model is set out here, because it changes what the
 diagnosis is expected to find.
 
 The agent format is far more varied in its wording. After normalisation, 83,
-70 and 86 percent of the samples that entered clustering in the three agent
+71 and 86 percent of the samples that entered clustering in the three agent
 cells are distinct strings (785 of 944, 674 of 956 and 824 of 958), against
 35 to 62 percent in the six other cells; within a single cloud of six
 samples, between three quarters and nine tenths are distinct. The
-share-of-answers and new-answers checks read a partition of the samples into
-answers, and the judging model is what decides that two differently worded
-samples are the same answer. Run with exact matching instead, so that only
+share-of-answers check and the new-answers check, which scores how much of
+the candidate's output falls on answers the baseline never gave, both read a
+partition of the samples into answers, and the judging model is what decides
+that two differently worded samples are the same answer. Run with exact matching instead, so that only
 identical strings count as the same answer, both checks put the second
 baseline run at the greatest possible distance from the first on 22, 17 and
 25 of the 40 inputs: without paraphrase merging the two baseline runs already
@@ -1124,11 +1141,16 @@ comes from the judging model's merging, and how far that merging went is what
 the pending diagnosis measures.
 
 The decision itself moves about as much on its own as the fault moves it. An
-agent cell's output is a decision, approve, decline or escalate, followed by
-a rationale. The decision needs no judging model to read, so it can be scored
-exactly, with the same distance the share-of-answers check uses: per input,
-how far the candidate's mix of decisions sits from the baseline's, and how
-far the second baseline run sits from the first. In all three cells the
+agent cell's output is meant to be a decision, approve, decline or escalate,
+with a rationale; section 6 said the format obeys that instruction loosely,
+and here the decision is read as the first of the three words anywhere in the
+text, with a sample that has none counted as a fourth answer, which was 12 to
+16 percent of samples in banking, 20 to 22 in logistics and 3 to 6 in
+hospitality. Read that way the decision needs no judging model, so it can be
+scored exactly, with the same distance the share-of-answers check uses, the
+share of a mix that would have to move for two mixes to match: per input, how
+far the candidate's mix of decisions sits from the baseline's, and how far
+the second baseline run sits from the first. In all three cells the
 typical distance between the two baseline runs is one decision in six, a
 median of 0.17. The typical effect of the fault on a touched input is one
 decision in six in banking and logistics and one and a half in hospitality,
@@ -1146,9 +1168,9 @@ fault it stayed inside the system's own variation. A check over the wording
 cannot be expected to report at a 10 percent budget what the decision itself
 does not show, unless the rationale changed where the decision did not, and
 that is the one question the judging model answers. The expectation for the
-diagnosis is on record before it runs. [In the JSON cells one decoy on the
-top value put the floor out of reach while the touched inputs stood clear
-above the rest. In the agent cells the decoys, the second baseline run's
+diagnosis is on record before it runs. [In the JSON cells the touched inputs stood
+clear above the rest and a single decoy at the top value made the best
+estimate 0.111 against the 0.100 budget. In the agent cells the decoys, the second baseline run's
 scores against the first, are expected to be spread as wide as the touched
 inputs, which is the system's own variation being as large as the fault's
 effect, and more samples would narrow the estimate without changing the
@@ -1174,7 +1196,7 @@ label was lost, so the cell's realised rate is somewhere between 1 in 19 and
 4 in 19, from 0.05 to 0.21, and the data cannot say where. Pooled across the
 row the same bracket runs from 4 in 51 to 7 in 51, 0.08 to 0.14, and the
 0.10 budget sits inside it; the 95 percent intervals on the two ends run
-from 0.03 to 0.19 and from 0.07 to 0.26. At roughly twenty flags per cell, a
+from 0.03 to 0.19 and from 0.07 to 0.26. At eleven to twenty-one flags per cell, a
 realised rate in that bracket is not yet distinguishable from an honest 0.10
 with ordinary variation around it, and it is not yet distinguishable from a
 miscalibration either. The one extraction cell that flagged anything flagged
@@ -1194,9 +1216,8 @@ interval of the six-sample row, the whole matrix is re-recorded at twenty. If
 it does not, the six-sample matrix stands as the transfer result and twenty
 samples are reserved for the measurements that need them. That row is
 recording as this draft is written: the banking summary cell stands at 654 of
-its 800 triples, paused at a triple boundary when the GPU was needed
-elsewhere, with the logistics and hospitality cells queued behind it. [Result
-of that row to be entered here.]
+its 800 triples, with the logistics and hospitality cells queued behind it.
+[Result of that row to be entered here.]
 
 ### Which checks carried the result, and why that is not a contradiction
 
@@ -1208,7 +1229,7 @@ information-direction check flagged none. The embedding check was switched
 off, as it is in the shipped configuration without an embedding model.
 
 A reader of section 4 will notice that the judging-model checks carried the
-load there and the clustering checks carried it here. The two measurements
+load there and the two checks that read the mix of answers carried it here. The two measurements
 answer different questions on different material. Section 4 asks which kinds
 of change a judging model can see in a single pair of texts, one fact changed
 and nothing else. This section asks which statistic separated two clouds of
@@ -1236,21 +1257,24 @@ which is the same reading the first end-to-end run gave.
 - Leave-one-system-out and leave-one-fault-out numbers. With one fault class
   recorded, leave-one-fault-out is undefined, and leave-one-system-out across
   three systems per row gives the interval above and no more.
-- The severity titration per fault class on real systems. The only
-  titration so far is on the synthetic system (section 5), and the fault used
-  here cannot drive one at any sample count, because it is near-binary per
-  input; a titration needs a fault with a severity knob, and at least twenty
-  samples per cloud.
+- Stepping each fault's severity up until detection starts, per fault class,
+  on real systems. The only such sweep so far is on the synthetic system
+  (section 5), and the fault used here cannot drive one at any sample count,
+  because it is close to all-or-nothing per input; it needs a fault with a
+  severity setting, and at least twenty samples per cloud.
 - The sealed holdout of real regressions, not yet collected.
 - Any second model. Every cell here was driven by one model, so this section
   describes that model, as section 4 described one judging model.
 
 Every number above traces to analysis runs `20261015T205513Z` and
 `20261015T205514Z`, the two identifiers the one pass stamped a second apart,
-to the nine per-cell configuration hashes listed in Appendix F, and to code
-revision `de23b8c`, with a working tree that differed from it only by result
-files. The decision-level numbers trace to the three files Appendix F names
-beside the agent cells.
+as written to the matrix file, to the nine per-cell configuration hashes
+listed in Appendix F, and to code revision `de23b8c`, with a working tree
+that differed from it only by result files. One per-cell file, banking
+summary, carries a later analysis of the same recording on its own, run
+`20261016T041749Z`, with every count identical; Appendix F says so. The
+decision-level numbers trace to the three files Appendix F names beside the
+agent cells.
 
 ---
 
@@ -1280,9 +1304,10 @@ first four are the ones a reader must know before running the tool at all.
 
 4. **Nothing here has run against a production system.** Every figure comes
    from a synthetic system whose correct answers we control, from hand-built
-   text pairs, or from one real system on which the first run fell under the
-   ten-input floor. This is research in progress, not a tool with a track
-   record.
+   text pairs, from one real system on which the first run fell under the
+   ten-input floor, or from the nine bench systems of section 6, whose
+   knowledge we wrote and which one locally served model drove. This is
+   research in progress, not a tool with a track record.
 
 5. **Small shifts are invisible, and we can say roughly how small.** A system
    that still produces the same set of answers but shifts how often it picks
@@ -1339,10 +1364,12 @@ first four are the ones a reader must know before running the tool at all.
     on a candidate where nothing had changed. That is one draw, not a measured
     rate.
 
-15. **Every run so far pooled all inputs into one threshold.** The per-shape
-    machinery needs thirty inputs per output shape before it fits a separate
-    threshold, and no run has had that many. It is tested and has never been
-    stressed.
+15. **One per-shape threshold has never been compared against another.** The
+    per-shape machinery needs thirty inputs per output shape before it fits a
+    separate threshold. Five cells of the nine-cell matrix had thirty or more
+    in one shape and fitted it its own threshold, with the remainder pooled;
+    no run has had two shapes of thirty, so the machinery is tested and has
+    never been stressed.
 
 16. **Everything is English and generated from templates.** Nothing here
     speaks to other languages, or to free text that no template produced.
@@ -1399,15 +1426,19 @@ the three calls for one input close in time to bound that exposure.
 
 The judging model is the dominant cost of the detector, and the cost line now
 counts every clustering it is asked for, which is the evidence for or against
-distilling it into something cheaper once a real study has shown the cost to
-bind; fine-tuning anything before that point was considered and cut.
+distilling it into something cheaper; the nine-cell matrix put detection at
+22 to 80 seconds per cell against hours of recording, so that cost does not
+yet bind and distillation stays deferred. Fine-tuning anything before that
+point was considered and cut.
 
 ---
 
 ## 12. Reproducibility
 
-Every number in this paper traces to a run identifier and a configuration
-hash, written into the results file that holds it. The hash covers the
+Every detector result in this paper traces to a run identifier and a
+configuration hash, written into the results file that holds it; the
+diagnosis and decision files of Appendix F carry the recording's hash in
+their name and the judging model's revision inside. The hash covers the
 instrument revisions, the sample count, the budget, the fault, the seed policy
 and a fingerprint of the inputs. A figure computed from other results names
 the runs it was computed from; the blind-spot map prints its three source runs
@@ -1452,8 +1483,10 @@ map reproduces the numbers the ledger records.
 
 **To reproduce.** The probe suite, the blind-spot map and the synthetic
 validation of the false-discovery guarantee run from the committed result
-files or from a model-free demo. The nine-system study needs a machine with a
-graphics processor and a local model server; the repository documents what
+files or from a model-free demo. Recording the nine-system study needs a
+machine with a graphics processor and a local model server; its analysis
+reruns from the committed recordings with the judging model alone, and the
+agent decision figures with no model at all. The repository documents what
 travels with it and what does not, and the recorder resumes a run from its
 checkpoint on any machine that can reach the model server.
 
@@ -1694,16 +1727,20 @@ example is printed" and "the program prints it".
 | hospitality-agent | `2cea59ca300a6358` | 240 | 1 | 40 of 40 | 79.9 s | [pending]; `hospitality-agent.2cea59ca300a6358.decisions.json` |
 
 Model `granite4.2:8b`, digest `f586c02fdecdf151`. All nine cells were
-analysed in one pass between 01:53 and 01:59 UTC on 16 October 2026, which
-is why the detection times of the first six differ from those in an earlier
-draft; the recordings did not change. A cell with more than one session was
+analysed in one pass between 01:53 and 01:59 UTC on 16 October 2026; the
+table and the matrix file carry that pass. The banking summary per-cell file beside its recording carries a
+later analysis of the cell on its own, run `20261016T041749Z` at 04:18 UTC,
+with every count and every flagged input identical and a detection time of
+25.5 s. Recording time, summed over the calls that returned, was 0.8 to 0.9
+hours per summary cell, 1.2 to 7.6 per extraction cell and 3.1 to 12.8 per
+agent cell, with pauses on top. A cell with more than one session was
 paused and resumed, and the recorder resumes from its checkpoint. Seventeen
 samples in the agent row were errored calls and are in no cloud (12, 3 and 2
 in the banking, logistics and hospitality cells); the banking agent
 checkpoint also holds three triples twice, a first attempt that failed on all
 three arms and the attempt that replaced it when the cell resumed. No sample
 in any other cell was an errored call. The two cells resumed before the label
-fix lost the activation labels of their earlier sessions to the bug described
+fix lost the fired-or-not labels of their earlier sessions to the bug described
 in section 8; the fix is in the code that recorded every cell after them, and
 the banking extraction row is to be replaced by a twenty-sample recording. A
 diagnosis file holds, for every check, the best cut the estimator could make,
@@ -1715,12 +1752,13 @@ section 8 gives. A decisions file, written for an agent cell by a script in
 the repository that needs no model, holds the per-input decision distances of
 section 8 for candidate against baseline and for baseline against second
 baseline, the majority-decision changes, and the exact-match reading of the
-three partition checks. Detection time is for the analysis of one recorded
-cell with the judging model loaded; recording took hours per cell and is the
-binding cost, as section 7 says.
+share-of-answers, new-answers and spread checks. Detection time is for the analysis of one recorded
+cell with the judging model loaded; recording took hours per cell and is where
+almost all the time goes, as section 7 says.
 
 ---
 
 *Section 8 is written against the complete six-sample matrix. Its bracketed
-sentences fill when the agent-row diagnosis and the twenty-sample rows land;
-the abstract's result stays blank until the twenty-sample summary row does.*
+sentences fill when the agent-row diagnosis and the twenty-sample rows
+arrive; the abstract's result stays blank until the twenty-sample summary row
+does.*
