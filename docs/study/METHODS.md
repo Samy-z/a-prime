@@ -64,3 +64,9 @@ interval is wide.
   value-consistent figure, subject to the coverage trap above. Any such number
   can only have overstated separation; the GPU rerun list is in STD-011 third
   append.
+
+- **matrix.json is a view of the last run, not an accumulator.** Each
+  `run_study.py` invocation overwrites it with the rows of its own
+  configuration; a chain ending on a one-cell k=20 stage leaves a one-row
+  matrix. The per-cell `.report.json` files are the artifacts. Before citing
+  matrix.json, check its rows match the configuration you mean (STD-013).

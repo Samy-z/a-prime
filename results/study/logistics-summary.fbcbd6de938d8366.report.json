@@ -1,0 +1,169 @@
+{
+  "cell": "logistics-summary",
+  "domain": "logistics",
+  "output_format": "summary",
+  "run_id": "20261016T195711Z",
+  "config_hash": "fbcbd6de938d8366",
+  "git_commit": "1d50fee60fa77e0a8c2e437faecbb853c11696f7",
+  "git_dirty": true,
+  "system": "granite4.2:8b",
+  "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+  "sessions": 1,
+  "analysed_utc": "2026-10-16T19:59:17Z",
+  "n_inputs": 40,
+  "k": 20,
+  "q": 0.1,
+  "activated": 15,
+  "flagged": 15,
+  "true_positives": 14,
+  "findings": [
+    {
+      "input_id": "logistics-summary-lookup-000",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-lookup-018",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-lookup-036",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-mixed-008",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-mixed-026",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-search-001",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-search-010",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-search-019",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-search-028",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-search-037",
+      "channels": [
+        "mode_share",
+        "nli_contradiction",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-history-014",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-history-032",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-compute-021",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-history-005",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "logistics-summary-history-023",
+      "channels": [
+        "mode_share"
+      ]
+    }
+  ],
+  "realised_fdr": 0.06666666666666665,
+  "recall": 0.9333333333333333,
+  "detect_s": 67.8,
+  "cost": {
+    "predicate_calls": 6105,
+    "clusterings": 80,
+    "samples_clustered": 3200,
+    "distinct_after_normalisation": 1385
+  },
+  "channels": {
+    "mode_share": {
+      "flagged": 15,
+      "skipped": null
+    },
+    "dispersion": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "novel_mode": {
+      "flagged": 12,
+      "skipped": null
+    },
+    "embedding": {
+      "flagged": 0,
+      "skipped": "no embedder supplied"
+    },
+    "nli_contradiction": {
+      "flagged": 10,
+      "skipped": null
+    },
+    "nli_directional": {
+      "flagged": 0,
+      "skipped": null
+    }
+  },
+  "gradable": true
+}

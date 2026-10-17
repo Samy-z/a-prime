@@ -794,3 +794,44 @@ commit (tie-consistent run ids); the six regenerated diagnosis artifacts
 **Reopen if:** the k=20 reports, analysed on the same estimator, disagree
 with their recordings' committed k=6 counterparts in a way ENG-010 would
 explain.
+
+## STD-013 — Both k=20 rows land; D25 closes with two passes and no re-record (2026-10-17)
+
+The owner's night chain completed 2026-10-16 22:20 (exit 0). Analysed on the
+tie-consistent estimator, labels complete everywhere.
+
+**The summary row passes its pre-registered test.** Pooled recall 51 of 56
+touched inputs (0.91), inside D25's filed interval [0.72, 0.92]; realised
+false flags 3 of 54 (0.056) against the 0.10 budget. Per cell: banking 16/19
+touched flagged, 0 false; hospitality 21/22, 2 false; logistics 14/15, 1
+false. The k=6 row's hot cells (0.21 bracket, 0.14) were calibration at
+small k, as the prediction said: at k=20 the realised rate sits under
+budget.
+
+**The extraction re-record detects everything.** banking-extraction at k=20
+(config 1a37665b4308bcf4): 21 of 40 inputs touched, 21 flagged, all 21 true,
+0 false — recall 1.00, realised FDR 0.000. The cell that flagged nothing at
+k=6, diagnosed resolution-limited at best estimate 0.176 (STD-010), reaches
+certainty when the statistic grid refines from 7 to 21 values. The partial-
+label k=6 row (20 of 40 labelled, BCH-018) is superseded outright.
+
+**What this closes and what it leaves open.** D25's contingency — the 57 h
+full k=20 re-record — does not trigger: both rows landed inside or above
+expectation. The format gradient now reads: at k=6, prose detects and
+structured output is resolution-limited; at k=20, extraction detects fully.
+The agent format at k=20 is the one untested point, with the expectation
+already filed (STD-011 second append): the binding count there is separating
+inputs, not grid fineness, so an agent k=20 cell is a genuine question, not
+a formality.
+
+**Data trap, recorded here and in the study METHODS:** `run_study.py` writes
+`matrix.json` for the configuration it ran, overwriting whatever was there.
+After the chain, the file held the one-row k=20 extraction matrix; the
+nine-cell k=6 matrix was regenerated from checkpoints and recommitted with
+this entry. Reading matrix.json requires knowing which run wrote it; the
+per-cell report files are the artifacts, the matrix is a view.
+**Evidence:** the three k=20 summary report/activation pairs, the k=20
+banking-extraction pair (config above), `logs/chain.log` timings; all
+committed with this entry.
+**Reopen if:** an agent cell is recorded at k=20, or the k=20 rows are
+re-analysed under a changed instrument.

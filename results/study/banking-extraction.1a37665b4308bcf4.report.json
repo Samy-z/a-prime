@@ -1,0 +1,197 @@
+{
+  "cell": "banking-extraction",
+  "domain": "banking",
+  "output_format": "extraction",
+  "run_id": "20261016T200035Z",
+  "config_hash": "1a37665b4308bcf4",
+  "git_commit": "1d50fee60fa77e0a8c2e437faecbb853c11696f7",
+  "git_dirty": true,
+  "system": "granite4.2:8b",
+  "system_digest": "f586c02fdecdf151b656207c339aa003997345774a41768bac1fd6d2fb85913b",
+  "sessions": 2,
+  "analysed_utc": "2026-10-16T20:20:52Z",
+  "n_inputs": 40,
+  "k": 20,
+  "q": 0.1,
+  "activated": 21,
+  "flagged": 21,
+  "true_positives": 21,
+  "findings": [
+    {
+      "input_id": "banking-extraction-compute-003",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-compute-039",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-history-005",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-history-014",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-lookup-000",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-lookup-018",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-lookup-036",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-mixed-026",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-mixed-035",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-search-001",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-search-010",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-search-019",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-search-028",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-search-037",
+      "channels": [
+        "mode_share",
+        "novel_mode"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-compute-012",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-compute-021",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-compute-030",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-history-023",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-history-032",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-mixed-008",
+      "channels": [
+        "mode_share"
+      ]
+    },
+    {
+      "input_id": "banking-extraction-mixed-017",
+      "channels": [
+        "mode_share"
+      ]
+    }
+  ],
+  "realised_fdr": 0.0,
+  "recall": 1.0,
+  "detect_s": 47.1,
+  "cost": {
+    "predicate_calls": 2469,
+    "clusterings": 80,
+    "samples_clustered": 3200,
+    "distinct_after_normalisation": 669
+  },
+  "channels": {
+    "mode_share": {
+      "flagged": 21,
+      "skipped": null
+    },
+    "dispersion": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "novel_mode": {
+      "flagged": 14,
+      "skipped": null
+    },
+    "embedding": {
+      "flagged": 0,
+      "skipped": "no embedder supplied"
+    },
+    "nli_contradiction": {
+      "flagged": 0,
+      "skipped": null
+    },
+    "nli_directional": {
+      "flagged": 0,
+      "skipped": null
+    }
+  },
+  "gradable": true
+}
