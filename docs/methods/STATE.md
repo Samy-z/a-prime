@@ -60,3 +60,17 @@ negative control - score a system against itself across a time gap, expect
 nothing - is its first instrument: period-one arms already exist in the k=6
 and k=20 recordings; the period-two re-record needs a thin runner and about
 an hour of GPU.
+
+## Queued question — agent self-variance, titrated with clear numbers (owner-directed 2026-10-17)
+
+The agent row's silence decomposed into high text-level self-variance plus
+decisions the fault barely moved (STD-011 appends). The owner's direction:
+investigate the limitation rather than wait for a reviewer to, and publish
+it with numbers. Parameters to titrate, each a dial that might polish the
+statistical issue: k (grid fineness and mass per mode); the number of
+baseline arms m (A-prime, A-second, ... — the estimator currently assumes
+one decoy per target, so m > 1 needs a generalised estimator, for example
+(1 + d/m)/t, DESIGNED AND FROZEN before use, per the k=6 lesson);
+temperature and serving policy as the entropy dial; and the decision-token
+versus rationale-text channel split the decision-level instrument opened.
+First data point: the banking-agent k=20 cell (scheduled 2026-10-17 night).

@@ -75,3 +75,9 @@ interval is wide.
   keys, the post-resume samples missing (BCH-020). Input-level labels are
   complete; only per-sample counts for that input are short. List inputs with
   fewer than k keys before quoting a per-sample firing figure.
+
+- **Drift negative control instrument:** `scripts/run_drift_control.py`
+  (protocol and filed expectations in MTH-026). Records a fresh all-baseline
+  triple of the banking-summary cell and scores it against the 2026-10-04
+  pair three ways. Refuses to run as a negative control if the model digest
+  changed. Its artifacts live under `results/drift/`.

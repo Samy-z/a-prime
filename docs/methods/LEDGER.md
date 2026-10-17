@@ -803,3 +803,30 @@ artifacts, not committed; the protocol is the four lines above and
 `tests/test_pipeline.py::_run`.
 **Reopen if:** a sweep on these seeds gives k=20 at severity 0.6 below 0.5
 or realised FDR above 0.12 in any cell.
+
+## MTH-026 — The drift negative control: protocol frozen before the run (2026-10-17)
+
+STD-008's sketch, instantiated and frozen before any period-2 call is made.
+Instrument: `scripts/run_drift_control.py`.
+
+**Protocol.** Period one is the banking-summary k=6 baseline pair recorded
+2026-10-04 (`banking-summary.60ac20518858cf53`, arms A and A-prime; its
+faulted B arm is ignored). Period two: three fresh arms of the same cell,
+same corpus, same k, NO fault, recorded by the script about 13 days later.
+Three detections at q=0.10 through the unchanged pipeline: cross-period with
+period one's pair as the null; cross-period with period two's pair as the
+null; and within-period-two as the same-day sanity. Guards: the model digest
+must equal period one's or the run aborts as a positive case, and the
+rebuilt corpus must match the period-1 checkpoint's input ids exactly.
+
+**Expectations, filed now.** Zero flagged in all three comparisons. A
+nonzero cross-period count beside a zero within-period count is the drift
+measurement itself: how much difference time alone produces at 13 days. One
+reading caveat carried from MTH-024: at q=0.10 and n=40 the detector cannot
+report fewer than ten findings, so "zero flagged" is consistent with up to
+nine genuinely drifted inputs; the diagnosis fields, not the flag count, say
+which.
+**Evidence:** the script at this commit; STD-008.
+**Reopen if:** the digest guard fires (a version change arrived first), or
+the within-period comparison flags anything, which would indict the
+harness rather than time.
