@@ -35,8 +35,9 @@ class and one model, with every threshold set by each system's own second
 baseline run, detection transferred across all three domains on prose: at
 six samples per input 44 of 52 changed inputs were caught, and at twenty, 51
 of 56, with 3 false alarms in 54 flags against a budget of 10 percent. Three
-successes out of three bound the rate at which this would hold on a new
-system below at 0.29. Structured and agent outputs were silent at six
+systems out of three is too few to say how often this would hold on a new
+system: it puts the per-system success rate somewhere above 0.29, the lower
+end of a 95 percent interval, and says no more. Structured and agent outputs were silent at six
 samples in five of six cells, every one diagnosed as under-resolved rather
 than blind; the one structured cell recorded again at twenty samples caught
 21 of 21 changed inputs with no false alarm. What governed detection was the
@@ -204,9 +205,11 @@ the baseline can provide it.
 
 So before comparing the baseline to the candidate, run the baseline against
 itself a second time. Three runs in all: the baseline, the baseline again, and
-the candidate. We call the second baseline run the **decoy** arm, borrowing a
-word from the field that invented the trick: a decoy is a comparison in which
-nothing changed, run so that its differences can stand for noise. Any
+the candidate. We call the second baseline run the **decoy** arm, taking the word from
+protein identification, where a decoy is a match known in advance to be
+false, so that counting decoys estimates how many real-looking matches are
+false too. Here the decoy is a comparison in which nothing changed, run so
+that its differences can stand for noise. Any
 difference the decoy shows against the first baseline run is noise by
 construction, because nothing changed between them. That noise is the yardstick. A difference between the
 baseline and the candidate counts only if it is larger than the differences
@@ -992,12 +995,12 @@ is marked as such wherever it appears. A second configuration, at twenty
 samples per cloud, was then recorded for the summary row and for one JSON
 cell; it is the test of the first finding's calibration and of the second
 finding, and its outcome is reported where each prediction was written down.
-Everything here comes from one analysis pass, run on 16 October over all
-nine cells after a correction to how the estimator counts tied scores, and
-from nine per-cell result files, each carrying its run identifier,
-configuration hash and the code revision that produced it. A first pass the
-night before, with the uncorrected estimator, had flagged the same number of
-inputs in every cell.
+Everything here comes from the per-cell result files, nine for the
+six-sample cells and four for the twenty-sample cells, each carrying its run
+identifier, configuration hash and the code revision that produced it. The
+six-sample cells have been analysed three times, the last on 17 October
+after a correction to how the estimator counts tied scores, and every pass
+flagged the same inputs in every cell.
 
 ### What explains the matrix
 
@@ -1013,9 +1016,10 @@ every domain; the JSON row caught 48 percent in one domain and nothing in
 two; the agent row caught nothing anywhere.
 
 So the registered question has its answer at its width. On the summary
-format, detection transferred across all three domains, and three successes
-out of three bound the rate at which it would succeed on a new system below
-at 0.29. On the other two formats the question is unresolved at six samples
+format, detection transferred across all three domains; three systems out
+of three is too few to say how often that would hold on a new system, and
+puts the per-system success rate somewhere above 0.29, the lower end of a 95
+percent interval. On the other two formats the question is unresolved at six samples
 per cloud: not answered no, because the silent cells were diagnosed and in
 every one the detector saw the change and could not certify it at the
 budget, as the paragraphs on those rows show. At twenty samples per cloud
@@ -1227,8 +1231,8 @@ share-of-answers check puts 5 inputs on the top value, 3 of them touched and
 reading only because its touched inputs score higher on average than the
 decoys do, by 0.13 on that check. Where these cells differ from the JSON
 pair is the width of the decoys. In the JSON cells 17 and 18 inputs stood
-above one or two decoys, in banking 9 of the 17 known to be touched and the
-other 8 among the inputs whose label was lost. Here the decoys, the second
+above one or two decoys, in banking 17 with 9 of them known to be touched
+and the other 8 among the inputs whose label was lost. Here the decoys, the second
 baseline run scored against the first, span 0 to 0.83 in banking and
 logistics, leaving only the top value clear, and the full 0 to 1 in
 hospitality, leaving nothing clear. So four touched inputs in banking and
@@ -1360,16 +1364,18 @@ to 0.15; at six samples it was a bracket from 0.08 to 0.14 that straddled
 the budget. Cell by cell, none of 16 flags, 1 of 15 and 2 of 23, against a
 bracket of 0.05 to 0.21, none of 11 and 3 of 21.
 
-Both halves of the prediction held. Recall moved modestly, up five points,
+Both halves of the prediction held. Recall moved modestly, up six points from 85 to 91 percent,
 because the fault is close to all-or-nothing per input and was mostly seen
 already: 73 of the 77 touched inputs in these four cells fired on all twenty
 of their samples. The false alarms moved to the budget's side, because what
 twenty samples bought was resolution: the share-of-answers statistic takes
 21 values instead of 7, and the cut the estimator settles on no longer sits
 a whole value too low as easily as too high. The banking extraction cell is
-the sharper demonstration. At six samples it reported nothing, with the
-change seen and one decoy too many at the top value; at twenty it caught
-every one of its 21 touched inputs and flagged nothing else. That is the
+the sharper demonstration. At six samples it reported nothing: 17 inputs stood above the best cut the
+estimator could make, 9 of them known to be touched and 8 with lost labels,
+but two decoys stood there too, for an estimate of 0.176 against the 0.10
+budget; at twenty it caught every one of its 21 touched inputs and flagged
+nothing else. That is the
 confirmatory arm of the post-hoc finding in the opening, and it confirms it
 for one format in one domain: the silence was the price of six samples, and
 twenty paid it. It says nothing about the agent format, where no
@@ -1432,7 +1438,10 @@ revision `1d50fee`, the third analysis of the same recordings and the third
 to flag the same inputs in every cell; every twenty-sample number to the
 four per-cell files, runs `20261016T195710Z`, `20261016T195711Z` and
 `20261016T200035Z` at the same revision; and all of them to the
-configuration hashes listed in Appendix F. The per-cell files are the record;
+configuration hashes listed in Appendix F. Each of those passes recorded a
+working tree that differed from the revision; what differed is not
+recorded, and the code under the source, script and test directories is
+identical between that revision and the commit that holds the files. The per-cell files are the record;
 the matrix file beside them is a view of whichever configuration was
 analysed last. The decision-level numbers trace to the three files Appendix
 F names beside the agent cells.
@@ -1916,7 +1925,8 @@ three arms and the attempt that replaced it when the cell resumed. No sample
 in any other cell was an errored call. The two cells resumed before the label
 fix lost the fired-or-not labels of their earlier sessions to the bug described
 in section 8; the fix is in the code that recorded every cell after them, and
-the banking extraction row is to be replaced by a twenty-sample recording. A
+the banking extraction row has since been superseded by the twenty-sample
+recording in the table's last row, which carries every label. A
 diagnosis file holds, for every check, the best cut the estimator could make,
 the counts of inputs and decoys above it, and the full sorted target and decoy
 scores, with the judging model's pinned revision inside and the recording's
