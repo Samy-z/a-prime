@@ -70,3 +70,8 @@ interval is wide.
   configuration; a chain ending on a one-cell k=20 stage leaves a one-row
   matrix. The per-cell `.report.json` files are the artifacts. Before citing
   matrix.json, check its rows match the configuration you mean (STD-013).
+- **The input in flight at a pause is short of per-sample labels.** In the
+  three resumed k=20 cells one input each carries 14, 11 and 15 of its 20
+  keys, the post-resume samples missing (BCH-020). Input-level labels are
+  complete; only per-sample counts for that input are short. List inputs with
+  fewer than k keys before quoting a per-sample firing figure.

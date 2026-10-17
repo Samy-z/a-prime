@@ -184,10 +184,11 @@ the headline transfer numbers**; it is reported separately. See HANDOFF §3.
 ## Where things stand
 
 **The k=6 matrix is complete: nine of nine cells recorded, analysed and
-written to `results/study/matrix.json` on 2026-10-16** (analysis runs
-20261016T141703Z to 05Z at f56af52, the tie-consistent rerun of the night
-pass 20261015T205513Z/14Z with every flag count unchanged; one fault class,
-the stale knowledge base F5; per-input activation as ground truth; q = 0.10). Summary row: recall
+written to `results/study/matrix.json` on 2026-10-16** (the per-cell report
+files carry analysis runs 20261017T012750Z/51Z at 1d50fee, the third pass
+over the same recordings, every flag count unchanged since the night pass;
+one fault class, the stale knowledge base F5; per-input activation as ground
+truth; q = 0.10). Summary row: recall
 0.88 / 0.79 / 0.86 for banking / logistics / hospitality. Extraction row:
 0 / 0.48 / 0, the two zeros diagnosed as decoy resolution at six samples, not
 blindness (STD-010, D25). **Agent row: nothing flagged in any domain, with
@@ -210,20 +211,22 @@ post-hoc finding with the k=20 row as its confirmatory arm. The
 banking-summary realised FDR stays a bracket, [0.05, 0.21], at k=6 (STD-010
 fourth append).
 
-The D25 test is under way. The one-shot night chain (`scripts/night-chain.ps1`)
-finished the matrix at 03:59 and started the k=20 summary row; banking-summary
-was paused at 654 of 800 triples at 06:10 on the owner's request, the GPU
-being needed elsewhere, with the stop flag set and the checkpoint committed.
-Still to record: the rest of that cell (about 35 min), logistics-summary and
-hospitality-summary at k=20 (about 3.2 h each), the banking-extraction k=20
-re-record (about 4.7 h). Resume by rerunning the chain with a window; it
-clears the flag and skips what is done. The 05:00 daily task runs only the
-k=6 stage, which is now a few minutes of analysis.
+**The D25 test is closed (STD-013, 2026-10-17).** The k=20 summary row
+passed its pre-registered test: pooled recall 51/56 = 0.91 inside
+[0.72, 0.92], realised FDR 3/54 = 0.056 under budget, labels complete
+(hashes 5aa2e096752e8c38, fbcbd6de938d8366, ba6eaed55818324c). The
+banking-extraction k=20 re-record (1a37665b4308bcf4) caught 21/21 at FDR 0,
+superseding the partial-label k=6 row. No full re-record. Paper §8 reports
+both against the prediction and the abstract's result is filled
+(2026-10-17); one bracket left, the agent format at k=20. **Data trap:**
+`matrix.json` is a view of the last `run_study.py` run; cite the per-cell
+`.report.json` files (STD-013, study METHODS). The 05:00 daily task runs only
+the k=6 stage.
 
 Not built: the severity titration rerun (needs k>=20 and a fault with a
 severity knob, bench METHODS), LOSO, the embedding style-stability gate, the
 Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
 paper is drafted in every section; section 8 and Appendix F describe the
-nine-cell k=6 matrix in the two-question shape (2026-10-16), silent cells
-diagnosed, the k=20 rows bracketed; the abstract's result stays blank until
-the k=20 summary row lands.
+nine-cell k=6 matrix in the two-question shape and the four k=20 cells
+against the D25 prediction (2026-10-17), silent cells diagnosed; the abstract
+carries its result; subtitle per RDR-010.

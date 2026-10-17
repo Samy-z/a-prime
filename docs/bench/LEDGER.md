@@ -613,3 +613,32 @@ research exception), with source URLs per claim.
 **Reopen if:** the dossier's watch conditions fire — a dense sub-10B
 Nemotron, a Qwen3.6 9B, an LFM2.5 revision with independent tool-use scores
 — or the GPU budget changes, which re-admits the 30B-A3B MoE class.
+
+## BCH-020 — At a pause, the input in flight keeps per-sample labels only for the samples recorded before it (2026-10-17)
+
+Found by the study seat while verifying the k=20 rows for the paper. In
+each twenty-sample cell that was paused and resumed, exactly one input, the
+one in flight at the pause, carries fewer than twenty activation keys, and
+the missing keys are the samples recorded after the resume:
+`banking-summary-history-032` keys `#0` to `#13`, missing `#14` to `#19`;
+`hospitality-summary-compute-030` keys `#0` to `#10`, missing `#11` to
+`#19`; `banking-extraction-lookup-036` keys `#0` to `#14`, missing `#15` to
+`#19`. The cell recorded in one session, logistics-summary, has no such
+input. Input-level labels are complete (40 of 40 in all four cells), so
+every recall and false-alarm figure in STD-013 and the paper stands: an
+input counts as touched when any sample fired. Per-sample firing counts for
+that one input per cell are short by 6, 9 and 5 samples.
+
+Not BCH-018 again (that erased the earlier session's labels wholesale; the
+merge-on-persist fix holds here, the pre-pause keys survive), but adjacent:
+the resumed session's wrapper appears not to label the remaining samples of
+the triple-group it picks up mid-input, or labels them under indices that
+collide with the pre-pause keys and carry the same values. Which of the two
+is not determinable from the stores alone.
+
+**Instrument:** for each `results/study/<cell>.<hash>.activation.json`,
+group keys by input id and list inputs with fewer than k keys (k=20 here);
+the three listed above are the only ones.
+**Reopen if:** the wrapper's index assignment on resume is read and the
+mechanism named; or an input with fewer than k keys appears in a
+single-session cell, which would make this a different fault.

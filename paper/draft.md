@@ -1,8 +1,12 @@
 # Does label-free regression detection transfer across domains?
 
-*Draft in progress. Every section is drafted; section 8 is written against
-the complete six-sample matrix with the twenty-sample rows bracketed, with appendices A to F and an abstract whose result is
-left blank; `docs/reader/paper-outline.md` maps each claim to its backing.*
+*Certifying behaviour change from outputs alone, with false-discovery
+control borrowed from proteomics*
+
+*Draft in progress. Every section is drafted; section 8 reports the
+six-sample matrix and the twenty-sample rows, and the abstract carries its
+result; appendices A to F; `docs/reader/paper-outline.md` maps each claim to
+its backing.*
 
 ## Abstract
 
@@ -26,10 +30,18 @@ different question, and the sign of that answer names the fault. Comparing
 embeddings, the obvious approach, performed below chance on three model
 families.
 
-[RESULT: across N systems spanning three domains and three output formats,
-with every threshold chosen without sight of the held-out system, the detector
-flagged changed inputs at the chosen budget; performance on an unseen system
-is expected within [lower, upper]. Filled from the nine-system study.]
+On nine systems spanning three domains and three output formats, one fault
+class and one model, with every threshold set by each system's own second
+baseline run, detection transferred across all three domains on prose: at
+six samples per input 44 of 52 changed inputs were caught, and at twenty, 51
+of 56, with 3 false alarms in 54 flags against a budget of 10 percent. Three
+successes out of three bound the rate at which this would hold on a new
+system below at 0.29. Structured and agent outputs were silent at six
+samples in five of six cells, every one diagnosed as under-resolved rather
+than blind; the one structured cell recorded again at twenty samples caught
+21 of 21 changed inputs with no false alarm. What governed detection was the
+output format and the number of samples per input, not the domain, a
+finding this study generated rather than set out to test.
 
 Two limits matter most. The method cannot report fewer than ten changed
 inputs at its default setting, by arithmetic, so an empty report means fewer
@@ -161,9 +173,9 @@ system's output from the baseline's own output distribution; everything
 adjacent, schema assertions and constrained decoding, is written by hand. The
 nearest ancestor is Daikon, a 2001 program-analysis tool, and it was never
 ported to language-model output. And no tool we found uses a repeated baseline
-run as a general way to calibrate a black-box comparison; the target-decoy
-construction behind it is standard in proteomics and has, as far as we can
-tell, no prior use in evaluating language models.
+run as a general way to calibrate a black-box comparison; the
+false-discovery arithmetic behind it is standard in proteomics and has, as
+far as we can tell, no prior use in evaluating language models.
 
 And one thing has not been studied at all: whether any of this transfers
 across domains. One recent paper tested moving a detection threshold across
@@ -238,10 +250,14 @@ Everything above that cut is flagged. If no cut qualifies, nothing is flagged.
 The `+ 1` is deliberate. Without it, a cut with no decoys above it and one
 target above it would claim a false discovery rate of zero on the strength of
 one lucky draw. The correction is the one proposed by Barber and Candès in the
-knockoff literature, and the whole construction is the target-decoy method
+knockoff literature, and the selection arithmetic is the target-decoy method
 from protein identification by mass spectrometry, where it has been standard
-since the mid-2000s. We have not found a prior use of it for comparing two
-versions of a language-model system.
+since the mid-2000s. What is not borrowed is the decoys themselves.
+Proteomics manufactures its decoys by reversing protein sequences; here the
+decoy is a second genuine run of the old system, which carries the real
+comparison's dependence structure instead of approximating it. We have not
+found a prior use of the arithmetic for comparing two versions of a
+language-model system.
 
 The textbook alternative for controlling a false discovery rate is the
 Benjamini-Hochberg procedure, which works from p-values. We do not use it, for
@@ -963,8 +979,8 @@ regressions beyond what the holdout can support; that the tool can tell a
 regression from an improvement; and any headline number produced under a
 random split.
 
-Section 8 holds the results of the six-sample matrix, and ends with what is
-still recording and what is missing.
+Section 8 holds the results of the six-sample matrix and of the
+twenty-sample rows, and ends with what is missing.
 
 ## 8. Results
 
@@ -973,8 +989,9 @@ per cloud and analysed, and this section reports that matrix. It answers the
 question in the title at the width the data allow, and it then reports a
 second finding, one this study generated rather than set out to test, which
 is marked as such wherever it appears. A second configuration, at twenty
-samples per cloud, is recording as this draft is written; it is the test of
-that second finding, and the sentences that depend on it are marked.
+samples per cloud, was then recorded for the summary row and for one JSON
+cell; it is the test of the first finding's calibration and of the second
+finding, and its outcome is reported where each prediction was written down.
 Everything here comes from one analysis pass, run on 16 October over all
 nine cells after a correction to how the estimator counts tied scores, and
 from nine per-cell result files, each carrying its run identifier,
@@ -1001,7 +1018,9 @@ out of three bound the rate at which it would succeed on a new system below
 at 0.29. On the other two formats the question is unresolved at six samples
 per cloud: not answered no, because the silent cells were diagnosed and in
 every one the detector saw the change and could not certify it at the
-budget, as the paragraphs on those rows show.
+budget, as the paragraphs on those rows show. At twenty samples per cloud
+the one JSON cell recorded again detected fully, in one domain; the other
+two JSON cells and the agent format at twenty remain unmeasured.
 
 The second finding is what that pattern says about the method, and it was
 not a hypothesis before the matrix was read, so it is labelled post hoc here
@@ -1015,9 +1034,11 @@ What the ends share is that the second baseline run's scores crowd the few
 values a six-sample statistic can take: on JSON because the few distinct
 answers let a baseline run land wholly on one answer and then wholly on
 another, on the agent format because almost every answer is distinct and the
-baseline moves on nearly every input. The confirmatory arm of that finding is the twenty-sample summary row,
-with its prediction written down before it ran, in the paragraphs on the
-false-alarm budget.
+baseline moves on nearly every input. The confirmatory arm of that finding was the twenty-sample row, with its
+prediction written down before it ran, and it held: the summary row's false
+alarms fell under the budget, and the one JSON cell recorded again at twenty
+samples went from reporting nothing to catching every touched input. Both
+are reported below, under the twenty-sample rows.
 
 ### What has run
 
@@ -1050,12 +1071,22 @@ before the pause, 20 of 40 in banking extraction and 5 of 40 in banking
 summary. Those inputs are label-unknown and cannot be relabelled, because
 the label is a difference between two tool results and the recording keeps
 outputs, not tool arguments. Every count below for those two cells is over
-the labelled inputs, and says so. The banking extraction cell will be
-recorded again at twenty samples per cloud and that recording replaces this
-one outright, so its row below is reported as it stands, label gap included.
+the labelled inputs, and says so. The banking extraction cell was recorded again at twenty samples per cloud
+with every input labelled, and that recording supersedes this one; the
+six-sample row stays in the table as it stands, label gap included, because
+the six-sample matrix is read as a whole.
 The seven other cells carry complete labels, the two agent cells that were
 paused and resumed among them, because the fix landed before any agent cell
 was recorded.
+
+Four cells were then recorded again at twenty samples per cloud, as a
+separate configuration with its own hashes: the three summary cells and
+banking extraction, 800 triples and 2,400 calls each, 9,600 calls in all,
+none of which errored, every input labelled. These are independent
+recordings with their own draws, so the fault touched different inputs in
+them, 19, 15 and 22 in the summary cells against 17, 14 and 21 at six
+samples, and 21 of 40 in banking extraction. They are reported beside the
+six-sample cells, as rows, and never pooled with them.
 
 Two things to hold in mind while reading the numbers. Six samples per cloud
 is below the twenty that section 3 calls the working minimum; the line above
@@ -1084,13 +1115,14 @@ validation like this one is the only place the promise can be checked.
 that section 3 names as the working minimum. The choice was made for the
 nights available and without a recorded decision, and it was noticed only
 when this section was first drafted. It is disclosed here rather than
-corrected quietly; the twenty-sample row that measures what it cost is
-recording, and its prediction is written down below.**
+corrected quietly; the twenty-sample row that measures what it cost was
+recorded afterwards, and its result is reported below against the
+prediction written down before it ran.**
 
 | | banking | logistics | hospitality |
 |---|---|---|---|
 | **summary** (prose) | 15 of 17 changed inputs caught, 5 inputs unlabelled; 19 flagged, 1 false, 3 of unknown label | 11 of 14; 11 flagged, 0 false | 18 of 21; 21 flagged, 3 false |
-| **extraction** (JSON) | 0 of 11, 20 inputs unlabelled; nothing flagged; to be re-recorded at twenty samples | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
+| **extraction** (JSON) | 0 of 11, 20 inputs unlabelled; nothing flagged; superseded at twenty samples, below | 11 of 23; 11 flagged, 0 false | 0 of 25; nothing flagged |
 | **agent** (decision line) | 0 of 26; nothing flagged | 0 of 25; nothing flagged | 0 of 26; nothing flagged |
 
 Each cell reads: inputs the fault actually touched and how many of them were
@@ -1154,8 +1186,12 @@ by the arithmetic of section 3. So the format-shaped failure is a resolution
 failure: the
 change was seen and could not be reported, which is the same shape as the
 first end-to-end run in section 3, arrived at from the other side. The fix is
-finer statistics, which means more samples per cloud, and the paragraphs on
-the false-alarm budget say what has been committed to.
+finer statistics, which means more samples per cloud, and it was tested:
+recorded again at twenty samples per cloud with every input labelled, the
+banking cell that had reported nothing caught 21 of 21 touched inputs and
+flagged nothing else. The twenty-sample rows below report it in full.
+Whether the other two JSON cells would do the same at twenty is not
+measured.
 
 ### On the agent format, nothing was flagged in any domain
 
@@ -1301,18 +1337,58 @@ false-alarm rates move towards the budget, because what twenty samples buy is
 decoy resolution rather than detection. If that row's recall leaves the
 interval of the six-sample row, the whole matrix is re-recorded at twenty. If
 it does not, the six-sample matrix stands as the transfer result and twenty
-samples are reserved for the measurements that need them. That row is
-recording as this draft is written: the banking summary cell stands at 654 of
-its 800 triples, with the logistics and hospitality cells queued behind it.
-[Result of that row to be entered here.]
+samples are reserved for the measurements that need them. The next
+subsection reports what happened.
+
+### The twenty-sample rows, against the prediction
+
+| cell at twenty samples | touched inputs caught | flagged, of which false |
+|---|---|---|
+| banking summary | 16 of 19 | 16, 0 |
+| logistics summary | 14 of 15 | 15, 1 |
+| hospitality summary | 21 of 22 | 23, 2 |
+| banking extraction | 21 of 21 | 21, 0 |
+
+Every input in these four cells is labelled and no call errored. Pooled over
+the summary row, 51 of 56 touched inputs were caught, 91 percent, with a 95
+percent interval from 81 to 96. The six-sample row's figure was 85 percent
+with an interval from 72 to 92, and 91 lies inside it, so by the rule
+written down above the six-sample matrix stands as the transfer result and
+no re-recording was triggered. The realised false-alarm rate across the row
+is 3 of 54 flags, 0.056, under the 0.10 budget, with an interval from 0.02
+to 0.15; at six samples it was a bracket from 0.08 to 0.14 that straddled
+the budget. Cell by cell, none of 16 flags, 1 of 15 and 2 of 23, against a
+bracket of 0.05 to 0.21, none of 11 and 3 of 21.
+
+Both halves of the prediction held. Recall moved modestly, up five points,
+because the fault is close to all-or-nothing per input and was mostly seen
+already: 73 of the 77 touched inputs in these four cells fired on all twenty
+of their samples. The false alarms moved to the budget's side, because what
+twenty samples bought was resolution: the share-of-answers statistic takes
+21 values instead of 7, and the cut the estimator settles on no longer sits
+a whole value too low as easily as too high. The banking extraction cell is
+the sharper demonstration. At six samples it reported nothing, with the
+change seen and one decoy too many at the top value; at twenty it caught
+every one of its 21 touched inputs and flagged nothing else. That is the
+confirmatory arm of the post-hoc finding in the opening, and it confirms it
+for one format in one domain: the silence was the price of six samples, and
+twenty paid it. It says nothing about the agent format, where no
+twenty-sample cell exists and the paragraph above says why the answer may
+differ.
+
+The twenty-sample cells are separate recordings with their own draws, so
+the fault touched different inputs in them, and the two sets of numbers are
+compared as rows, never input by input.
 
 ### Which checks carried the result, and why that is not a contradiction
 
-Of everything flagged across the nine cells, all of it in the three summary
-cells and one extraction cell, the share-of-answers check flagged 57 inputs
-and the new-answers check 61, with most inputs flagged by both. The
-contradiction check flagged 10, all in one cell, and the
-information-direction check flagged none. The embedding check was switched
+Of everything flagged across the nine six-sample cells, all of it in the
+three summary cells and one extraction cell, the share-of-answers check
+flagged 57 inputs and the new-answers check 61, with most inputs flagged by
+both. The contradiction check flagged 10, all in one cell, and the
+information-direction check flagged none. In the four twenty-sample cells
+the same two checks carried it again, 75 and 63 flags, and the contradiction
+check flagged 21 across two summary cells. The embedding check was switched
 off, as it is in the shipped configuration without an embedding model.
 
 A reader of section 4 will notice that the judging-model checks carried the
@@ -1331,15 +1407,13 @@ them. The information-direction check flagging nothing is expected: a stale
 fact substitutes one value for another and neither adds nor removes content,
 which is the same reading the first end-to-end run gave.
 
-### What is recording, and what is missing
+### What is missing
 
-- The summary row at twenty samples per cloud, recording, with the prediction
-  above on record before it runs: one cell paused at 654 of 800 triples, two
-  queued.
-- The banking extraction cell at twenty samples per cloud, queued behind that
-  row. It replaces its six-sample row and with it the twenty-input label gap.
-- Any agent cell at twenty samples per cloud. The expectation for one is in
-  the agent paragraph, bracketed.
+- Any agent cell at twenty samples per cloud, the one point of the format
+  reading left unmeasured. The expectation for one is in the agent
+  paragraph, bracketed.
+- The logistics and hospitality JSON cells at twenty samples, which would say
+  whether banking's full recovery belongs to the row or to the cell.
 - Leave-one-system-out and leave-one-fault-out numbers. With one fault class
   recorded, leave-one-fault-out is undefined, and leave-one-system-out across
   three systems per row gives the interval above and no more.
@@ -1352,12 +1426,16 @@ which is the same reading the first end-to-end run gave.
 - Any second model. Every cell here was driven by one model, so this section
   describes that model, as section 4 described one judging model.
 
-Every number above traces to analysis runs `20261016T141703Z`,
-`20261016T141704Z` and `20261016T141705Z`, the identifiers one pass stamped
-a second apart, as written to the matrix file and to the nine per-cell files,
-to the nine configuration hashes listed in Appendix F, and to code revision
-`f56af52` with a clean working tree. The decision-level numbers trace to the
-three files Appendix F names beside the agent cells.
+Every six-sample number above traces to the nine per-cell result files,
+which carry analysis runs `20261017T012750Z` and `20261017T012751Z` at code
+revision `1d50fee`, the third analysis of the same recordings and the third
+to flag the same inputs in every cell; every twenty-sample number to the
+four per-cell files, runs `20261016T195710Z`, `20261016T195711Z` and
+`20261016T200035Z` at the same revision; and all of them to the
+configuration hashes listed in Appendix F. The per-cell files are the record;
+the matrix file beside them is a view of whichever configuration was
+analysed last. The decision-level numbers trace to the three files Appendix
+F names beside the agent cells.
 
 ---
 
@@ -1802,24 +1880,34 @@ example is printed" and "the program prints it".
 
 | cell | configuration hash | triples | sessions | inputs labelled | detection time | diagnosis file |
 |---|---|---|---|---|---|---|
-| banking-summary | `60ac20518858cf53` | 240 | 3 | 35 of 40 | 22.4 s | |
-| logistics-summary | `164081630f20c414` | 240 | 1 | 40 of 40 | 24.9 s | |
-| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 40 of 40 | 24.2 s | |
-| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 20 of 40 | 17.2 s | `banking-extraction.7e1c3a40f5946fc8.diagnosis.json` |
-| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 40 of 40 | 15.6 s | |
-| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 40 of 40 | 27.6 s | `hospitality-extraction.418a3438efcfbb12.diagnosis.json` |
-| banking-agent | `04b75acf8f69d4ec` | 240 | 2 | 40 of 40 | 60.4 s | `banking-agent.04b75acf8f69d4ec.diagnosis.json`, `banking-agent.04b75acf8f69d4ec.decisions.json` |
-| logistics-agent | `4bc58937db555622` | 240 | 2 | 40 of 40 | 60.1 s | `logistics-agent.4bc58937db555622.diagnosis.json`, `logistics-agent.4bc58937db555622.decisions.json` |
-| hospitality-agent | `2cea59ca300a6358` | 240 | 1 | 40 of 40 | 72.7 s | `hospitality-agent.2cea59ca300a6358.diagnosis.json`, `hospitality-agent.2cea59ca300a6358.decisions.json` |
+| banking-summary | `60ac20518858cf53` | 240 | 3 | 35 of 40 | 28.5 s | |
+| logistics-summary | `164081630f20c414` | 240 | 1 | 40 of 40 | 35.3 s | |
+| hospitality-summary | `19ffac0bccf2ddd8` | 240 | 1 | 40 of 40 | 38.0 s | |
+| banking-extraction | `7e1c3a40f5946fc8` | 240 | 2 | 20 of 40 | 24.9 s | `banking-extraction.7e1c3a40f5946fc8.diagnosis.json` |
+| logistics-extraction | `b541f3b106c5d06d` | 240 | 1 | 40 of 40 | 23.2 s | |
+| hospitality-extraction | `418a3438efcfbb12` | 240 | 1 | 40 of 40 | 38.4 s | `hospitality-extraction.418a3438efcfbb12.diagnosis.json` |
+| banking-agent | `04b75acf8f69d4ec` | 240 | 2 | 40 of 40 | 79.1 s | `banking-agent.04b75acf8f69d4ec.diagnosis.json`, `banking-agent.04b75acf8f69d4ec.decisions.json` |
+| logistics-agent | `4bc58937db555622` | 240 | 2 | 40 of 40 | 78.9 s | `logistics-agent.4bc58937db555622.diagnosis.json`, `logistics-agent.4bc58937db555622.decisions.json` |
+| hospitality-agent | `2cea59ca300a6358` | 240 | 1 | 40 of 40 | 93.3 s | `hospitality-agent.2cea59ca300a6358.diagnosis.json`, `hospitality-agent.2cea59ca300a6358.decisions.json` |
+| banking-summary, twenty samples | `5aa2e096752e8c38` | 800 | 2 | 40 of 40 | 48.6 s | |
+| logistics-summary, twenty samples | `fbcbd6de938d8366` | 800 | 1 | 40 of 40 | 67.8 s | |
+| hospitality-summary, twenty samples | `ba6eaed55818324c` | 800 | 2 | 40 of 40 | 76.0 s | |
+| banking-extraction, twenty samples | `1a37665b4308bcf4` | 800 | 2 | 40 of 40 | 47.1 s | |
 
-Model `granite4.2:8b`, digest `f586c02fdecdf151`. All nine cells were
-analysed in one pass between 14:17 and 14:22 UTC on 16 October 2026, after
-the estimator's handling of tied scores was corrected; the table, the matrix
-file and the nine per-cell files carry that pass, and a first pass the night
-before, between 01:53 and 01:59 UTC, had flagged the same number of inputs in
-every cell. Recording time, summed over the calls that returned, was 0.8 to 0.9
-hours per summary cell, 1.2 to 7.6 per extraction cell and 3.1 to 12.8 per
-agent cell, with pauses on top. A cell with more than one session was
+Model `granite4.2:8b`, digest `f586c02fdecdf151`. The nine six-sample cells
+have been analysed three times: on the night of 15 to 16 October 2026, again
+on 16 October after the estimator's handling of tied scores was corrected,
+and again on 17 October after the twenty-sample chain had overwritten the
+matrix file; every pass flagged the same inputs in every cell, and the table
+and the per-cell files carry the last. The four twenty-sample cells were
+analysed once, on the evening of 16 October, by the corrected estimator.
+Every input in the four is labelled; in the three that were paused and
+resumed, the input in flight at the pause carries labels for 14, 11 and 15
+of its twenty samples, which changes nothing reported here because an input
+counts as touched when any sample was. Recording time, summed over the calls
+that returned, was 0.8 to 0.9 hours per summary cell at six samples and 2.5
+to 2.8 at twenty, 1.2 to 7.6 per extraction cell at six and 3.3 for banking
+at twenty, and 3.1 to 12.8 per agent cell, with pauses on top. A cell with more than one session was
 paused and resumed, and the recorder resumes from its checkpoint. Seventeen
 samples in the agent row were errored calls and are in no cloud (12, 3 and 2
 in the banking, logistics and hospitality cells); the banking agent
@@ -1848,7 +1936,7 @@ almost all the time goes, as section 7 says.
 
 ---
 
-*Section 8 is written against the complete six-sample matrix, with its
-silent cells diagnosed. Its bracketed sentences fill when the twenty-sample
-rows arrive; the abstract's result stays blank until the twenty-sample
-summary row does.*
+*Section 8 reports the six-sample matrix, its silent cells diagnosed, and
+the four twenty-sample cells against the prediction written down before
+they ran; the abstract carries its result. One bracket remains: the agent
+format at twenty samples per cloud.*
