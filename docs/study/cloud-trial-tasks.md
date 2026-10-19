@@ -1,112 +1,89 @@
 # Work for a machine with no GPU
 
-**Rewritten 2026-10-16 for the Claude Code cloud session (trial credit expires
-2026-11-05, 8:59 AM GMT+1).** The 2026-10-04 list is done, items 1 to 6; it
-lives in git history. This is the second hand-off. **Check `HANDOFF.md` for
-anything dated after this file before trusting it**: the first version was a
-day out of date the first time it was read.
+**Rewritten 2026-10-19 for the Claude Code cloud session (trial credit expires
+2026-11-05, 8:59 AM GMT+1 — about two weeks left).** This is the third
+hand-off; the first two lists are done and live in git history. **Check
+`HANDOFF.md` for anything dated after this file before trusting it.**
 
 If you are reading this on a machine that has a GPU and a running Ollama, you
 are not the audience. Go to `CLAUDE.md` and the per-family `STATE.md` files.
 
-## What changed since the first hand-off
+## What changed since the second hand-off
 
-- The k=6 matrix is complete: nine cells in `results/study/matrix.json`,
-  analysed 2026-10-16 (HANDOFF §22, STD-010, STD-011). The agent row flags
-  nothing in any of the three domains with 25 to 26 of 40 inputs touched.
-- The k=20 summary row, the pre-registered D25 test (HANDOFF §21), is being
-  recorded on the owner's GPU and is paused: banking-summary at 654 of 800
-  triples, checkpoint `results/study/banking-summary.5aa2e096752e8c38.jsonl`.
-  Do not wait for it. Write against the k=6 matrix and bracket what the k=20
-  row will change, as section 8 already does for its gaps.
-- Every result file carries its run id, configuration hash and commit; the
-  matrix rows were analysed at `de23b8c` with a dirty tree holding results
-  only. Quote those, not the chain log, which is gitignored.
-
-## The constraint, unchanged
-
-Recording needs the system under test, which is Ollama serving `granite4.2:8b`
-on the owner's PC. **No new study data can be produced here.** The preflight
-says so in about a second if you try. Everything below reads committed files.
-
-What this machine can do: run the test suite in seconds, read every recording
-under `results/`, run `scripts/diagnose_channels.py` (it needs the NLI judge,
-which downloads from the Hub and runs on CPU in minutes, and no system under
-test), and all documentation and analysis work.
+- The paper is complete against its evidence: section 8 and Appendix F carry
+  the nine-cell k=6 matrix and the four k=20 cells against the D25
+  prediction, the abstract's result is filled, the subtitle landed (RDR-010),
+  and your three verification passes are in. One bracket remains: the agent
+  format at k=20.
+- Two GPU items run on the owner's machine on the next quiet night: the
+  drift negative control (protocol MTH-026, expectations filed; its period-2
+  recording sits at ~230 of 240 triples) and the banking-agent cell at k=20,
+  the first data point of the agent self-variance investigation (methods
+  STATE, owner-directed 2026-10-19). Their report files land on main when
+  done. Do not wait on them for tasks 1-3 below.
+- The network constraint stands: this instance cannot reach the model hosts,
+  so nothing needing the NLI judge or the system under test runs here.
 
 ## Tasks, in the order the owner agreed
 
-### 1. Diagnose the agent row (STD-011's first reopen condition)
+### 1. Draft the cross-system null design (a proposal, not a decision)
 
-Run `scripts/diagnose_channels.py` over the three agent cells:
-banking-agent `04b75acf8f69d4ec`, logistics-agent `4bc58937db555622`,
-hospitality-agent `2cea59ca300a6358`. **Classify each cell by MTH-025, which
-was frozen before this task on purpose** — the criterion is three rules in
-priority order (blindness / resolution-limited / selection defect) bound to
-fields the script already emits, and the script must run unmodified. Do not
-classify from the docstring's informal reading alone; it predates the freeze.
-Write the three `.diagnosis.json` files beside the cells, as was done for the
-two extraction cells, and append to STD-011 with the MTH-025 classification
-and the numbers. Two side questions belong in the same
-append: why 944, 956 and 958 of 960 samples entered clustering in these cells
-(`cost.samples_clustered`) when every other cell had 960; and whether the
-distinctness figures in STD-011 (70 to 86 percent of samples unique after
-normalisation) are the mechanism, or a coincidence of it.
+The methods STATE queues it: A-vs-B between two DIFFERENT systems has no
+null yet. A-prime calibrates within-system variance only; a proper design
+needs the candidate's own second run (B-prime) and a frozen combination
+rule. Write `docs/methods/cross-system-null-proposal.md`, clearly headed as
+a PROPOSAL awaiting owner ratification: the candidate designs (four arms
+with pooled null, per-input max, two one-sided selections), what each does
+to the (1+d)/t estimator, what the recorder's triple-atomicity needs to
+generalise, and the stored-baseline regime (version bump: baseline weeks
+old, interleaving impossible — MTH-026's drift control is its first
+instrument). Argue from fdr.py, MTH-023/024/026 and the proteomics
+literature on decoy-to-target ratios. Recommend one design and say why.
 
-### 2. Rewrite section 8 and Appendix F of `paper/draft.md` against the full matrix
+### 2. Draft the agent self-variance titration protocol
 
-**The claim shape is ratified as the two-question paper (STD-012, HANDOFF
-§24); write to it.** The registered transfer question keeps the title and is
-answered at its width: yes on summary, three of three domains, per-system
-success bounded below at 0.29; unresolved below the certification floor
-elsewhere at k=6. The format-and-k structure is the section's second finding
-and is LABELLED post hoc wherever it appears — generated by this study,
-confirmatory arm the k=20 row under D25's filed prediction. Section 8 opens
-with the variance partition (domain explains almost nothing, format and k
-nearly everything), not with the cell-by-cell walk. The k=6 sizing slip
-(HANDOFF §21) is disclosed in the paper body as a bolded line above the
-results table, not only in HANDOFF.
+Methods STATE carries the owner's direction: investigate the agent
+limitation with clear numbers before a reviewer does. Draft the protocol as
+a dated proposal: the dials (k; number of baseline arms m, with the
+estimator generalisation m>1 requires — this overlaps task 1, reference it;
+temperature as the entropy dial; decision-token vs rationale-text channels),
+a grid worth running, and a cost table from the measured 16.9 s per agent
+invocation. The banking-agent k=20 cell (landing on main shortly) is the
+first data point; design the rest of the grid around it.
 
-Mechanics: three rows recorded at six samples; the agent row paragraph, new,
-written in the register of the extraction paragraph and carrying task 1's
-MTH-025 classification; "What is missing" updated so the k=20 rows read as
-recording rather than missing; the provenance line updated to runs
-20261015T205513Z and 20261015T205514Z and the commit; Appendix F to nine rows
-with the agent cells' sessions (2, 2, 1), label completeness (40 of 40 in all
-three) and detection times (67 s, 66 s, 80 s). Keep the D19 reader (HANDOFF
-§16) and the register of section 1: a statistic is explained where it is
-used, nothing is compressed into a name. Leave the abstract's [RESULT] blank;
-it fills with the k=20 row. Bracket, do not guess, what k=20 will change.
-Then update the paper's closing status footnote and the paper row of
-`docs/reader/STATE.md`.
+### 3. Draft paper two's pre-registration skeleton
 
-While in the file, take the cold-read fix list (2026-10-16 audit), by value:
-line 1026-1032 move the 0.29 lower bound BEFORE "the answer yes"; 987-989 is
-superseded by the bolded-disclosure item above; 326-327 vs 1230-1233
-reconcile per-shape thresholds "exercised" against limit 15's "every run
-pooled"; 1324 define "probe pairs" as the 896 hand-built pairs of section 4;
-75-78 merge the staccato fragments into full sentences; 1052-1055 split the
-banking-extraction arithmetic into two sentences; 497, 514, 651-652 cut the
-"not X, but Y" reversals to the reader contract's cap; line 34 trim the
-RESULT template's severity-per-class promise (no titration exists for most
-classes); 468-480 one paragraph per reading of the directional score.
+STD-012 names the second study's thesis: how much difference-information
+between systems can be mined from outputs alone. Draft
+`docs/study/preregistration-2-draft.md`, headed DRAFT — NOT REGISTERED:
+the question stated falsifiably, the pool (D10's four models, confirmed
+current by BCH-019), the protocol slots that wait on task 1's ratified
+design, the sizing that MTH-024's rule dictates once k and q are chosen,
+and empty prediction slots to be filled and dated BEFORE any recording.
+This is the paper whose integrity story is "everything was registered
+first"; the draft's job is to make that cheap to do.
 
-### 3. Run `scripts/check_prose.py` on the rewritten section and act on it
+### 4. When tonight's results land on main: fold them in
 
-It is advisory. The owner reads about two thirds of the paper on screen and
-confirmed the register; a results section that drifts from it will be noticed.
+Pull first. The drift-control report (`results/drift/drift-control.*.json`)
+carries three comparisons with expectations filed in MTH-026 — write its
+paragraph into the paper where the stored-baseline/version-change
+discussion lives, numbers from the file, bracket nothing. The banking-agent
+k=20 report fills section 8's last bracket; if it is silent again, the
+MTH-025 classification comes from the GPU machine's diagnosis, not from
+here. Then the closing status footnote and the reader STATE row.
 
-### 4. Not yet
+### 5. Not yet
 
-The README front door (D24) is gated on the paper existing: not now. The
-leave-one-out numbers need the k=20 rows. Nothing that records.
+The README front door (D24) stays gated until the owner says the paper
+"exists" within the meaning of that decision — ask through the owner, not
+here. LOSO needs the NLI judge: blocked on this instance. Nothing that
+records.
 
 ## Hand-back
 
-Commit and push on `main` unless the change is large enough to want a review,
-in which case a branch named `cloud/2026-10-16-<task>` and say so in the
-commit. The owner's local session pulls, runs `python -m pytest tests/ -q`
-with the GPU machine's environment, and continues the k=20 recording. The
-`.agents/` directory is gitignored and dies with the instance: if a dossier
-there is worth keeping, say so in HANDOFF rather than assuming it travels
-(`docs/knowledge/environment.md`).
+Commit and push on `main` unless the change is large enough to want review,
+then a branch named `cloud/2026-10-19-<task>` and say so in the commit.
+Anything in `.agents/` dies with the instance unless named a keeper in
+HANDOFF. The owner's local session pulls, runs the suite, and drives the
+GPU items.
