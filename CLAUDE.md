@@ -229,4 +229,9 @@ Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
 paper is drafted in every section; section 8 and Appendix F describe the
 nine-cell k=6 matrix in the two-question shape and the four k=20 cells
 against the D25 prediction (2026-10-17), silent cells diagnosed; the abstract
-carries its result; subtitle per RDR-010.
+carries its result; subtitle per RDR-010. Three proposals await owner
+ratification (2026-10-20, HANDOFF §26): the cross-system null
+(`docs/methods/cross-system-null-proposal.md`), the agent self-variance
+titration (`docs/methods/agent-self-variance-titration-proposal.md`) and
+paper two's pre-registration skeleton
+(`docs/study/preregistration-2-draft.md`, DRAFT, not registered).

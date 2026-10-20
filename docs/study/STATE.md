@@ -34,6 +34,17 @@ synthetic cell on disk under the runner's own file names and config hash and
 drives the real function: matrix rows carry full provenance, and an
 untraceable row is refused before any file is written.
 
+## Paper two
+
+Pre-registration skeleton drafted 2026-10-20, **DRAFT, NOT REGISTERED**:
+`docs/study/preregistration-2-draft.md`. Three hypotheses stated with
+their refutation conditions (the null pair's realised FDR, format over
+domain, the self-variance ceiling), the D10 pool per BCH-019, protocol
+slots that wait on the ratified cross-system null, MTH-024 sizing with
+`q`, `k`, `n` as slots, an empty dated predictions table, and the
+registration procedure (fill, commit alone, tag `prereg-2-v1`, append
+only after). Nothing may be recorded against it before step 2 of its §9.
+
 ## Figures
 
 | Figure | Status |

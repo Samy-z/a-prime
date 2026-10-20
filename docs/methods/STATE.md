@@ -49,6 +49,13 @@ detail. Report it as prominently as any other choice.
 
 ## Queued question — the cross-system null (opened 2026-10-16, gates paper two)
 
+**Proposal drafted 2026-10-20, awaiting owner ratification:**
+`docs/methods/cross-system-null-proposal.md`. Recommends four arms with a
+pooled within-system null and the ratio-adjusted estimate `(1 + d/r)/t`,
+the two one-sided counts and each system's self-variance reported beside
+it, a recorder roster change, and the drift control (MTH-026) as the gate
+for stored-baseline certification. Five ratification items in its §6.
+
 A vs A-prime calibrates one system against its own variance. A vs B is two
 systems with two self-variances, and no entry yet says whose null certifies
 the comparison. Candidate design is four arms (A, A-prime, B, B-prime) with
@@ -62,6 +69,14 @@ and k=20 recordings; the period-two re-record needs a thin runner and about
 an hour of GPU.
 
 ## Queued question — agent self-variance, titrated with clear numbers (owner-directed 2026-10-17)
+
+**Protocol drafted 2026-10-20, awaiting owner ratification:**
+`docs/methods/agent-self-variance-titration-proposal.md`. Dials k, m,
+temperature and the decision-versus-text channel with an expectation filed
+per dial; a three-point committed grid on banking-agent plus two gated
+points; a cost table at the brief's 16.9 s per call and at the k=6 banking
+mean of 65 s, which differ by a factor of four until the k=20 file says
+which holds. Four ratification items in its §6.
 
 The agent row's silence decomposed into high text-level self-variance plus
 decisions the fault barely moved (STD-011 appends). The owner's direction:

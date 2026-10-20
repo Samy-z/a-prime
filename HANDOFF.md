@@ -1135,3 +1135,57 @@ row completed and passed its D25 test — pooled recall 51 of 56 touched
 (0.056) against the 0.10 budget, labels complete in all three cells. The
 full k=20 re-record contingency does not trigger. The reading against the
 prediction and the paper's section 8 are the cloud session's, per its brief.
+
+## §26 — Third cloud hand-off: three proposals drafted, none ratified (2026-10-20)
+
+The cloud session's third brief (`docs/study/cloud-trial-tasks.md`,
+rewritten 2026-10-19) asked for three drafts that need no GPU, and all
+three are on main as proposals, each headed as unratified and each ending
+in the list of what the owner is asked to decide.
+
+1. **The cross-system null** (`docs/methods/cross-system-null-proposal.md`).
+   Three designs compared on what they do to `(1 + d)/t`: four arms with
+   a pooled within-system null and the ratio-adjusted estimate
+   `(1 + d/r)/t`, which adds resolution at the margin the silent cells sat
+   on and is valid under the same exchangeability the current estimator
+   assumes; a per-input maximum, valid and about twice conservative in the
+   tail with no resolution gain; and two one-sided selections, valid each
+   but with no bound on their union or intersection. Recommendation: the
+   pooled design, with the one-sided counts and each system's self-variance
+   reported beside it, the replicate cross pairs as a stability check, the
+   recorder generalised to a roster, and the drift control as the gate for
+   certifying a stored-baseline comparison. Two things the proposal says
+   plainly: pooling fixes resolution and not separation, so it does not
+   rescue the agent row; and the text-level channels carry a cross-model
+   style confound that no within-system decoy calibrates, so they report
+   and do not select in cross-system runs until a null pair measures them.
+2. **The agent self-variance titration**
+   (`docs/methods/agent-self-variance-titration-proposal.md`). Dials k, m,
+   temperature and the decision-versus-text channel, an expectation filed
+   per dial before any point runs, a three-point committed grid on
+   banking-agent with two gated points, and a cost table that is honest
+   about not knowing its own unit: the brief's 16.9 s per agent call and
+   the k=6 banking mean of 65 s differ by four, and the k=20 banking file
+   decides which column the budget lives in.
+3. **Paper two's pre-registration skeleton**
+   (`docs/study/preregistration-2-draft.md`, DRAFT, NOT REGISTERED). The
+   thesis of STD-012 as a question that can fail, three hypotheses with
+   refutation conditions, the null pair as the validity check that runs
+   first, the D10 pool with its per-model harness invariants from the
+   survey, protocol slots that wait on item 1, MTH-024 sizing with the
+   study parameters as slots, an empty dated predictions table whose
+   "if outside" column is already filled, and a registration procedure
+   that is one commit and one tag.
+
+Why proposals and not decisions: the k=6 leak (§21) is the standing lesson
+that a study-shaping choice made in passing is the one that costs a
+re-record; each of these shapes a study, so each waits for a dated
+ratification appended to its own file, and the methods STATE points at
+the appends when they exist.
+
+Decisions the owner has to take, in the order the work needs them: the
+null design and its estimator (item 1's §6, five items; it gates both the
+titration's `m` dial and the pre-registration's protocol slots); the
+titration grid and which cost column to plan on (item 2's §6, four items);
+then the slots and predictions of item 3, filled and dated before the
+first null pair is recorded.
