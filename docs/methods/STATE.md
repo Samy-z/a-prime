@@ -66,7 +66,8 @@ self-variance, the reverse selection, the reverse orientation, the pooled
 estimate and the three replicate target sets reported beside it; the
 orientation declared (the reference defines the strata and the
 new-answers direction); the estimator `(1 + d/r)/t` over the `b - 1` star
-pairs frozen for the reported pooled number and the titration's `b` dial.
+pairs proposed for freezing for the titration's `b` dial, the cross-pooled
+estimate reported under its own name outside `r`.
 Validation is the stub sweep (MTH-018's protocol, the bounds
 `tests/test_pipeline.py` asserts) for the selector; the null pair stays
 as a hard stop and a sign statistic with a binomial band, since an
@@ -82,8 +83,8 @@ baseline regime (version bump: baseline recorded weeks before the candidate,
 interleaving impossible) is part of the same question, and the STD-008
 negative control - score a system against itself across a time gap, expect
 nothing - is its first instrument: period-one arms already exist in the k=6
-and k=20 recordings; the period-two re-record needs a thin runner and about
-an hour of GPU.
+and k=20 recordings; the period-two re-record runs under
+`scripts/run_drift_control.py` and sits at 212 of 240 triples on main.
 
 ## Queued question — agent self-variance, titrated with clear numbers (owner-directed 2026-10-17)
 

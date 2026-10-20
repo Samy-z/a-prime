@@ -142,7 +142,7 @@ the same expectation at every cut as today's and half the variance, and
 the first draft of this proposal read that as added resolution. The
 instrument says otherwise:
 
-| k | sev | single: FDR, power, P(any) | pooled r=2: FDR, power, P(any) | max: FDR, power, P(any) |
+| k | sev | single: FDR, power, P(any) | pooled, ratio 2: FDR, power, P(any) | max: FDR, power, P(any) |
 |---|---|---|---|---|
 | 6 | 0.9 | 0.002, 0.009, 0.018 | 0.000, 0.000, 0.000 | 0.000, 0.000, 0.000 |
 | 20 | 0.7 | 0.011, 0.081, 0.152 | 0.002, 0.023, 0.040 | 0.002, 0.019, 0.037 |
@@ -168,7 +168,8 @@ stated for the mean. The realised rate of the single form sits far under
 report nothing), and measured directly the flags it makes on inputs
 pooling does not flag are 92 to 95 percent true at the three k=20 rows
 (488 of 533, 887 of 953, 882 of 928; 91 to 95 percent with three modes)
-and 80 to 86 percent at k=6 on 10 to 86 flags. Pooling buys a flagged set
+and 80 to 86 percent at k=6 with four modes (10 to 86 flags), 70 to 91
+percent with three (10 to 34). Pooling buys a flagged set
 that varies less between draws and pays for it in reports, most of them
 true.
 
@@ -178,7 +179,8 @@ star pairs only, and the instrument runs that configuration (block 2;
 titration §2): at k=20 and severity 0.9 the two star pairs at `r = 2`
 report in 0.362 of cells against the single decoy's 0.490, with power
 0.219 against 0.300 and realised rate 0.010 against 0.019, and all three
-pairs at `r = 3` in 0.295; at the floor, more decoys cost reports.
+pairs pooled at ratio 3 (outside §0's `r`, since `s(A', A'')` is not a
+star pair) in 0.295; at the floor, more decoys cost reports.
 
 ### Design 2 — per-input maximum
 
@@ -194,7 +196,8 @@ cut resting on few targets; the pooled count halved runs at 1.01, 1.00,
 0.99 and 0.78, 0.94, 1.00 at the same cuts, expectation exactly 1, which
 is the equal-marginals identity measured. The instrument's third column:
 the realised rate between none and half of the single form's (0.18, 0.22
-and 0.50 at k=20 severities 0.7 to 0.9; zero at the rows below), where the
+and 0.50 at k=20 severities 0.7 to 0.9 with four modes, a fifth to a
+third with three; at most 0.001 at the rows below in either regime), where the
 single form's own rate is about a fifth of `q` at its highest row (0.020
 and 0.021 in the two regimes), and the reports fewer at every row where
 the single form reports at all. Conservative at a fixed cut, symmetric,
@@ -244,8 +247,10 @@ any cross-model tuple is recorded:
   stored clouds still defining the strata;
 - reported beside every selection, never selecting: the candidate's
   self-variance `s(B, B')`; the reverse selection against `s(B, B')`; the
-  reverse orientation; the pooled estimate `(1 + d/2)/t` at the
-  selection's cut, or, when the selection is empty, at the cut
+  reverse orientation; the cross-pooled estimate `(1 + d/2)/t` over
+  `s(A, A')` and `s(B, B')` (ratio 2, outside §0's `r`, since `s(B, B')`
+  is not a star pair) at the selection's cut, or, when the selection is
+  empty, at the cut
   `best_achievable` reports for the selecting pair under the tie rule of
   §8 item 7; and the three replicate target sets;
 - seed policy per system (MTH-023 correction: mirror each system's
@@ -289,8 +294,8 @@ errored. The roster change:
 - the preflight asks one question per arm; the cost is `len(roster) / 3` of
   today's per-input time, 4/3 for this design.
 
-The estimator, for the reported pooled number and for the titration's `b`
-dial: `(1 + d/r) / t` over the `r = b - 1` star pairs, the `r = 1` path
+The estimator, for the titration's `b` dial: `(1 + d/r) / t` over the
+`r = b - 1` star pairs, the `r = 1` path
 byte-identical to today and asserted by a test; the pairs that share no
 cloud with the target are reported and never pooled. `select_stratified`
 requires targets, decoys and strata of one length; with `r > 1` every decoy
@@ -313,11 +318,13 @@ registered `k` and `n`.** It runs on MTH-018's stub (`aprime.stub`, the
 at the registered `k` over candidate `n` of 40, 60, 100 and 200, with half
 the inputs changed at strengths 0.5 to 0.9, under `r = 1` and the star
 `r = 2`, with the seed count filed beside its Monte Carlo standard error.
-Its criterion is the one the project already asserts: the mean
-false-discovery proportion over seeds at or under `q + 0.02` in every
-(strength, `r`) cell and no single seed above 0.35
-(`tests/test_pipeline.py`; the MTH-018 amendment reopens at 0.12), and a
-strength whose P(any report) is under 0.10 is void, not passed. A single
+Its criterion is the one the project already asserts plus a pooled bound:
+the mean false-discovery proportion over seeds at or under `q + 0.02` in
+every non-void (strength, `r`) cell and no single seed above 0.35
+(`tests/test_pipeline.py`; the MTH-018 amendment reopens at 0.12), the
+mean pooled over all non-void cells at or under `q`, and at least two
+non-void strengths, a strength whose P(any report) is under 0.10 being
+void, not passed. A single
 seed above `q` is sampling: MTH-018's own validation realised 0.101 at
 `q = 0.10`. It runs before `n` is filed, so the pre-registration can read
 `s` at each candidate `n`, and V's row then records the realised rate at
@@ -338,19 +345,21 @@ instrument models, and the hard stop is for that: with the decoy arm tied
 to the reference, as a pinned or cached seed makes it (MTH-023 and its
 correction), `A'` copying each sample of `A` with probability 0.7 flags in
 0.318 of null cells at k=6 and 0.475 at k=20 (0.100 and 0.215 with three
-modes), probability 0.9 in 0.885 and 0.980, and a copy in every cell. The
+modes), probability 0.9 in 0.885 and 0.980 (0.667 and 0.932 with three
+modes), and a copy in every cell. The
 null pair therefore stays, as two things: a **hard stop** (any flag by any
 selection run on it, selecting or reported, on any channel that runs,
 stops recording in that cell until the departure is found) and an
 **exchangeability statistic**: among the inputs whose target and
 reference decoy differ as values (ENG-010), the share with the target
 above. Under pairwise exchangeability with independent inputs that count
-is Binomial(m, 1/2) whatever the score distribution, the grid or the
-mode structure, so its band is the binomial's central 95 percent at the
-`m` non-tied inputs the cell shows (at `m = 30`, 0.32 to 0.68); the
-instrument confirms it (block 4: mean 0.497 to 0.504, central 95 percent
-0.31 to 0.69 at a mean `m` of 26 to 27 for k=6 and 0.32 to 0.68 at 32 to
-33 for k=20, both regimes). The first draft's statistic, the share of
+is Binomial(u, 1/2), `u` the number of non-tied inputs, whatever the
+score distribution, the grid or the mode structure, so its band is the
+binomial's central 95 percent at the `u` the cell shows (at `u = 30`,
+0.32 to 0.68); the instrument confirms it (block 4: mean 0.497 to 0.504,
+central 95 percent 0.31 to 0.69 at a mean `u` of 26 to 27 for k=6 and
+0.32 to 0.68 at 32 to 33 for k=20, both regimes). The first draft's
+statistic, the share of
 targets at or above the pooled decoy median, is withdrawn: its band moved
 with the mode count and the tie convention and read 1.0 wherever the
 decoy median was zero.
@@ -429,8 +438,8 @@ in paper two's limits.
    `adapter.check_arm` and the hash rule that keeps every committed
    checkpoint's hash, three-arm behaviour unchanged.
 3. The generalised estimator `(1 + d/r) / t` over the `b - 1` star pairs
-   as an engine entry, for the reported pooled number and the titration's
-   `b` dial, with `r = 1` byte-identical and tested, `select_stratified`
+   as an engine entry, for the titration's `b` dial, with `r = 1`
+   byte-identical and tested, `select_stratified`
    taking a decoy-to-input mapping with a decoy carrying its input's
    stratum, and `best_achievable` taking `r`; its condition, the joint
    exchangeability of `(s(A,B), s(A,A'), s(A,A''))` under `H0_i`, named

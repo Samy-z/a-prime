@@ -112,7 +112,8 @@ exchangeability requires; with `s(A', A'')` added the four shares are
 21.4, 15.3, 15.3 and 17.8 percent). So
 the estimate generalises to `(1 + d/r) / t` over the star pairs with
 `r = b - 1`, and `s(A', A'')` is reported beside it. This is the
-generalisation the cross-system proposal freezes (§4 and §8 item 3 there),
+generalisation the cross-system proposal proposes to freeze (§4 and §8
+item 3 there),
 **designed and frozen there once, before any point here uses it**, per the
 k=6 lesson (HANDOFF §21); it also needs `select_stratified` to take a
 decoy-to-input mapping, and `detect`, `diagnose_channels.py`,
@@ -125,9 +126,10 @@ three baseline clouds with the two star pairs selecting at `r = 2`: at
 k=20 and severity 0.9 it reports in 0.362 of cells against the single
 decoy's 0.490, with power 0.219 against 0.300 and realised rate 0.010
 against 0.019 (four modes, half changed, 400 cells; 0.370 against 0.500
-with three modes), and at k=6 it reports in no cell where the single
-decoy reports in 1.8 percent; pooling all three pairs at `r = 3` reports
-less often still (0.295 and 0.287). More
+with three modes), and at k=6 in no cell with four modes (the single
+decoy in 1.8 percent) and 1 of 400 with three (against 1.3 percent);
+pooling all three pairs at ratio 3 (outside §0's `r`) reports less often
+still (0.295 and 0.287). More
 decoy pairs cut the variance of the decoy count without moving its mean,
 and at the floor that removes the draws the selection profits from. In
 banking and logistics four targets stand above the cut and none of the 40
@@ -186,9 +188,10 @@ count is at or below point 1's and the best estimate does not move the
 reading; *refuted if* either does. Both are read under §5, by best
 estimate and separating count, never by flag count. **Guard:** if point
 3's decoys on the selecting channel sit at exactly 0 on more than
-[threshold, fixed in the ratifying append; point 1's own count is the
-anchor, and the k=6 counts are 2, 2 and 1 of 40 on mode share] inputs, or
-take fewer than [count] distinct values, the point is classified as
+[multiplier, fixed in the ratifying append] times point 1's
+decoys-at-zero count (the k=6 counts are 2, 2 and 1 of 40 on mode
+share), or take fewer than [count, fixed in the same append] distinct
+values, the point is classified as
 MTH-023's near-zero self-variance regime, reported by exact diff with its
 decoy-zero count and its distinct-value count, and is not read against
 point 1 by the step rule: a collapsed null makes every touched difference

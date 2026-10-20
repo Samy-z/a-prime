@@ -42,7 +42,8 @@ second time after a three-seat cross-model review). The certified
 fraction is defined on the share-of-answers channel's stratified
 selection, the union over channels reported without a budget claim. A
 validity check runs first (the stub sweep at the registered `k` over
-candidate `n`, under the bounds `tests/test_pipeline.py` asserts), then
+candidate `n`, under the bounds `tests/test_pipeline.py` asserts plus a
+pooled bound), then
 three hypotheses with their refutation conditions (the null pair as a
 hard stop plus a sign statistic with a binomial band and a count rule
 over cells; format over domain with a positive control that is paper

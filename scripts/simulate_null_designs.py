@@ -26,8 +26,10 @@ Blocks, in print order:
    does not;
 2. the within-baseline designs of the titration's `b = 3` point: the two
    star pairs that share the reference cloud (r = 2) and all three pairs
-   (r = 3), against the single decoy, plus the rank of the target among the
-   decoys on all-null inputs, which is the exchangeability check;
+   pooled at ratio 3 (the third pair shares no cloud with the target, so
+   it is outside the proposals' `r`), against the single decoy, plus the
+   share of all-null inputs on which each score is the strict maximum,
+   which is the exchangeability check;
 3. all-null cells: P(any report) under every design, and under a decoy arm
    correlated with the reference (`A'` copies a sample of `A` with
    probability rho), which is what a null pair's hard stop can see;
@@ -148,7 +150,7 @@ def star_designs(T, DA, DA2, DAA):
     single = _mask(select(T, DA, Q), T)
     star = select_ratio(T, np.concatenate([DA, DA2]), r=2)
     allp = select_ratio(T, np.concatenate([DA, DA2, DAA]), r=3)
-    return {"single": single, "star r=2": star, "all pairs r=3": allp}
+    return {"single": single, "star r=2": star, "all pairs ratio 3": allp}
 
 
 def sign_statistic(T, DA):
@@ -195,7 +197,7 @@ def summarise(rng, n, k, n_changed, severity, reps, modes: int = 4):
 
 
 def summarise_b3(rng, n, k, n_changed, severity, reps, modes: int = 4):
-    names = ("single", "star r=2", "all pairs r=3")
+    names = ("single", "star r=2", "all pairs ratio 3")
     out = {name: {"fdp": [], "power": [], "any": 0} for name in names}
     for _ in range(reps):
         T, DA, DA2, DAA, truth = cell_b3(rng, n, k, n_changed, severity, modes)
@@ -226,7 +228,7 @@ def main() -> int:
           f"{args.modes} true modes, {args.reps} cells per row, seed {args.seed}")
     print("1. cross-system designs")
     print(f"{'k':>3} {'sev':>4} | {'single: FDR pow P(any)':24} | "
-          f"{'pooled r=2: FDR pow P(any)':28} | {'max: FDR pow P(any)':22} | single-not-pooled flags: true")
+          f"{'pooled ratio 2: FDR pow P(any)':28} | {'max: FDR pow P(any)':22} | single-not-pooled flags: true")
     for k in (6, 20):
         for sev in (0.5, 0.6, 0.7, 0.8, 0.9):
             r = summarise(rng, args.n, k, changed, sev, args.reps, args.modes)
@@ -237,10 +239,10 @@ def main() -> int:
 
     print()
     print("2. within-baseline designs (b = 3): star pairs share the reference cloud, all pairs add s(A', A'')")
-    print(f"{'k':>3} {'sev':>4} | {'single: FDR pow P(any)':24} | {'star r=2: FDR pow P(any)':26} | {'all pairs r=3: FDR pow P(any)':30}")
+    print(f"{'k':>3} {'sev':>4} | {'single: FDR pow P(any)':24} | {'star r=2: FDR pow P(any)':26} | {'all pairs ratio 3: FDR pow P(any)':34}")
     for k, sev in ((6, 0.9), (20, 0.7), (20, 0.8), (20, 0.9)):
         r = summarise_b3(rng, args.n, k, changed, sev, args.reps, args.modes)
-        cells = _fmt(r, ("single", "star r=2", "all pairs r=3"))
+        cells = _fmt(r, ("single", "star r=2", "all pairs ratio 3"))
         print(f"{k:3d} {sev:4.1f} | {cells[0]:24} | {cells[1]:26} | {cells[2]:30}")
     print("   share of all-null inputs on which each score is the strict maximum (exchangeable scores give equal shares):")
     for k in (6, 20):
@@ -290,7 +292,7 @@ def main() -> int:
         mbar = float(np.mean(ms))
         half = 1.96 * np.sqrt(0.25 / mbar)
         print(f"   k={k}: mean {np.mean(shares):.3f}, central 95 percent {lo:.2f} to {hi:.2f}; "
-              f"non-tied inputs mean {mbar:.1f} of {args.n}; binomial band at that m {0.5 - half:.2f} to {0.5 + half:.2f}")
+              f"non-tied inputs u mean {mbar:.1f} of {args.n}; binomial band at that u {0.5 - half:.2f} to {0.5 + half:.2f}")
 
     print()
     print("5. decoy-to-target count ratios at the top of the grid on all-null cells (expectation: max at most 2, pooled/2 exactly 1)")

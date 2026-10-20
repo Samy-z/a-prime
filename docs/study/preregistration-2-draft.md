@@ -73,8 +73,10 @@ the share-of-answers channel) is reported beside it.
 
 STD-012 also names the resolution surface over (`k`, `n`, dispersion, `q`)
 as a required instrument: [SLOT: registered as an instrument sweep, the
-synthetic half from `scripts/simulate_null_designs.py` over `k` in {6, 20,
-40}, `n` in {40, 100, 200}, `q` in {0.05, 0.10} with the mode count as the
+synthetic half from `scripts/simulate_null_designs.py` once it takes
+`--k` and `--q` (a prerequisite; today both are fixed in the script) over
+`k` in {6, 20, 40}, `n` in {40, 100, 200}, `q` in {0.05, 0.10} with the
+mode count as the
 dispersion axis, and the recorded half from the registered cells at the
 registered `k`; or deferred by a dated STD-012 append named here with its
 reason].
@@ -94,8 +96,10 @@ validity check that runs before any of them is read:
   amendment reopens on) with no single seed above 0.35, and a mean pooled
   over cells at or under `q`. A strength whose P(any report) is under 0.10
   is void, not passed; V needs at least two non-void strengths. *Refuted
-  if* either bound is broken in any non-void cell; then the design is
-  reopened and nothing is recorded. A single seed above `q` is sampling,
+  if* any of the three bounds is broken (a non-void cell's seed-mean above
+  `q + 0.02`, a seed above 0.35, the pooled mean above `q`) or fewer than
+  two strengths are non-void; then the design is reopened and nothing is
+  recorded. A single seed above `q` is sampling,
   not refutation (MTH-018's own validation realised 0.101). The sweep
   validates the selector at `k` and `n`; it cannot test equal marginals
   between two systems, which hold in the stub by construction, and this
@@ -103,19 +107,21 @@ validity check that runs before any of them is read:
 - **H1, the null pair.** One model recorded as both A and B, under two
   names, in the ratified roster: (a) **hard stop**, no input is flagged by
   any selection run on the null pair, selecting or reported (the reference
-  selection, the reverse selection and the three replicate target sets),
-  on any channel that runs. Every such flag is a false discovery; the
-  guarantee permits one at rate up to `q` per cell, but the instrument
-  puts the event at 0 of 2,000 all-null cells at `n = 40` under an
-  independent decoy arm and at 0.1 to 0.5 of cells under a decoy arm that
+  selection, the reverse selection, the reverse orientation and the three
+  replicate target sets), on any channel that runs. Every such flag is a
+  false discovery; the guarantee permits one at rate up to `q` per cell,
+  but the instrument puts the event at 0 of 2,000 all-null cells at
+  `n = 40` under an independent decoy arm (1 of 2,000 at k=6 with three
+  modes) and at 0.1 to 0.5 of cells under a decoy arm that
   copies the reference 70 percent of the time, across its two regimes and
   both `k` (null proposal §5), so a
   flag means the recording departs from what the instrument models;
   (b) the **sign statistic**: among inputs whose target and reference
   decoy differ as values, the share with the target above. Under pairwise
-  exchangeability with independent inputs it is Binomial(m, 1/2) whatever
-  the score distribution, so each cell's band is that binomial's central
-  95 percent at its own `m` non-tied inputs (at `m = 30`, 0.32 to 0.68;
+  exchangeability with independent inputs it is Binomial(u, 1/2), `u` the
+  number of non-tied inputs, whatever the score distribution, so each
+  cell's band is that binomial's central 95 percent at its own `u` (at
+  `u = 30`, 0.32 to 0.68;
   `scripts/simulate_null_designs.py` block 4 confirms it at k=6 and 20
   with three and four modes). *Refuted if* (a) fires in any cell, or (b)
   the number of null-pair cells outside their bands reaches `c`, the
@@ -301,7 +307,7 @@ The registration fixes:
 - `c_min` = [SLOT].
 
 Cost, on granite's measured per-call times. Summary cells ran at 3.8 to
-4.6 s per call and banking extraction at 5.0 s at k=20, all in the current
+4.3 s per call and banking extraction at 5.0 s at k=20, all in the current
 serving regime; logistics and hospitality extraction were recorded only on
 4 and 5 October at 28.2 and 37.7 s, in the partial-CPU load regime that
 `docs/knowledge/environment.md` documents, and the smoke-run ratios put
@@ -323,8 +329,8 @@ excludes and that scales with calls rather than with the layout; one
 interleaved tuple of each layout is timed before the layout slot is
 filled, and the hours column re-stated with it. The eight-arm layout costs
 a third of the four-arm one in either regime; whether the two slow
-extraction cells dominate (86 percent of the eight-arm hours at the
-October rates, 55 percent at the current-regime estimates) is settled by a
+extraction cells dominate (79 percent of the eight-arm hours at the
+October rates, 37 percent at the current-regime estimates) is settled by a
 k=20 granite timing of them before `n` is filed.
 
 ## 6. Predictions — EMPTY, to be filled and dated before any recording
@@ -337,7 +343,7 @@ recording time is a protocol violation, not an omission.
 |---|---|---|---|---|
 | V, stub sweep: seed-mean false-discovery proportion per non-void cell at the registered k over n in {40, 60, 100, 200}, r = 1 and r = 2 | at or under 0.12, no seed above 0.35, pooled at or under q; the realised rate at the filed n recorded beside it | | | stop; reopen the null design |
 | H1a, flags by any selection on any null pair | 0 | | | stop recording in that cell; check interleaving, seed policy and the channel's score tail against the instrument; reopen the null design if none explains it |
-| H1b, null-pair cells outside their sign-statistic band, of N = [SLOT] | fewer than c = [SLOT: smallest c with P(Bin(N, 0.05) ≥ c) ≤ 0.05] | | | report; cross-pair recording in that cell halts until the null design is reopened by dated append |
+| H1b, null-pair cells outside their sign-statistic band, of N = [SLOT] | fewer than c = [SLOT: smallest c with P(Bin(N, 0.05) ≥ c) ≤ 0.05] | | | report; cross-pair recording halts until the null design is reopened by dated append |
 | H2, format share over domain share | [SLOT] | | | report as refuted; no reframing |
 | H2 positive control, certified fraction (a fraction of n) | [SLOT: an interval around the chosen cell's activation rate] | | | if activation shows the fault did not fire, re-record the control before anything else is read; if it fired, report the value with its Wilson interval as the scale and read H2 as registered |
 | H3, ceiling on the tested pair-cells | [SLOT: F, G, and the expected number of tested pair-cells] | | | report as refuted |
@@ -398,9 +404,13 @@ What makes it cheap: the slots are named and few; the floor table and the
 cost table are computed; the "if outside" column is filled for every row,
 so filing a number commits to a consequence; and the freeze is a commit
 and a tag, which the repository already does for everything else. What the
-registrant still has to supply: the cells and layout, the per-model
-timings and the model-switch cost, `c_min`, the H2 factor, the two H3
-fractions and the H3 antecedent count, and the predictions.
+registrant still has to supply, every `[SLOT]` included: `q`, `k`, `n`
+and `c_min`; the cells and layout; the per-model timings and the
+model-switch cost; V's seed count and H1's `N`; the positive-control model
+and cell, the style-only control's cell and the null-pair cells; the
+resolution-surface decision; which channels select; the LOSO script and
+the fittable choices; the engine entries; the H2 factor, the two H3
+fractions and the H3 antecedent count; and the predictions.
 
 **Evidence:** STD-012, STD-013, BCH-007, BCH-009, BCH-012, BCH-019,
 MTH-008, MTH-010, MTH-015, MTH-018 and amendment, MTH-020, MTH-021,

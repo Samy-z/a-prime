@@ -1352,3 +1352,28 @@ first amendment, by item, since that text stays as written:
 The instrument gained the within-baseline `b = 3` designs, the tied
 decoy arm, the sign statistic and the count ratios, so "every simulation
 figure" in the proposals is now true of it.
+
+#### Corrections to the two amendments (2026-10-20, later the same day, after a cross-document consistency read)
+
+- Second amendment item 2: "frozen for the reported pooled number" is
+  wrong twice. The estimator `(1 + d/r)/t` is proposed for freezing, not
+  frozen (nothing in the proposals is), and only for the titration's `b`
+  dial over the star pairs; the cross-pooled estimate over `s(A, A')` and
+  `s(B, B')` is reported under its own name, at ratio 2, outside §0's `r`,
+  since `s(B, B')` is not a star pair. The all-pairs design is likewise
+  "ratio 3", not `r = 3`.
+- Second amendment item 4: not "unchanged". Item 2 changed the terms:
+  `r = b - 1`, so the titration's point 2 has `r = 2`, not the 3 of the
+  first revision.
+- Second amendment item 6: the positive control is not "a null pair"; it
+  is one model as A and B with the fault in B, recorded apart from the
+  null pairs and excluded from H1 and the partition, since under H1 any
+  flag on a null pair is a hard stop.
+- First amendment item 1: "1 to 2 percent of cells" at k=6 reads 0.3 to
+  1.8 percent (severities 0.6 to 0.9); the k=6 true fraction of the
+  reports pooling removes, 80 to 86 percent, is the four-mode figure (70
+  to 91 with three). First amendment item 3: "0.0000 for every design"
+  reads 1 in 2,000 at k=6 with three modes.
+- The non-tied count in the sign statistic is written `u` in the
+  proposals, not `m`, to keep `m` from colliding with the queue entry's
+  dial name.
