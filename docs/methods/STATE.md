@@ -49,22 +49,29 @@ detail. Report it as prominently as any other choice.
 
 ## Queued question — the cross-system null (opened 2026-10-16, gates paper two)
 
-**Proposal drafted 2026-10-20 and revised the same day, awaiting owner
-ratification:** `docs/methods/cross-system-null-proposal.md`. Its first
-recommendation (a pooled within-system null with the ratio-adjusted
+**Proposal drafted 2026-10-20 and revised twice the same day, awaiting
+owner ratification:** `docs/methods/cross-system-null-proposal.md`. Its
+first recommendation (a pooled within-system null with the ratio-adjusted
 estimate `(1 + d/r)/t`, "adding resolution at the margin") was refuted by
 an adversarial pass and withdrawn: the committed instrument
-`scripts/simulate_null_designs.py` shows pooling halves the decoy count's
-variance without moving its mean, which lowers the probability of reporting
-at the floor and never raises power. The revised recommendation is Design
-R: four arms `A, A', B, B'`, selection against the reference pair at
-`r = 1` exactly as today, with the candidate's self-variance, the reverse
-selection, the pooled estimate and the three replicate target sets
-reported beside it; the orientation declared (the reference defines the
-strata and the new-answers direction); the pooled estimator frozen only
-as the titration's `m` dial. Validation is the stub sweep (MTH-018), not a
-null pair, which flags nothing almost surely under any design. Seven
-ratification items in its §8. HANDOFF §26 amendment.
+`scripts/simulate_null_designs.py` shows pooling reports no more often
+than the single decoy in every row and never raises power. The second
+revision, after a three-seat cross-model review, re-grounds validity on
+pairwise exchangeability rather than equal marginals, which only Design R
+inherits unchanged. The recommendation is Design R: every system
+contributes two clouds (`A, A', B, B'` per pair; whether a roster may
+hold more than one pair is put to the owner), selection against the
+reference pair at `r = 1` exactly as today, with the candidate's
+self-variance, the reverse selection, the reverse orientation, the pooled
+estimate and the three replicate target sets reported beside it; the
+orientation declared (the reference defines the strata and the
+new-answers direction); the estimator `(1 + d/r)/t` over the `b - 1` star
+pairs frozen for the reported pooled number and the titration's `b` dial.
+Validation is the stub sweep (MTH-018's protocol, the bounds
+`tests/test_pipeline.py` asserts) for the selector; the null pair stays
+as a hard stop and a sign statistic with a binomial band, since an
+independent decoy arm flags nothing almost surely under any sound rule.
+Seven ratification items in its §8. HANDOFF §26 and its two amendments.
 
 A vs A-prime calibrates one system against its own variance. A vs B is two
 systems with two self-variances, and no entry yet says whose null certifies
@@ -80,19 +87,26 @@ an hour of GPU.
 
 ## Queued question — agent self-variance, titrated with clear numbers (owner-directed 2026-10-17)
 
-**Protocol drafted 2026-10-20 and revised the same day, awaiting owner
-ratification:** `docs/methods/agent-self-variance-titration-proposal.md`.
-Dials k, b (baseline runs; `r = C(b, 2)` decoy pairs), temperature and the
-decision-versus-text channel with an expectation filed per dial; a
-three-point committed grid on banking-agent plus two gated points and an
-optional re-anchor of k=6 in the current serving regime; a cost table at
-16.9 s per call (the 2026-09-29 smoke-run figure, matching the 13 to 17 s
-of every agent call since 15 October) with the 6 October regime's 65 s as
-the risk column. Two prerequisites named: the generalised estimator and
-roster change (frozen in the cross-system proposal) before the `b` point;
-temperature and the other sampling parameters as hashed study parameters
-with a flag before any temperature point, since `run_study.py` hard-codes
-0.2 and does not hash it. Five ratification items in its §6.
+**Protocol drafted 2026-10-20 and revised twice the same day, awaiting
+owner ratification:** `docs/methods/agent-self-variance-titration-proposal.md`.
+Point 1 (banking-agent at k=20) is owner-directed and records without
+further ratification; every other point waits. Dials k, b (baseline runs;
+`r = b - 1` star decoy pairs), temperature and the decision-versus-text
+channel, each with an expectation that names its refuting observation; a
+three-point committed grid on banking-agent (1, 2, 3) plus two points
+gated on results and an optional re-anchor of k=6 in the current serving
+regime; a cost table in three columns, 16.9 s (the 2026-09-29 pooled
+smoke figure), 20.9 s (banking-agent's own smoke row, the planning figure
+for this grid) and 65 s (the 6 October partial-CPU regime
+`docs/knowledge/environment.md` documents, the risk column). Prerequisites
+named per point: the generalised estimator, roster change and
+roster-aware readers under a dated MTH-025 amendment before point 2; the
+sampling parameters hashed without orphaning the committed checkpoints,
+plus an eight-call temperature-0 repeat check, before any temperature
+point; a hashed anchor label before the re-anchor; a digest guard and
+server-version field in `run_study.py`. The reading rule registers a move
+on the finer `1/t` of the two points or on crossing `q`. Five
+ratification items in its §6.
 
 The agent row's silence decomposed into high text-level self-variance plus
 decisions the fault barely moved (STD-011 appends). The owner's direction:
@@ -101,7 +115,10 @@ it with numbers. Parameters to titrate, each a dial that might polish the
 statistical issue: k (grid fineness and mass per mode); the number of
 baseline arms m (A-prime, A-second, ... — the estimator currently assumes
 one decoy per target, so m > 1 needs a generalised estimator, for example
-(1 + d/m)/t, DESIGNED AND FROZEN before use, per the k=6 lesson);
+(1 + d/m)/t, DESIGNED AND FROZEN before use, per the k=6 lesson; in the
+proposals' terms, `b` baseline clouds with the first counted and
+`r = b - 1` star pairs selecting, estimate `(1 + d/r)/t`, the null
+proposal §0);
 temperature and serving policy as the entropy dial; and the decision-token
 versus rationale-text channel split the decision-level instrument opened.
 First data point: the banking-agent k=20 cell (scheduled 2026-10-17 night).

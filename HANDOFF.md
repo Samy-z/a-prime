@@ -1262,3 +1262,93 @@ The ratification lists moved: the null proposal's is now §8 with seven
 items, the titration's §6 with five. The recommendation changed on the
 strength of a committed instrument, which is the only way a proposal
 here is allowed to change its mind.
+
+### §26 — SECOND AMENDMENT (2026-10-20, same day): the revision reviewed by three seats on two models; what the first amendment got wrong
+
+The revised proposals went through a second review, one statistics seat
+on this session's model and two seats (provenance, cold read) on a
+different model, every finding cross-checked by the other model: 177
+findings, 166 confirmed, most of them the same defects seen from three
+sides. The documents were revised again and the instrument extended so
+that every number they quote is its printed output. Corrections to the
+first amendment, by item, since that text stays as written:
+
+1. The pooling figures were overstated. "Never at k=6" reads "in at most
+   1 of 400 cells at k=6 (three modes, severity 0.9)"; "a quarter to two
+   thirds" reads "none to two thirds" once the severity-0.5 and 0.6 rows
+   the same commands print are counted; the max-decoy ratios are the
+   instrument's 2.03, 1.99 and 1.91 at seed 20261020 with four modes
+   (1.56, 1.87, 1.94 with three), not the session figures quoted; "the
+   reports pooling removes are overwhelmingly true" is measured, 92 to 95
+   percent true at the three k=20 rows and 80 to 86 at k=6; and the two
+   one-sided selections are nested within one stratum and channel only,
+   not across strata under `select_stratified`, so "run both" is a choice
+   of one per stratum, which Design R makes once. The mechanism stated
+   for pooling, variance, is right but is the symptom: a cut admitting
+   `t` targets tolerates `q t - 1` single decoys or `2(q t - 1)` pooled
+   ones, none of 40 against none of 80 for `t` under 15.
+2. The ground was wrong even for Design R. Validity rests on pairwise
+   exchangeability of (target, decoy) under the null, not on equal
+   marginals, which give only a fixed-cut identity while `select` chooses
+   its cut from the data; Design R is the only design for which that
+   argument goes through unchanged. The titration has no `m` dial: the
+   dial is `b`, the estimator `(1 + d/r)/t` is frozen for the reported
+   pooled number and the `b` dial, and `r = b - 1` counts only the star
+   pairs that share the reference cloud with the target, because the
+   pair that shares none is not exchangeable with it (on all-null inputs
+   at k=20 the target is the strict maximum among the star triple on
+   25.3 percent against 25.1 and 25.0, but among all four scores on 21.4
+   against 15.3, 15.3 and 17.8).
+3. "A null pair passes whether or not the design is sound" overclaimed:
+   the instrument models an independent decoy arm, under which a null
+   pair passes almost surely whatever the combination rule; a decoy arm
+   tied to the reference, as a pinned or cached seed makes it, flags in
+   0.1 to 0.5 of null cells when it copies 70 percent of the samples and
+   in every cell when it copies all, which is what the hard stop is for.
+   The exchangeability statistic is now the sign statistic (share of
+   non-tied inputs with the target above its decoy, Binomial(m, 1/2)
+   under the null, band 0.32 to 0.68 at m = 30), replacing the
+   pooled-median share, whose band moved with the mode count and the tie
+   convention. The stub sweep validates the selector at `k` and `n`
+   under the bounds `tests/test_pipeline.py` asserts (seed-mean at or
+   under 0.12, no seed above 0.35); it cannot test equal marginals, which
+   hold in the stub by construction, and no check in the protocol does.
+4. Unchanged, with one addition: `best_achievable` takes `r` too.
+5. "Held fixed now includes the server version, the serving regime and
+   the model digest" was wrong: the digest guard is a prerequisite
+   (`run_study.py` has none), the server version and serving regime are
+   recorded per point and compared, and the thinking switch is fixed by
+   the harness but unhashed. The reading rule "the coarser `1/t`" could
+   never register an improvement against a reference whose best cut
+   admits no decoy (point 0's 0.25 at four over none); it now reads the
+   finer `1/t` of the two points, or crossing `q`. Point 0' hashes to
+   point 0's configuration and needs an anchor label; the 6 October rate
+   is the documented partial-CPU regime, not opaque server state; the
+   grid is planned on banking-agent's own smoke row, 20.9 s, not the
+   pooled 16.9; points 4 and 5 are the conditional ones (2 and 3 wait on
+   prerequisites); and a temperature-0 point needs a collapsed-null
+   guard (MTH-023) and an eight-call repeat check first.
+6. "About 43 hours for four null pairs" reads twelve null-pair
+   recordings, one per model in each of the three summary cells. The
+   positive control is a null pair with the fault in B, paper one's own
+   design, anchored at a certified fraction of 21 of 40 (not the recall
+   21 of 21), and excluded from the partition; the certified fraction is
+   defined on the share-of-answers channel's selection, since the union
+   over channels carries no budget; `n` is filed from the smallest
+   fraction the paper means to resolve, not from a stub `s` and an
+   unrecorded `a`; H3 is stated on the candidate's non-selecting decoys,
+   because for the selecting pair the ceiling holds by arithmetic; and
+   the cost table carries two serving regimes.
+7. New: §26 item 1 said the text channels report "until a null pair
+   measures them"; a null pair is one model and cannot carry a style
+   term. The instrument is a style-only control, and the partition
+   channels carry part of the term too (the judge merges reorderings 75
+   percent of the time, MTH-020), so whether any channel selects before
+   that control has run is put to the owner.
+8. New: whether a roster may hold more than one pair (the eight-arm
+   layout the pre-registration costs) departs from the "four arms" of
+   the 2026-10-16 queue entry and is put to the owner explicitly.
+
+The instrument gained the within-baseline `b = 3` designs, the tied
+decoy arm, the sign statistic and the count ratios, so "every simulation
+figure" in the proposals is now true of it.

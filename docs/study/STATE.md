@@ -37,20 +37,27 @@ untraceable row is refused before any file is written.
 ## Paper two
 
 Pre-registration skeleton drafted 2026-10-20, **DRAFT, NOT REGISTERED**:
-`docs/study/preregistration-2-draft.md` (revised the same day after an
-adversarial pass). A validity check that runs first (the stub sweep at the
-registered `k` and `n`), then three hypotheses with their refutation
-conditions (the null pair as a hard stop plus an exchangeability band from
-`scripts/simulate_null_designs.py`; format over domain with a positive
-control; the self-variance ceiling with its antecedent count asked for in
-advance), the D10 pool per BCH-019 with sampling parameters set explicitly
-and hashed, protocol slots that wait on the ratified cross-system null,
-the MTH-024 floor table and a cost table computed from measured per-call
-times (about 440 hours as 36 four-arm pair-cells against about 150 as six
-eight-arm rosters), an empty dated predictions table with a consequence
-per row, and the registration procedure (fill, commit alone, tag
-`prereg-2-v1`, append only after). Nothing may be recorded against it
-before step 2 of its §9.
+`docs/study/preregistration-2-draft.md` (revised twice the same day, the
+second time after a three-seat cross-model review). The certified
+fraction is defined on the share-of-answers channel's stratified
+selection, the union over channels reported without a budget claim. A
+validity check runs first (the stub sweep at the registered `k` over
+candidate `n`, under the bounds `tests/test_pipeline.py` asserts), then
+three hypotheses with their refutation conditions (the null pair as a
+hard stop plus a sign statistic with a binomial band and a count rule
+over cells; format over domain with a positive control that is paper
+one's own within-system design, anchored at a certified fraction of 21 of
+40; the self-variance ceiling on the candidate's non-selecting decoys,
+with its antecedent count asked for in advance), the D10 pool per BCH-019
+with the 3B fixed here and every Modelfile parameter set and hashed,
+protocol slots that wait on the ratified cross-system null, the MTH-024
+floor table with `n` filed from the smallest fraction the paper means to
+resolve, and a cost table in two serving regimes (about 440 or 145 hours
+as 36 four-arm pair-cells against about 150 or 50 as six eight-arm
+rosters, model-switch loads unmeasured), an empty dated predictions table
+with a consequence per row, and the registration procedure (fill, commit
+alone, tag `prereg-2-v1`, append only after). Nothing may be recorded
+against it before step 2 of its §9.
 
 ## Figures
 
