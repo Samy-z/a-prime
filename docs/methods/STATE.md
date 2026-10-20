@@ -49,12 +49,22 @@ detail. Report it as prominently as any other choice.
 
 ## Queued question — the cross-system null (opened 2026-10-16, gates paper two)
 
-**Proposal drafted 2026-10-20, awaiting owner ratification:**
-`docs/methods/cross-system-null-proposal.md`. Recommends four arms with a
-pooled within-system null and the ratio-adjusted estimate `(1 + d/r)/t`,
-the two one-sided counts and each system's self-variance reported beside
-it, a recorder roster change, and the drift control (MTH-026) as the gate
-for stored-baseline certification. Five ratification items in its §6.
+**Proposal drafted 2026-10-20 and revised the same day, awaiting owner
+ratification:** `docs/methods/cross-system-null-proposal.md`. Its first
+recommendation (a pooled within-system null with the ratio-adjusted
+estimate `(1 + d/r)/t`, "adding resolution at the margin") was refuted by
+an adversarial pass and withdrawn: the committed instrument
+`scripts/simulate_null_designs.py` shows pooling halves the decoy count's
+variance without moving its mean, which lowers the probability of reporting
+at the floor and never raises power. The revised recommendation is Design
+R: four arms `A, A', B, B'`, selection against the reference pair at
+`r = 1` exactly as today, with the candidate's self-variance, the reverse
+selection, the pooled estimate and the three replicate target sets
+reported beside it; the orientation declared (the reference defines the
+strata and the new-answers direction); the pooled estimator frozen only
+as the titration's `m` dial. Validation is the stub sweep (MTH-018), not a
+null pair, which flags nothing almost surely under any design. Seven
+ratification items in its §8. HANDOFF §26 amendment.
 
 A vs A-prime calibrates one system against its own variance. A vs B is two
 systems with two self-variances, and no entry yet says whose null certifies
@@ -70,13 +80,19 @@ an hour of GPU.
 
 ## Queued question — agent self-variance, titrated with clear numbers (owner-directed 2026-10-17)
 
-**Protocol drafted 2026-10-20, awaiting owner ratification:**
-`docs/methods/agent-self-variance-titration-proposal.md`. Dials k, m,
-temperature and the decision-versus-text channel with an expectation filed
-per dial; a three-point committed grid on banking-agent plus two gated
-points; a cost table at the brief's 16.9 s per call and at the k=6 banking
-mean of 65 s, which differ by a factor of four until the k=20 file says
-which holds. Four ratification items in its §6.
+**Protocol drafted 2026-10-20 and revised the same day, awaiting owner
+ratification:** `docs/methods/agent-self-variance-titration-proposal.md`.
+Dials k, b (baseline runs; `r = C(b, 2)` decoy pairs), temperature and the
+decision-versus-text channel with an expectation filed per dial; a
+three-point committed grid on banking-agent plus two gated points and an
+optional re-anchor of k=6 in the current serving regime; a cost table at
+16.9 s per call (the 2026-09-29 smoke-run figure, matching the 13 to 17 s
+of every agent call since 15 October) with the 6 October regime's 65 s as
+the risk column. Two prerequisites named: the generalised estimator and
+roster change (frozen in the cross-system proposal) before the `b` point;
+temperature and the other sampling parameters as hashed study parameters
+with a flag before any temperature point, since `run_study.py` hard-codes
+0.2 and does not hash it. Five ratification items in its §6.
 
 The agent row's silence decomposed into high text-level self-variance plus
 decisions the fault barely moved (STD-011 appends). The owner's direction:

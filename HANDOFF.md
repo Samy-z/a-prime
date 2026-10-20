@@ -1189,3 +1189,76 @@ titration's `m` dial and the pre-registration's protocol slots); the
 titration grid and which cost column to plan on (item 2's §6, four items);
 then the slots and predictions of item 3, filled and dated before the
 first null pair is recorded.
+
+### §26 — AMENDMENT (2026-10-20, same day): the null proposal's recommendation withdrawn and replaced; all three proposals revised against an instrument
+
+An adversarial verification pass over the three proposals (independent
+refuters per document, a session artifact) found the null proposal's
+central ground false in effect, and the revision replaces it rather than
+editing the claim away. What changed and why:
+
+1. **Pooling does not add resolution.** The first draft read "same
+   expected decoy count, half the variance" as a finer estimate. A
+   committed instrument, `scripts/simulate_null_designs.py` (a synthetic
+   cell with known truth, the mode-share distance on true modes,
+   grid-valued scores, `select_ratio` asserted equal to `fdr.select` at
+   `r = 1`), measures what the selector does with it: pooling never
+   reports more often than the single decoy, reports a quarter to two
+   thirds as often at k=20, and never at k=6 where the single decoy
+   reports in 1 to 2 percent of cells. `select` takes the most permissive
+   cut whose estimate clears `q`, so it profits from draws in which the
+   decoys fall below a cut, and halving the decoy count's variance removes
+   those draws. The realised rate of the single form sits at 0.02 at its
+   highest row, so the reports pooling removes are overwhelmingly true.
+   The per-input maximum is about twice conservative at the top of the
+   grid (measured 2.2, 2.1, 1.95) and reports fewer still; the two
+   one-sided selections are nested sets, so "run both" is a choice of one.
+2. **The recommendation is now Design R:** four arms recorded, selection
+   against the reference pair at `r = 1` exactly as today, with the
+   candidate's self-variance, the reverse selection, the pooled estimate
+   and the three replicate target sets reported and never selecting; the
+   orientation declared, because `novel_mode_mass` is asymmetric and the
+   strata come from the baseline's clouds, so a symmetric rule is not
+   available without changing both. The pooled estimator `(1 + d/r)/t`
+   stays frozen only as the titration's `m` dial, whose expectation it
+   now explains.
+3. **The null pair cannot validate the design.** On an all-null cell the
+   instrument puts the probability of flagging anything at 0.0000 for
+   every design at n=40, k=6 and k=20, so a null pair passes whether or
+   not the design is sound. Validation is the stub sweep at the registered
+   `k` and `n` (MTH-018's protocol); the null pair stays as a hard stop
+   plus an exchangeability statistic with a band from the instrument.
+4. **Terms fixed once, in the null proposal's §0, and used by both
+   proposals:** `b` baseline clouds per system, `C(b, 2)` within pairs,
+   `r` decoy pairs per target; the first drafts had `m` and `b` meaning
+   different things in different places. `select_stratified` requires
+   equal-length targets, decoys and strata, so `r > 1` needs a
+   decoy-to-input mapping with a decoy carrying its input's stratum;
+   `best_achievable`'s docstring and code disagree on tie direction and
+   the freeze must pick one.
+5. **Titration corrections:** temperature is hard-coded at 0.2 in
+   `run_study.py`'s chat factory with no flag and is not in the hashed
+   parameters, so a point at another temperature would resume point 1's
+   checkpoint; hashing it is a prerequisite with a dated entry. The
+   16.9 s is the 2026-09-29 smoke-run figure (three agent cells of four
+   inputs, 202 s), not a measured study rate; the study's own rates are
+   65 s per call on 6 October and 13 to 17 s since 15 October, two
+   serving regimes that point 0 and point 1 straddle, so an optional
+   point 0' re-anchors k=6 in the current regime. Held-fixed now includes
+   the server version, the serving regime and the model digest. Reading
+   rule: a point moves the reading if its best estimate differs by more
+   than the coarser `1/t` of the two points.
+6. **Pre-registration corrections:** sizing as the floor table
+   `(1/q)/n` with the stub sweep supplying `s`; cost from measured
+   per-format timings (about 440 hours as 36 four-arm pair-cells, about
+   150 as six eight-arm rosters, about 43 for four null pairs in the
+   summary cells); a validity check V before H1; H2 with a positive
+   control and a three-way partition; H3 with its expected antecedent
+   count asked for in advance; the five banned phrasings carried whole
+   with three additions; `ministral-3:8b`'s default temperature recorded
+   as unmeasured.
+
+The ratification lists moved: the null proposal's is now §8 with seven
+items, the titration's §6 with five. The recommendation changed on the
+strength of a committed instrument, which is the only way a proposal
+here is allowed to change its mind.
