@@ -27,9 +27,17 @@ def _example_block() -> list[str]:
 
 
 def test_readme_example_matches_the_demo_output():
+    # Pin the encoding on BOTH sides of the pipe. Left to the environment,
+    # a shell that exports PYTHONIOENCODING=utf-8 (this project's own
+    # convention for scripts that print non-ASCII) makes the child emit
+    # UTF-8 while text=True decodes with the Windows codepage, and the
+    # README's "·" lines come back as mojibake — a spurious red that reads
+    # exactly like a stale README (2026-11-04).
+    env = {**__import__("os").environ, "PYTHONIOENCODING": "utf-8"}
     out = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "demo_detect.py")],
         capture_output=True, text=True, timeout=120, cwd=ROOT,
+        encoding="utf-8", env=env,
     )
     assert out.returncode == 0, out.stderr[-2000:]
     printed = out.stdout.splitlines()
