@@ -14,7 +14,16 @@ import re
 from pathlib import Path
 
 COMPARE = Path(__file__).resolve().parents[1] / "compare"
-ALLOWED_IMPORTS: set[str] = set()  # grows deliberately, never by convenience
+# Grows deliberately, never by convenience. Each name is here because the
+# pairwise stage (CMP-001/002, Design R) consumes it as public API:
+ALLOWED_IMPORTS: set[str] = {
+    "aprime.net",             # truststore before the NLI judge downloads
+    "aprime.detect",          # the frozen pipeline: detect() -> Report
+    "aprime.recorder",        # Sample/Recording, constructed from the store
+    "aprime.clustering",      # NLIEquivalence at the pinned 0.7 threshold
+    "aprime.probes.channels", # the pinned NLI judge (NLI_MODELS, NLIChannel)
+    "aprime.provenance",      # capture() + corpus_fingerprint for the report
+}
 
 _IMPORT = re.compile(r"^\s*(?:from|import)\s+(aprime[\w.]*)", re.M)
 
