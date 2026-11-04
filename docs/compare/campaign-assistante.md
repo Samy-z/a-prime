@@ -61,22 +61,25 @@ system RAM, and no documented breakage on the serving stack.
 
 ## Measurement plan
 
-1. **Pace and footprint per candidate**, CPU-only on the dev machine
-   (`num_gpu: 0` in Ollama options so the 4060 does not flatter anyone),
-   reported as seconds per T3/T4 task and peak RAM. A five-year-old office
-   CPU will be slower than the dev machine's; measured ratios, not absolute
-   times, carry the decision.
-2. **Pairwise difference triage with a-prime.** For each candidate pair on
+1. **Pace and footprint per candidate** — DONE 2026-11-04 (CMP-002).
+   CPU-only on the dev machine (`num_gpu: 0` so the 4060 flatters nobody),
+   40 tasks per candidate, results in `compare/results/pace-2026-11.json`.
+   Outcome: llama3.2:3b (2.8 s/task) and phi4-mini (3.0 s/task) nominated;
+   ministral-3:3b third; qwen3.5:4b excluded (thinking default returned
+   empty text on 40/40 tasks AND last decode rate); smollm3 and lfm2.5
+   unavailable under tried tags. French gate passed by both nominees via
+   `compare/spotcheck_french.py`. A five-year-old office CPU will be
+   slower; measured ratios, not absolute times, carry the decision.
+2. **Pairwise difference triage with a-prime.** For the nominated pair on
    the same task set, k samples per input, the detector flags only inputs
    where the two models' behaviour certifiably differs; a human judges the
    flagged cases only. This is the comparator's honest claim: a-prime does
    not rank quality, it concentrates human judgment where candidates
-   actually disagree. The null design for cross-system pairs is the
-   ratification-pending proposal in
-   `docs/methods/cross-system-null-proposal.md`; until it is ratified, the
-   campaign runs pace, footprint and SINGLE-system sanity only, and the
-   pairwise stage waits. No study rail crosses into this campaign and none
-   of its numbers enter the paper.
+   actually disagree. The null design is Design R, ratified and frozen in
+   MTH-027 (2026-11-04); sizing is CMP-001 (n=40, k=20, q=0.10). The
+   recording mirrors the deployment: CPU only, both models resident. No
+   study rail crosses into this campaign and none of its numbers enter the
+   paper.
 3. **Human judgment protocol**: flagged inputs go to the owner (and the
    real user where French tone matters) blind to which model produced
    which output.

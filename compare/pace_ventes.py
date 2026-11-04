@@ -68,18 +68,32 @@ def on_disk() -> dict[str, int]:
     return {m["name"]: m.get("size", 0) for m in api("/api/tags").get("models", [])}
 
 
+def resolve(tag: str, have: dict[str, int]) -> str | None:
+    """A bare tag is stored by Ollama as tag:latest; match either spelling.
+
+    The first pass missed this: phi4-mini pulled fine but its size was then
+    looked up under the bare name and recorded as 0.00 GB (corrected
+    post-run from /api/tags, noted in CMP-002)."""
+    if tag in have:
+        return tag
+    if ":" not in tag and f"{tag}:latest" in have:
+        return f"{tag}:latest"
+    return None
+
+
 def ensure(tags: list[str], pull: bool) -> tuple[str | None, str]:
     have = on_disk()
     for tag in tags:
-        if tag in have:
-            return tag, "already on disk"
+        hit = resolve(tag, have)
+        if hit:
+            return hit, "already on disk"
     if not pull:
         return None, "not on disk (--no-pull)"
     for tag in tags:
         proc = subprocess.run(["ollama", "pull", tag],
                               capture_output=True, text=True, timeout=3600)
         if proc.returncode == 0:
-            return tag, "pulled"
+            return resolve(tag, on_disk()) or tag, "pulled"
     return None, "no tag found: " + ", ".join(tags)
 
 
@@ -141,7 +155,8 @@ def main() -> int:
             results["models"][name] = {"status": "unavailable", "detail": how}
         else:
             size = on_disk().get(tag, 0)
-            print(f"  {tag} ({how}), {size / 1e9:.1f} GB — measuring 14 tasks")
+            print(f"  {tag} ({how}), {size / 1e9:.1f} GB — "
+                  f"measuring {len(tasks())} tasks")
             try:
                 m = measure(tag)
                 results["models"][name] = {

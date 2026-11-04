@@ -1,0 +1,50 @@
+{
+  "purpose": "French-capability gate for the CMP pair rule",
+  "tasks": [
+    "msg-01",
+    "msg-02",
+    "out-01"
+  ],
+  "models": {
+    "llama3.2:3b": [
+      {
+        "task": "msg-01",
+        "lang_in": "en",
+        "wall_s": 5.35,
+        "text": "Bonjour, concernant la facture CMD-2026-1004, notre équipe comptable confirme que le paiement sera effectué la prochaine semaine. Désolés pour le retard, nous avions un backlog d'approbation interne."
+      },
+      {
+        "task": "msg-02",
+        "lang_in": "de",
+        "wall_s": 2.88,
+        "text": "Bonjour, la livraison pour le CMD-2026-1011 est incomplète arrivée. Il manque 2 pièces sur 5 de la position P-1204. Veuillez envoyer la quantité manquante le plus rapidement possible."
+      },
+      {
+        "task": "out-01",
+        "lang_in": "fr",
+        "wall_s": 8.35,
+        "text": "Objet : Relance de la commande CMD-2026-1015\n\nCher(e) [Nom du client],\n\nJe vous écris pour relancer la commande CMD-2026-1015 qui était initialement prévue pour être livrée le [Date d'échéance]. Malheureusement, nous avons constaté que l'échéance a été dépassée de 12 jours et nous voulons vous informer de cette situation.\n\nNous comprenons que cela peut vous causer des inconvénients et nous sommes prêts à discuter de solutions pour rétablir la date de livraison. Nous vous proposons de nous contacter dès que possible pour discuter de cette affaire.\n\nMerci de nous faire savoir si vous avez des questions ou des préoccupations.\n\nCordialement,\n[Votre nom]"
+      }
+    ],
+    "phi4-mini:latest": [
+      {
+        "task": "msg-01",
+        "lang_in": "en",
+        "wall_s": 5.95,
+        "text": "Bonjour, en ce qui concerne le numéro de facture CMD-2026-1004, notre équipe des comptes confirme que le paiement sera exécuté le vendredi prochain. Nous nous excusons pour le retard, nous avons eu un retard interne d'approbation."
+      },
+      {
+        "task": "msg-02",
+        "lang_in": "de",
+        "wall_s": 2.69,
+        "text": "Bonjour, la livraison de CMD-2026-1011 est arrivée incomplet. Manque 2 des 5 pièces de la position P-1204. Veuillez envoyer la quantité manquante dès que possible."
+      },
+      {
+        "task": "out-01",
+        "lang_in": "fr",
+        "wall_s": 7.02,
+        "text": "Objet : Relance pour le CMD-2026-1015 (échéance dépassée de 12 jours)\n\nCher Monsieur/Madame,\n\nNous tenons à vous rappeler le rappel concernant le CMD-2026-1015, dont l'échéance est passée de 12 jours. Nous espérons que vous trouverez le temps de répondre à cette demande afin de poursuivre le processus de commande.\n\nNous sommes à votre disposition pour toute information complémentaire ou pour répondre à vos questions.\n\nCordialement,\n\n[Votre Nom]\n[Votre Poste]\n[Nom de l'entreprise]\n[Coordonnées de l'entreprise]"
+      }
+    ]
+  }
+}

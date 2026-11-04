@@ -1,0 +1,1170 @@
+{
+  "purpose": "pace pass, campaign-assistante measurement plan 1",
+  "mode": "CPU only (num_gpu: 0) on the dev machine",
+  "models": {
+    "qwen3.5-4b": {
+      "status": "complete",
+      "tag": "qwen3.5:4b",
+      "size_gb": 3.32,
+      "tasks": [
+        {
+          "task": "msg-01",
+          "wall_s": 30.21,
+          "out_tokens": 400,
+          "tok_per_s": 16.13,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-02",
+          "wall_s": 26.51,
+          "out_tokens": 400,
+          "tok_per_s": 15.85,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-03",
+          "wall_s": 26.23,
+          "out_tokens": 400,
+          "tok_per_s": 16.03,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-04",
+          "wall_s": 26.48,
+          "out_tokens": 400,
+          "tok_per_s": 15.82,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-05",
+          "wall_s": 26.48,
+          "out_tokens": 400,
+          "tok_per_s": 15.86,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-06",
+          "wall_s": 28.37,
+          "out_tokens": 400,
+          "tok_per_s": 14.7,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-07",
+          "wall_s": 28.77,
+          "out_tokens": 400,
+          "tok_per_s": 14.55,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-08",
+          "wall_s": 26.09,
+          "out_tokens": 400,
+          "tok_per_s": 16.06,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-09",
+          "wall_s": 25.55,
+          "out_tokens": 400,
+          "tok_per_s": 16.38,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-10",
+          "wall_s": 29.54,
+          "out_tokens": 400,
+          "tok_per_s": 14.08,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-11",
+          "wall_s": 33.74,
+          "out_tokens": 400,
+          "tok_per_s": 12.3,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-12",
+          "wall_s": 30.79,
+          "out_tokens": 400,
+          "tok_per_s": 13.52,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-13",
+          "wall_s": 34.14,
+          "out_tokens": 400,
+          "tok_per_s": 12.17,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-14",
+          "wall_s": 36.18,
+          "out_tokens": 400,
+          "tok_per_s": 11.47,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-15",
+          "wall_s": 38.42,
+          "out_tokens": 400,
+          "tok_per_s": 10.74,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-16",
+          "wall_s": 39.98,
+          "out_tokens": 400,
+          "tok_per_s": 10.35,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-17",
+          "wall_s": 38.84,
+          "out_tokens": 400,
+          "tok_per_s": 10.64,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-18",
+          "wall_s": 37.12,
+          "out_tokens": 400,
+          "tok_per_s": 11.17,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-19",
+          "wall_s": 36.83,
+          "out_tokens": 400,
+          "tok_per_s": 11.22,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-20",
+          "wall_s": 38.18,
+          "out_tokens": 400,
+          "tok_per_s": 10.84,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-21",
+          "wall_s": 38.93,
+          "out_tokens": 400,
+          "tok_per_s": 10.64,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-22",
+          "wall_s": 38.82,
+          "out_tokens": 400,
+          "tok_per_s": 10.65,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-23",
+          "wall_s": 40.35,
+          "out_tokens": 400,
+          "tok_per_s": 10.24,
+          "out_chars": 0
+        },
+        {
+          "task": "msg-24",
+          "wall_s": 39.37,
+          "out_tokens": 400,
+          "tok_per_s": 10.51,
+          "out_chars": 0
+        },
+        {
+          "task": "out-01",
+          "wall_s": 40.33,
+          "out_tokens": 400,
+          "tok_per_s": 10.23,
+          "out_chars": 0
+        },
+        {
+          "task": "out-02",
+          "wall_s": 35.06,
+          "out_tokens": 400,
+          "tok_per_s": 11.77,
+          "out_chars": 0
+        },
+        {
+          "task": "out-03",
+          "wall_s": 34.35,
+          "out_tokens": 400,
+          "tok_per_s": 12.04,
+          "out_chars": 0
+        },
+        {
+          "task": "out-04",
+          "wall_s": 36.72,
+          "out_tokens": 400,
+          "tok_per_s": 11.21,
+          "out_chars": 0
+        },
+        {
+          "task": "out-05",
+          "wall_s": 35.02,
+          "out_tokens": 400,
+          "tok_per_s": 11.8,
+          "out_chars": 0
+        },
+        {
+          "task": "out-06",
+          "wall_s": 33.84,
+          "out_tokens": 400,
+          "tok_per_s": 12.19,
+          "out_chars": 0
+        },
+        {
+          "task": "out-07",
+          "wall_s": 36.97,
+          "out_tokens": 400,
+          "tok_per_s": 11.16,
+          "out_chars": 0
+        },
+        {
+          "task": "out-08",
+          "wall_s": 32.97,
+          "out_tokens": 400,
+          "tok_per_s": 12.57,
+          "out_chars": 0
+        },
+        {
+          "task": "out-09",
+          "wall_s": 31.85,
+          "out_tokens": 400,
+          "tok_per_s": 12.99,
+          "out_chars": 0
+        },
+        {
+          "task": "out-10",
+          "wall_s": 31.79,
+          "out_tokens": 400,
+          "tok_per_s": 12.99,
+          "out_chars": 0
+        },
+        {
+          "task": "out-11",
+          "wall_s": 32.52,
+          "out_tokens": 400,
+          "tok_per_s": 12.71,
+          "out_chars": 0
+        },
+        {
+          "task": "out-12",
+          "wall_s": 32.22,
+          "out_tokens": 400,
+          "tok_per_s": 12.8,
+          "out_chars": 0
+        },
+        {
+          "task": "out-13",
+          "wall_s": 32.62,
+          "out_tokens": 400,
+          "tok_per_s": 12.67,
+          "out_chars": 0
+        },
+        {
+          "task": "out-14",
+          "wall_s": 32.22,
+          "out_tokens": 400,
+          "tok_per_s": 12.86,
+          "out_chars": 0
+        },
+        {
+          "task": "out-15",
+          "wall_s": 32.89,
+          "out_tokens": 400,
+          "tok_per_s": 12.54,
+          "out_chars": 0
+        },
+        {
+          "task": "out-16",
+          "wall_s": 32.84,
+          "out_tokens": 400,
+          "tok_per_s": 12.58,
+          "out_chars": 0
+        }
+      ],
+      "median_wall_s": 33.74,
+      "median_tok_per_s": 12.54
+    },
+    "llama3.2-3b": {
+      "status": "complete",
+      "tag": "llama3.2:3b",
+      "size_gb": 2.02,
+      "tasks": [
+        {
+          "task": "msg-01",
+          "wall_s": 4.62,
+          "out_tokens": 59,
+          "tok_per_s": 26.41,
+          "out_chars": 210
+        },
+        {
+          "task": "msg-02",
+          "wall_s": 2.46,
+          "out_tokens": 55,
+          "tok_per_s": 26.33,
+          "out_chars": 183
+        },
+        {
+          "task": "msg-03",
+          "wall_s": 2.81,
+          "out_tokens": 66,
+          "tok_per_s": 26.23,
+          "out_chars": 240
+        },
+        {
+          "task": "msg-04",
+          "wall_s": 2.64,
+          "out_tokens": 62,
+          "tok_per_s": 26.33,
+          "out_chars": 225
+        },
+        {
+          "task": "msg-05",
+          "wall_s": 2.54,
+          "out_tokens": 58,
+          "tok_per_s": 26.34,
+          "out_chars": 196
+        },
+        {
+          "task": "msg-06",
+          "wall_s": 1.99,
+          "out_tokens": 45,
+          "tok_per_s": 26.51,
+          "out_chars": 137
+        },
+        {
+          "task": "msg-07",
+          "wall_s": 2.47,
+          "out_tokens": 58,
+          "tok_per_s": 26.32,
+          "out_chars": 178
+        },
+        {
+          "task": "msg-08",
+          "wall_s": 2.14,
+          "out_tokens": 48,
+          "tok_per_s": 26.2,
+          "out_chars": 153
+        },
+        {
+          "task": "msg-09",
+          "wall_s": 2.79,
+          "out_tokens": 66,
+          "tok_per_s": 25.88,
+          "out_chars": 216
+        },
+        {
+          "task": "msg-10",
+          "wall_s": 2.2,
+          "out_tokens": 49,
+          "tok_per_s": 26.41,
+          "out_chars": 165
+        },
+        {
+          "task": "msg-11",
+          "wall_s": 2.43,
+          "out_tokens": 57,
+          "tok_per_s": 26.37,
+          "out_chars": 199
+        },
+        {
+          "task": "msg-12",
+          "wall_s": 2.22,
+          "out_tokens": 50,
+          "tok_per_s": 26.41,
+          "out_chars": 145
+        },
+        {
+          "task": "msg-13",
+          "wall_s": 3.24,
+          "out_tokens": 75,
+          "tok_per_s": 25.72,
+          "out_chars": 264
+        },
+        {
+          "task": "msg-14",
+          "wall_s": 2.31,
+          "out_tokens": 53,
+          "tok_per_s": 26.18,
+          "out_chars": 154
+        },
+        {
+          "task": "msg-15",
+          "wall_s": 2.55,
+          "out_tokens": 58,
+          "tok_per_s": 25.63,
+          "out_chars": 203
+        },
+        {
+          "task": "msg-16",
+          "wall_s": 2.05,
+          "out_tokens": 46,
+          "tok_per_s": 26.48,
+          "out_chars": 162
+        },
+        {
+          "task": "msg-17",
+          "wall_s": 2.03,
+          "out_tokens": 46,
+          "tok_per_s": 26.46,
+          "out_chars": 156
+        },
+        {
+          "task": "msg-18",
+          "wall_s": 2.75,
+          "out_tokens": 65,
+          "tok_per_s": 26.28,
+          "out_chars": 217
+        },
+        {
+          "task": "msg-19",
+          "wall_s": 2.45,
+          "out_tokens": 57,
+          "tok_per_s": 26.37,
+          "out_chars": 183
+        },
+        {
+          "task": "msg-20",
+          "wall_s": 2.14,
+          "out_tokens": 49,
+          "tok_per_s": 26.43,
+          "out_chars": 157
+        },
+        {
+          "task": "msg-21",
+          "wall_s": 3.08,
+          "out_tokens": 73,
+          "tok_per_s": 26.26,
+          "out_chars": 250
+        },
+        {
+          "task": "msg-22",
+          "wall_s": 2.71,
+          "out_tokens": 64,
+          "tok_per_s": 26.33,
+          "out_chars": 218
+        },
+        {
+          "task": "msg-23",
+          "wall_s": 2.2,
+          "out_tokens": 50,
+          "tok_per_s": 26.43,
+          "out_chars": 166
+        },
+        {
+          "task": "msg-24",
+          "wall_s": 2.19,
+          "out_tokens": 50,
+          "tok_per_s": 26.45,
+          "out_chars": 183
+        },
+        {
+          "task": "out-01",
+          "wall_s": 10.58,
+          "out_tokens": 253,
+          "tok_per_s": 25.15,
+          "out_chars": 1012
+        },
+        {
+          "task": "out-02",
+          "wall_s": 9.46,
+          "out_tokens": 235,
+          "tok_per_s": 25.44,
+          "out_chars": 915
+        },
+        {
+          "task": "out-03",
+          "wall_s": 7.68,
+          "out_tokens": 189,
+          "tok_per_s": 25.54,
+          "out_chars": 712
+        },
+        {
+          "task": "out-04",
+          "wall_s": 9.02,
+          "out_tokens": 224,
+          "tok_per_s": 25.36,
+          "out_chars": 869
+        },
+        {
+          "task": "out-05",
+          "wall_s": 7.15,
+          "out_tokens": 177,
+          "tok_per_s": 25.55,
+          "out_chars": 697
+        },
+        {
+          "task": "out-06",
+          "wall_s": 6.21,
+          "out_tokens": 155,
+          "tok_per_s": 25.77,
+          "out_chars": 560
+        },
+        {
+          "task": "out-07",
+          "wall_s": 9.67,
+          "out_tokens": 232,
+          "tok_per_s": 24.68,
+          "out_chars": 888
+        },
+        {
+          "task": "out-08",
+          "wall_s": 7.24,
+          "out_tokens": 177,
+          "tok_per_s": 25.28,
+          "out_chars": 635
+        },
+        {
+          "task": "out-09",
+          "wall_s": 10.33,
+          "out_tokens": 254,
+          "tok_per_s": 25.25,
+          "out_chars": 946
+        },
+        {
+          "task": "out-10",
+          "wall_s": 8.47,
+          "out_tokens": 210,
+          "tok_per_s": 25.44,
+          "out_chars": 836
+        },
+        {
+          "task": "out-11",
+          "wall_s": 6.33,
+          "out_tokens": 158,
+          "tok_per_s": 25.79,
+          "out_chars": 596
+        },
+        {
+          "task": "out-12",
+          "wall_s": 8.75,
+          "out_tokens": 216,
+          "tok_per_s": 25.29,
+          "out_chars": 821
+        },
+        {
+          "task": "out-13",
+          "wall_s": 7.76,
+          "out_tokens": 191,
+          "tok_per_s": 25.32,
+          "out_chars": 799
+        },
+        {
+          "task": "out-14",
+          "wall_s": 10.62,
+          "out_tokens": 260,
+          "tok_per_s": 25.15,
+          "out_chars": 928
+        },
+        {
+          "task": "out-15",
+          "wall_s": 9.01,
+          "out_tokens": 223,
+          "tok_per_s": 25.33,
+          "out_chars": 857
+        },
+        {
+          "task": "out-16",
+          "wall_s": 6.24,
+          "out_tokens": 156,
+          "tok_per_s": 25.81,
+          "out_chars": 609
+        }
+      ],
+      "median_wall_s": 2.81,
+      "median_tok_per_s": 26.2
+    },
+    "smollm3-3b": {
+      "status": "unavailable",
+      "detail": "no tag found: smollm3:3b, smollm3"
+    },
+    "phi4-mini": {
+      "status": "complete",
+      "tag": "phi4-mini:latest",
+      "size_gb": 2.49,
+      "tasks": [
+        {
+          "task": "msg-01",
+          "wall_s": 4.66,
+          "out_tokens": 52,
+          "tok_per_s": 22.04,
+          "out_chars": 227
+        },
+        {
+          "task": "msg-02",
+          "wall_s": 2.46,
+          "out_tokens": 47,
+          "tok_per_s": 22.03,
+          "out_chars": 164
+        },
+        {
+          "task": "msg-03",
+          "wall_s": 2.66,
+          "out_tokens": 52,
+          "tok_per_s": 21.87,
+          "out_chars": 212
+        },
+        {
+          "task": "msg-04",
+          "wall_s": 2.76,
+          "out_tokens": 54,
+          "tok_per_s": 21.95,
+          "out_chars": 223
+        },
+        {
+          "task": "msg-05",
+          "wall_s": 2.49,
+          "out_tokens": 47,
+          "tok_per_s": 21.96,
+          "out_chars": 190
+        },
+        {
+          "task": "msg-06",
+          "wall_s": 1.5,
+          "out_tokens": 29,
+          "tok_per_s": 22.41,
+          "out_chars": 109
+        },
+        {
+          "task": "msg-07",
+          "wall_s": 2.6,
+          "out_tokens": 51,
+          "tok_per_s": 22.02,
+          "out_chars": 191
+        },
+        {
+          "task": "msg-08",
+          "wall_s": 2.07,
+          "out_tokens": 39,
+          "tok_per_s": 21.9,
+          "out_chars": 153
+        },
+        {
+          "task": "msg-09",
+          "wall_s": 3.01,
+          "out_tokens": 59,
+          "tok_per_s": 21.65,
+          "out_chars": 208
+        },
+        {
+          "task": "msg-10",
+          "wall_s": 2.23,
+          "out_tokens": 42,
+          "tok_per_s": 21.87,
+          "out_chars": 176
+        },
+        {
+          "task": "msg-11",
+          "wall_s": 2.24,
+          "out_tokens": 43,
+          "tok_per_s": 21.82,
+          "out_chars": 157
+        },
+        {
+          "task": "msg-12",
+          "wall_s": 2.48,
+          "out_tokens": 46,
+          "tok_per_s": 21.66,
+          "out_chars": 162
+        },
+        {
+          "task": "msg-13",
+          "wall_s": 3.21,
+          "out_tokens": 63,
+          "tok_per_s": 21.71,
+          "out_chars": 284
+        },
+        {
+          "task": "msg-14",
+          "wall_s": 2.5,
+          "out_tokens": 48,
+          "tok_per_s": 21.79,
+          "out_chars": 174
+        },
+        {
+          "task": "msg-15",
+          "wall_s": 2.37,
+          "out_tokens": 46,
+          "tok_per_s": 21.82,
+          "out_chars": 193
+        },
+        {
+          "task": "msg-16",
+          "wall_s": 2.25,
+          "out_tokens": 43,
+          "tok_per_s": 22.02,
+          "out_chars": 161
+        },
+        {
+          "task": "msg-17",
+          "wall_s": 2.13,
+          "out_tokens": 41,
+          "tok_per_s": 22.09,
+          "out_chars": 156
+        },
+        {
+          "task": "msg-18",
+          "wall_s": 2.59,
+          "out_tokens": 51,
+          "tok_per_s": 21.96,
+          "out_chars": 221
+        },
+        {
+          "task": "msg-19",
+          "wall_s": 2.43,
+          "out_tokens": 47,
+          "tok_per_s": 21.98,
+          "out_chars": 173
+        },
+        {
+          "task": "msg-20",
+          "wall_s": 2.35,
+          "out_tokens": 45,
+          "tok_per_s": 22.04,
+          "out_chars": 156
+        },
+        {
+          "task": "msg-21",
+          "wall_s": 2.98,
+          "out_tokens": 59,
+          "tok_per_s": 21.9,
+          "out_chars": 230
+        },
+        {
+          "task": "msg-22",
+          "wall_s": 2.26,
+          "out_tokens": 45,
+          "tok_per_s": 22.1,
+          "out_chars": 147
+        },
+        {
+          "task": "msg-23",
+          "wall_s": 2.49,
+          "out_tokens": 48,
+          "tok_per_s": 21.82,
+          "out_chars": 180
+        },
+        {
+          "task": "msg-24",
+          "wall_s": 2.31,
+          "out_tokens": 44,
+          "tok_per_s": 21.91,
+          "out_chars": 188
+        },
+        {
+          "task": "out-01",
+          "wall_s": 6.96,
+          "out_tokens": 139,
+          "tok_per_s": 21.56,
+          "out_chars": 578
+        },
+        {
+          "task": "out-02",
+          "wall_s": 9.67,
+          "out_tokens": 203,
+          "tok_per_s": 21.35,
+          "out_chars": 882
+        },
+        {
+          "task": "out-03",
+          "wall_s": 4.84,
+          "out_tokens": 100,
+          "tok_per_s": 21.66,
+          "out_chars": 440
+        },
+        {
+          "task": "out-04",
+          "wall_s": 7.04,
+          "out_tokens": 147,
+          "tok_per_s": 21.55,
+          "out_chars": 628
+        },
+        {
+          "task": "out-05",
+          "wall_s": 8.66,
+          "out_tokens": 181,
+          "tok_per_s": 21.34,
+          "out_chars": 924
+        },
+        {
+          "task": "out-06",
+          "wall_s": 5.55,
+          "out_tokens": 116,
+          "tok_per_s": 21.66,
+          "out_chars": 535
+        },
+        {
+          "task": "out-07",
+          "wall_s": 9.91,
+          "out_tokens": 204,
+          "tok_per_s": 21.14,
+          "out_chars": 861
+        },
+        {
+          "task": "out-08",
+          "wall_s": 8.26,
+          "out_tokens": 173,
+          "tok_per_s": 21.49,
+          "out_chars": 694
+        },
+        {
+          "task": "out-09",
+          "wall_s": 5.84,
+          "out_tokens": 121,
+          "tok_per_s": 21.63,
+          "out_chars": 538
+        },
+        {
+          "task": "out-10",
+          "wall_s": 5.61,
+          "out_tokens": 117,
+          "tok_per_s": 21.61,
+          "out_chars": 558
+        },
+        {
+          "task": "out-11",
+          "wall_s": 5.18,
+          "out_tokens": 106,
+          "tok_per_s": 21.36,
+          "out_chars": 476
+        },
+        {
+          "task": "out-12",
+          "wall_s": 6.22,
+          "out_tokens": 130,
+          "tok_per_s": 21.56,
+          "out_chars": 612
+        },
+        {
+          "task": "out-13",
+          "wall_s": 5.22,
+          "out_tokens": 109,
+          "tok_per_s": 21.64,
+          "out_chars": 496
+        },
+        {
+          "task": "out-14",
+          "wall_s": 8.62,
+          "out_tokens": 177,
+          "tok_per_s": 21.25,
+          "out_chars": 742
+        },
+        {
+          "task": "out-15",
+          "wall_s": 5.81,
+          "out_tokens": 120,
+          "tok_per_s": 21.44,
+          "out_chars": 506
+        },
+        {
+          "task": "out-16",
+          "wall_s": 5.92,
+          "out_tokens": 121,
+          "tok_per_s": 21.1,
+          "out_chars": 590
+        }
+      ],
+      "median_wall_s": 2.98,
+      "median_tok_per_s": 21.82
+    },
+    "lfm2.5-2.6b": {
+      "status": "unavailable",
+      "detail": "no tag found: lfm2.5:2.6b, lfm2.5"
+    },
+    "ministral3-3b": {
+      "status": "complete",
+      "tag": "ministral-3:3b",
+      "size_gb": 2.95,
+      "tasks": [
+        {
+          "task": "msg-01",
+          "wall_s": 12.13,
+          "out_tokens": 59,
+          "tok_per_s": 17.27,
+          "out_chars": 235
+        },
+        {
+          "task": "msg-02",
+          "wall_s": 4.72,
+          "out_tokens": 60,
+          "tok_per_s": 15.04,
+          "out_chars": 199
+        },
+        {
+          "task": "msg-03",
+          "wall_s": 4.3,
+          "out_tokens": 66,
+          "tok_per_s": 17.95,
+          "out_chars": 239
+        },
+        {
+          "task": "msg-04",
+          "wall_s": 4.19,
+          "out_tokens": 69,
+          "tok_per_s": 18.85,
+          "out_chars": 247
+        },
+        {
+          "task": "msg-05",
+          "wall_s": 4.16,
+          "out_tokens": 67,
+          "tok_per_s": 18.98,
+          "out_chars": 247
+        },
+        {
+          "task": "msg-06",
+          "wall_s": 3.9,
+          "out_tokens": 64,
+          "tok_per_s": 18.57,
+          "out_chars": 222
+        },
+        {
+          "task": "msg-07",
+          "wall_s": 4.43,
+          "out_tokens": 72,
+          "tok_per_s": 18.29,
+          "out_chars": 243
+        },
+        {
+          "task": "msg-08",
+          "wall_s": 3.79,
+          "out_tokens": 61,
+          "tok_per_s": 18.62,
+          "out_chars": 217
+        },
+        {
+          "task": "msg-09",
+          "wall_s": 3.96,
+          "out_tokens": 69,
+          "tok_per_s": 19.83,
+          "out_chars": 243
+        },
+        {
+          "task": "msg-10",
+          "wall_s": 3.56,
+          "out_tokens": 56,
+          "tok_per_s": 18.68,
+          "out_chars": 200
+        },
+        {
+          "task": "msg-11",
+          "wall_s": 4.74,
+          "out_tokens": 86,
+          "tok_per_s": 20.17,
+          "out_chars": 277
+        },
+        {
+          "task": "msg-12",
+          "wall_s": 4.03,
+          "out_tokens": 67,
+          "tok_per_s": 19.58,
+          "out_chars": 227
+        },
+        {
+          "task": "msg-13",
+          "wall_s": 4.04,
+          "out_tokens": 73,
+          "tok_per_s": 20.48,
+          "out_chars": 299
+        },
+        {
+          "task": "msg-14",
+          "wall_s": 3.36,
+          "out_tokens": 56,
+          "tok_per_s": 20.04,
+          "out_chars": 180
+        },
+        {
+          "task": "msg-15",
+          "wall_s": 2.89,
+          "out_tokens": 51,
+          "tok_per_s": 20.8,
+          "out_chars": 231
+        },
+        {
+          "task": "msg-16",
+          "wall_s": 3.9,
+          "out_tokens": 70,
+          "tok_per_s": 20.63,
+          "out_chars": 241
+        },
+        {
+          "task": "msg-17",
+          "wall_s": 3.73,
+          "out_tokens": 68,
+          "tok_per_s": 20.7,
+          "out_chars": 264
+        },
+        {
+          "task": "msg-18",
+          "wall_s": 4.02,
+          "out_tokens": 75,
+          "tok_per_s": 20.96,
+          "out_chars": 273
+        },
+        {
+          "task": "msg-19",
+          "wall_s": 5.33,
+          "out_tokens": 99,
+          "tok_per_s": 20.81,
+          "out_chars": 331
+        },
+        {
+          "task": "msg-20",
+          "wall_s": 3.69,
+          "out_tokens": 62,
+          "tok_per_s": 19.85,
+          "out_chars": 214
+        },
+        {
+          "task": "msg-21",
+          "wall_s": 4.23,
+          "out_tokens": 68,
+          "tok_per_s": 18.37,
+          "out_chars": 267
+        },
+        {
+          "task": "msg-22",
+          "wall_s": 5.25,
+          "out_tokens": 82,
+          "tok_per_s": 17.55,
+          "out_chars": 265
+        },
+        {
+          "task": "msg-23",
+          "wall_s": 3.99,
+          "out_tokens": 65,
+          "tok_per_s": 18.81,
+          "out_chars": 252
+        },
+        {
+          "task": "msg-24",
+          "wall_s": 3.73,
+          "out_tokens": 61,
+          "tok_per_s": 19.27,
+          "out_chars": 245
+        },
+        {
+          "task": "out-01",
+          "wall_s": 10.29,
+          "out_tokens": 186,
+          "tok_per_s": 19.46,
+          "out_chars": 704
+        },
+        {
+          "task": "out-02",
+          "wall_s": 13.08,
+          "out_tokens": 261,
+          "tok_per_s": 20.4,
+          "out_chars": 1030
+        },
+        {
+          "task": "out-03",
+          "wall_s": 7.37,
+          "out_tokens": 135,
+          "tok_per_s": 19.33,
+          "out_chars": 528
+        },
+        {
+          "task": "out-04",
+          "wall_s": 8.5,
+          "out_tokens": 152,
+          "tok_per_s": 18.63,
+          "out_chars": 616
+        },
+        {
+          "task": "out-05",
+          "wall_s": 10.04,
+          "out_tokens": 188,
+          "tok_per_s": 19.32,
+          "out_chars": 800
+        },
+        {
+          "task": "out-06",
+          "wall_s": 8.13,
+          "out_tokens": 157,
+          "tok_per_s": 19.99,
+          "out_chars": 685
+        },
+        {
+          "task": "out-07",
+          "wall_s": 8.9,
+          "out_tokens": 169,
+          "tok_per_s": 19.97,
+          "out_chars": 655
+        },
+        {
+          "task": "out-08",
+          "wall_s": 6.83,
+          "out_tokens": 129,
+          "tok_per_s": 19.94,
+          "out_chars": 508
+        },
+        {
+          "task": "out-09",
+          "wall_s": 10.95,
+          "out_tokens": 209,
+          "tok_per_s": 19.76,
+          "out_chars": 830
+        },
+        {
+          "task": "out-10",
+          "wall_s": 6.71,
+          "out_tokens": 131,
+          "tok_per_s": 20.51,
+          "out_chars": 574
+        },
+        {
+          "task": "out-11",
+          "wall_s": 5.75,
+          "out_tokens": 107,
+          "tok_per_s": 19.73,
+          "out_chars": 415
+        },
+        {
+          "task": "out-12",
+          "wall_s": 9.33,
+          "out_tokens": 165,
+          "tok_per_s": 18.25,
+          "out_chars": 709
+        },
+        {
+          "task": "out-13",
+          "wall_s": 12.18,
+          "out_tokens": 188,
+          "tok_per_s": 15.84,
+          "out_chars": 815
+        },
+        {
+          "task": "out-14",
+          "wall_s": 12.15,
+          "out_tokens": 171,
+          "tok_per_s": 14.61,
+          "out_chars": 725
+        },
+        {
+          "task": "out-15",
+          "wall_s": 12.03,
+          "out_tokens": 147,
+          "tok_per_s": 12.64,
+          "out_chars": 598
+        },
+        {
+          "task": "out-16",
+          "wall_s": 11.08,
+          "out_tokens": 145,
+          "tok_per_s": 13.48,
+          "out_chars": 571
+        }
+      ],
+      "median_wall_s": 4.74,
+      "median_tok_per_s": 19.33
+    }
+  }
+}
