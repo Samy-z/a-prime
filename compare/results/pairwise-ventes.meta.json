@@ -1,0 +1,31 @@
+{
+  "reference": {
+    "key": "m1",
+    "tag": "llama3.2:3b"
+  },
+  "candidate": {
+    "key": "m2",
+    "tag": "phi4-mini:latest"
+  },
+  "roster": [
+    "m1a",
+    "m1b",
+    "m2a",
+    "m2b"
+  ],
+  "n_inputs": 40,
+  "k": 20,
+  "q": 0.1,
+  "options": {
+    "temperature": 0.2,
+    "num_predict": 400,
+    "num_gpu": 0
+  },
+  "digests": {
+    "llama3.2:3b": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+    "phi4-mini:latest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753"
+  },
+  "seed_policy": "unset on every arm; mirrors the deployment (MTH-023)",
+  "mode": "CPU only (num_gpu: 0), both models resident",
+  "started_utc": "2026-11-04T18:25:41Z"
+}

@@ -67,7 +67,9 @@ K, Q = 20, 0.10
 # the deployment's seed policy and record the regime).
 OPTIONS = {"temperature": 0.2, "num_predict": 400, "num_gpu": 0}
 KEEP_ALIVE = "10m"
-SECONDS_PER_TUPLE = 12.0  # pace medians: 2 x 2.8s + 2 x 3.0s, rounded up
+SECONDS_PER_TUPLE = 19.0  # measured: 18.9 s/tuple over the first 29 live
+                          # tuples, 2026-11-04 (four-arm interleaving costs
+                          # more than the pace pass's one-model runs)
 
 PROMPT_TRADUIRE = (
     "Tu es l'assistante d'une société française de pièces aéronautiques. "
@@ -288,11 +290,13 @@ def cmd_record(go: bool) -> int:
     failures_in_a_row = 0
     t_start = time.perf_counter()
     done_now = 0
+    paused = False
     with STORE.open("a", encoding="utf-8") as fh:
         for g, iid, s_idx in todo:
             if STOP_FLAG.exists():
                 print(f"PAUSED by stop flag after {done_now} tuples. The "
                       "store resumes with --go.")
+                paused = True
                 break
             batch = []
             try:
@@ -336,15 +340,25 @@ def cmd_record(go: bool) -> int:
     rows = load_rows()
     n_done = len(complete_tuples(rows))
     print(f"store: {n_done}/{total} tuples complete")
-    if n_done == total:
-        print("recording COMPLETE. Next: --analyse (wants the GPU free "
-              "for the NLI judge)")
+    if paused:
+        return 2  # the night wrapper's convention: 2 means paused cleanly
+    if n_done < total:
+        print("loop finished with tuples still missing (abandoned on "
+              "errors); rerun --go to fill them")
+        return 7
+    print("recording COMPLETE. Next: --analyse (wants the GPU free "
+          "for the NLI judge)")
     return 0
 
 
 # ---------------------------------------------------------------- analyse
 
 def cmd_analyse() -> int:
+    if main_line_recorder_running():
+        print("REFUSING to analyse: a main-line recording is running and "
+              "the NLI judge would fight it for the GPU (MTH-015). Rerun "
+              "when it is done.")
+        return 3
     sys.path.insert(0, str(ROOT / "src"))
     from aprime.net import enable_os_truststore
     enable_os_truststore()
