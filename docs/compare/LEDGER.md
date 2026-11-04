@@ -79,3 +79,50 @@ became the live count. Neither touches any measured timing.
 quantity (the gate read three outputs, the pairwise records 1,600 per
 model), or the missing tags (smollm3, lfm2.5) are located AND both
 nominated models fail.
+
+## CMP-003 — Reference declared, runner built; nothing recorded yet (2026-11-04)
+
+**A = llama3.2:3b, declared here, before any tuple is recorded**, as
+Design R requires ("A is the reference of each pair, declared before
+recording"): it is the pace leader and ChatADV's provisional default, so
+the campaign's question reads naturally as "does the challenger behave
+differently from what the app would ship today?". B = phi4-mini.
+
+`compare/pairwise_ventes.py` (committed with this entry) records and
+scores the pair at CMP-001's sizing (n=40, k=20, q=0.10, ~2.7 h CPU for
+800 four-arm tuples):
+
+- **Recording is compare-side.** The engine's recorder speaks exactly
+  three arms by design; the roster generalisation is engine work under
+  MTH-027. The loop honours Design R's layout directly: all four arms of
+  one (input, sample index) called back to back, atomic on disk, lead
+  rotation over the roster, grouped by input (ENG-001), both models
+  resident, CPU only (`num_gpu: 0`), the deployment's own options
+  (temperature 0.2, 400-token budget, no seed — MTH-023's mirror rule,
+  regime recorded in the meta file). Guards: digest equality across
+  resumes (a weight change mid-store aborts, the drift lesson), a stop
+  flag, three-strike abort on consecutive tuple failures, and a refusal
+  to share Ollama with a main-line recording (MTH-015: one server would
+  serialise both runs and pollute both timings).
+- **Scoring reuses the frozen pipeline through the public API** — five
+  `detect()` passes over arm relabelings (the drift control's pattern):
+  the primary selection (targets s(A,B), decoys s(A,A'), r=1,
+  select/select_stratified byte-unchanged), the reverse orientation, and
+  the three replicate target sets s(A,B'), s(A',B), s(A',B'). Only the
+  primary selects; everything else is reported.
+- **Two Design R reported quantities are named pending, not computed**:
+  the reverse selection against s(B,B') and the cross-pooled (1+d/2)/t
+  estimate need the pairing-aware `detect` and the r>1 estimator
+  (proposal §4), which are engine work riding the MTH-027 freeze.
+  Hand-rolling selector logic in a consumer seat is exactly what the
+  rails forbid; the store keeps every array they will need.
+- **Boundary:** `ALLOWED_IMPORTS` grew by six names (net, detect,
+  recorder, clustering, probes.channels, provenance), each with its
+  reason in the test file. Rotation, tuple-atomic resume and the pairing
+  shapes are pinned by `tests/test_compare_pairwise.py`.
+
+**Evidence:** the runner and tests at this commit; plan dry-run
+2026-11-04 printing 0/800 tuples, ~2.7 h.
+**Reopen if:** the engine ships the §4 generalisations (then the pending
+quantities get computed from this store and appended here), or the first
+live run contradicts the plan's cost by more than 2x.
