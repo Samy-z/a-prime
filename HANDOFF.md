@@ -1377,3 +1377,19 @@ figure" in the proposals is now true of it.
 - The non-tied count in the sign statistic is written `u` in the
   proposals, not `m`, to keep `m` from colliding with the queue entry's
   dial name.
+
+## §27 — The three proposals ratified; the campaign fork; the trial's actual end (2026-11-04)
+
+The owner ratified all three 2026-10-20 proposals in one message (MTH-027):
+Design R frozen with roster width defaulting to four-arm pairs, the
+titration protocol adopted, paper two's skeleton accepted as skeleton. For
+the record: the cloud trial did not run to its 2026-11-05 expiry — the owner
+reports its credit was exhausted about three weeks in, which is why nothing
+cloud-side moved after 2026-10-20. All remaining work is local.
+
+Same day, in a fork session: the comparator's first real campaign opened
+(assistante-ventes, docs/compare/campaign-assistante.md) — a real user's
+four task families on a GPU-less office PC, a 1-4B candidate pool, synthetic
+fixtures, the seat's boundary test landed with its first code. The end-user
+app exists as its own repository (working skeleton, French UI, local-only),
+named ChatADV by the owner.

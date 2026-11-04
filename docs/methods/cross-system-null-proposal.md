@@ -1,4 +1,4 @@
-# The cross-system null — PROPOSAL, awaiting owner ratification
+# The cross-system null — RATIFIED 2026-11-04 (Design R; freeze entry MTH-027)
 
 **Status: PROPOSAL, drafted 2026-10-20 by the cloud session and revised
 twice the same day: once after an adversarial pass refuted its first

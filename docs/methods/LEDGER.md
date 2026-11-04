@@ -830,3 +830,33 @@ which.
 **Reopen if:** the digest guard fires (a version change arrived first), or
 the within-period comparison flags anything, which would indict the
 harness rather than time.
+
+## MTH-027 — Three ratifications: Design R frozen, the titration protocol adopted, paper two's skeleton accepted (2026-11-04)
+
+Owner ratification, 2026-11-04, of the three 2026-10-20 proposals (HANDOFF
+§26), each revised twice by cross-review before reaching the owner.
+
+**The cross-system null is Design R, frozen as of this entry** (full text:
+`docs/methods/cross-system-null-proposal.md` §3): every system in a
+comparison contributes at least two clouds; all arms interleave in one tuple
+per (input, sample index); A is the declared reference whose clouds set the
+strata and floors; selection runs targets s(A,B) against decoys s(A,A')
+with r = 1 through `select`/`select_stratified` unchanged; in the
+stored-baseline regime the decoys are s(B,B') and s(A,A') is reported
+alongside. One sub-question the proposal put to the owner stays open and
+DEFAULTS CONSERVATIVELY until answered: rosters are four-arm pairs, not the
+eight-arm pool roster, matching the original queue entry's "four arms".
+Cross-model recording may begin under this freeze; the first consumer is
+the assistante-ventes campaign's pairwise stage
+(`docs/compare/campaign-assistante.md`).
+
+**The agent self-variance titration protocol is adopted as written**, grid
+and cost table per its own instrument; its m > 1 estimator generalisation
+rides this same freeze. **Paper two's pre-registration skeleton is accepted
+as a skeleton**: it remains unregistered until its prediction and sizing
+slots fill in dated appends, before any recording, which is the entire
+point of its existence.
+**Evidence:** the three proposal files at this commit, headers updated the
+same day; the owner's ratification message, 2026-11-04.
+**Reopen if:** the owner answers the roster-width question differently, or
+Design R's first live run contradicts the proposal's stub-sweep validation.

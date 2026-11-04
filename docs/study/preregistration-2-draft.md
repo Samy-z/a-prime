@@ -1,5 +1,7 @@
 # Paper two — pre-registration — DRAFT — NOT REGISTERED
 
+**Status: skeleton RATIFIED 2026-11-04 (MTH-027). Still NOT REGISTERED: predictions and sizing fill in dated appends before any recording.**
+
 **Status: DRAFT, 2026-10-20, by the cloud session, revised twice the same
 day, the second time after a three-seat cross-model review. Nothing in
 this file is registered. Every slot marked `[SLOT]` is empty on purpose

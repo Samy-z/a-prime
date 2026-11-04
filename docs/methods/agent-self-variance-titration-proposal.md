@@ -1,4 +1,4 @@
-# Agent self-variance, titrated — PROPOSAL, dated 2026-10-20, awaiting owner ratification
+# Agent self-variance, titrated — RATIFIED 2026-11-04 (MTH-027)
 
 **Status: PROPOSAL, revised twice on the day it was drafted, the second
 time after a three-seat cross-model review. Not a decision.** Point 1
