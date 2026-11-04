@@ -19,3 +19,9 @@ Known design questions parked here until work starts: per-pair FDR does not
 give a many-way ranking (multiple-comparison design needed before any
 leaderboard view); perf measurement interacts with behaviour recording
 (MTH-015), so tokens/sec fields live in comparator records, never in Trace.
+
+Instruments: `compare/pace_ventes.py` runs measurement plan 1 of the
+assistante campaign — per-candidate pace and footprint, CPU only
+(`num_gpu: 0`), resumable, pull failures recorded as findings. Results in
+`compare/results/`. It talks to Ollama directly; the detector is not
+involved, and the boundary test holds the whole package to that.
