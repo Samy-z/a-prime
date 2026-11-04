@@ -1,0 +1,84 @@
+{
+  "inbound": [
+    {
+      "id": "msg-01",
+      "lang": "en",
+      "theme": "late_payment",
+      "text": "Hello, regarding invoice CMD-2026-1004, our accounts team confirms payment will be executed next Friday. Apologies for the delay, we had an internal approval backlog."
+    },
+    {
+      "id": "msg-02",
+      "lang": "de",
+      "theme": "incomplete_shipment",
+      "text": "Guten Tag, die Lieferung zu CMD-2026-1011 ist unvollständig angekommen. Es fehlen 2 von 5 Stück der Position P-1204. Bitte senden Sie die fehlende Menge schnellstmöglich nach."
+    },
+    {
+      "id": "msg-03",
+      "lang": "es",
+      "theme": "discount_request",
+      "text": "Buenos días, somos cliente habitual desde 2023. ¿Sería posible un descuento del 8% en el pedido CMD-2026-1017 por volumen? Pensamos repetir pedidos similares cada trimestre."
+    },
+    {
+      "id": "msg-04",
+      "lang": "en",
+      "theme": "discount_request",
+      "text": "Hi, before confirming CMD-2026-1020 we would like to discuss pricing: your quote is 6% above your competitor for the same part. Can you match it or offer free shipping?"
+    },
+    {
+      "id": "msg-05",
+      "lang": "it",
+      "theme": "late_payment",
+      "text": "Buongiorno, ci scusiamo per il ritardo nel pagamento della fattura CMD-2026-1008. Il bonifico partirà entro mercoledì. Potete confermare che la spedizione non sarà bloccata?"
+    },
+    {
+      "id": "msg-06",
+      "lang": "de",
+      "theme": "discount_request",
+      "text": "Sehr geehrte Damen und Herren, bei einer Abnahme von 12 Stück P-1306 jährlich: welchen Rahmenvertragspreis können Sie anbieten?"
+    },
+    {
+      "id": "msg-07",
+      "lang": "en",
+      "theme": "incomplete_shipment",
+      "text": "Good afternoon, order CMD-2026-1026 arrived today but the titanium screw kit P-1509 is missing from the box. The packing list mentions it. Please advise."
+    },
+    {
+      "id": "msg-08",
+      "lang": "fr",
+      "theme": "late_payment",
+      "text": "Bonjour, nous accusons un léger retard de trésorerie ce mois-ci. Le règlement de CMD-2026-1002 sera effectué sous 10 jours. Merci de votre compréhension."
+    }
+  ],
+  "outbound": [
+    {
+      "id": "out-01",
+      "kind": "payment_reminder",
+      "brief": "Relance polie: CMD-2026-1015, échéance dépassée de 12 jours, client C-202, premier rappel."
+    },
+    {
+      "id": "out-02",
+      "kind": "payment_reminder",
+      "brief": "Relance ferme: CMD-2026-1007, deuxième rappel, proposer un échéancier si besoin."
+    },
+    {
+      "id": "out-03",
+      "kind": "answer_incomplete_shipment",
+      "brief": "Répondre à msg-02: confirmer l'envoi des 2 pièces manquantes sous 48h, numéro de suivi à venir, présenter des excuses."
+    },
+    {
+      "id": "out-04",
+      "kind": "answer_discount",
+      "brief": "Répondre à msg-03: accorder 5% (pas 8%) si engagement sur 4 trimestres, sinon 3%."
+    },
+    {
+      "id": "out-05",
+      "kind": "answer_discount",
+      "brief": "Répondre à msg-04: pas d'alignement sur le concurrent, mais livraison offerte au-delà de 1500 EUR."
+    },
+    {
+      "id": "out-06",
+      "kind": "answer_late_payment",
+      "brief": "Répondre à msg-05: confirmer que l'expédition n'est pas bloquée, demander l'avis de virement."
+    }
+  ]
+}
