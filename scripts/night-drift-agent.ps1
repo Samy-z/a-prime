@@ -29,7 +29,7 @@ function Test-Server {
 Write-Log "================ drift + agent-k20 night start ================"
 
 $recorders = @(Get-CimInstance Win32_Process |
-    Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -match 'run_study|run_cell_detection|run_drift_control' })
+    Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -match 'run_study|run_cell_detection|run_drift_control|pairwise_ventes' })
 if ($recorders.Count -gt 0) {
     Write-Log "SKIPPED: a recorder is already running, leaving it alone"
     exit 0
