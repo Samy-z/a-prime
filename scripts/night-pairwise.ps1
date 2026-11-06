@@ -1,7 +1,7 @@
 # One night, two stages, no cap (the owner stops runs, timers do not):
 #   1. Record the assistante-ventes pairwise store to completion
 #      (compare/pairwise_ventes.py --go; four-arm tuples, CPU only,
-#      resumes wherever the store stands — ~19 s per remaining tuple).
+#      resumes wherever the store stands, ~19 s per remaining tuple).
 #   2. Score it (--analyse; loads the NLI judge on the GPU, refuses if a
 #      main-line recorder is running or the store is partial).
 # Starts Ollama itself if the server is down. Toasts on skip, pause,
@@ -79,5 +79,5 @@ foreach ($stage in $stages) {
 }
 
 Write-Log "================ pairwise night complete ================"
-Send-Toast "pairwise night complete" "Store recorded and scored. The report is compare\results\pairwise-ventes.report.txt — the flags are the human judging queue."
+Send-Toast "pairwise night complete" "Store recorded and scored. The report is compare\results\pairwise-ventes.report.txt. The flags are the human judging queue."
 exit 0
