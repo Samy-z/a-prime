@@ -1,0 +1,960 @@
+{
+  "purpose": "assistante-ventes pairwise, Design R four-arm pair",
+  "run_id": "20261106T075759Z",
+  "config_hash": "52b45df073b51223",
+  "git_commit": "bef44d178a286ee528fc8d49cd4849d8ac02a16d",
+  "git_dirty": true,
+  "reference_A": {
+    "key": "m1",
+    "tag": "llama3.2:3b"
+  },
+  "candidate_B": {
+    "key": "m2",
+    "tag": "phi4-mini:latest"
+  },
+  "digests": {
+    "llama3.2:3b": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+    "phi4-mini:latest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753"
+  },
+  "n_inputs": 40,
+  "k": 20,
+  "q": 0.1,
+  "recorded": {
+    "started_utc": "2026-11-04T18:25:41Z",
+    "sessions": 2,
+    "mode": "CPU only (num_gpu: 0), both models resident"
+  },
+  "nli_hub_id": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+  "analysed_utc": "2026-11-06T08:29:38Z",
+  "pairings": {
+    "primary": {
+      "selects": true,
+      "arms": {
+        "m1a": "A",
+        "m1b": "A_prime",
+        "m2a": "B"
+      },
+      "flagged": 18,
+      "findings": [
+        {
+          "input_id": "msg-13",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 1.0,
+            "novel_mode": 1.0,
+            "nli_directional": -0.6640625
+          }
+        },
+        {
+          "input_id": "msg-22",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.95,
+            "novel_mode": 0.95,
+            "nli_directional": -0.406005859375
+          }
+        },
+        {
+          "input_id": "out-01",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.75,
+            "nli_directional": 0.2822265625
+          }
+        },
+        {
+          "input_id": "out-02",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.65,
+            "nli_directional": -0.232421875
+          }
+        },
+        {
+          "input_id": "out-03",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.9,
+            "novel_mode": 0.9,
+            "nli_directional": -0.328369140625
+          }
+        },
+        {
+          "input_id": "out-08",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6,
+            "novel_mode": 0.6,
+            "nli_directional": -0.1859130859375
+          }
+        },
+        {
+          "input_id": "out-10",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6,
+            "novel_mode": 0.6,
+            "nli_directional": -0.31494140625
+          }
+        },
+        {
+          "input_id": "out-11",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.7,
+            "nli_directional": -0.252197265625
+          }
+        },
+        {
+          "input_id": "msg-01",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.8,
+            "nli_directional": -0.41943359375
+          }
+        },
+        {
+          "input_id": "msg-15",
+          "stratum": "short",
+          "channels": {
+            "novel_mode": 0.4,
+            "nli_directional": -0.2666015625
+          }
+        },
+        {
+          "input_id": "out-04",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.4
+          }
+        },
+        {
+          "input_id": "out-05",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.75
+          }
+        },
+        {
+          "input_id": "out-06",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.7000000000000001,
+            "nli_directional": -0.30517578125
+          }
+        },
+        {
+          "input_id": "out-09",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.7000000000000001,
+            "novel_mode": 0.7
+          }
+        },
+        {
+          "input_id": "out-12",
+          "stratum": "list",
+          "channels": {
+            "mode_share": 0.9500000000000001,
+            "novel_mode": 0.85
+          }
+        },
+        {
+          "input_id": "out-15",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.65,
+            "novel_mode": 0.45
+          }
+        },
+        {
+          "input_id": "out-14",
+          "stratum": "list",
+          "channels": {
+            "novel_mode": 0.5
+          }
+        },
+        {
+          "input_id": "out-16",
+          "stratum": "prose",
+          "channels": {
+            "novel_mode": 0.55
+          }
+        }
+      ],
+      "channels": {
+        "mode_share": {
+          "flagged": 15,
+          "skipped": null,
+          "reading": "all inputs pooled: 15 flagged above 0.600, estimated false-discovery rate 0.07"
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: 6 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 4 more would have cleared it"
+        },
+        "novel_mode": {
+          "flagged": 16,
+          "skipped": null,
+          "reading": "all inputs pooled: 16 flagged above 0.400, estimated false-discovery rate 0.06"
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied",
+          "reading": "skipped: no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: no separation: the new system's scores sit inside the old system's own run-to-run variation. Either nothing changed that this check can see, or it cannot see this kind of change; the report cannot tell those apart"
+        },
+        "nli_directional": {
+          "flagged": 11,
+          "skipped": null,
+          "reading": "all inputs pooled: 11 flagged above 0.186, estimated false-discovery rate 0.09"
+        }
+      },
+      "notes": [
+        "this recording crosses midnight UTC. At least one common chat template interpolates the date into a hidden system prompt, so the arms may differ by a prompt edit nobody made (BCH-009)."
+      ],
+      "short_clouds": 0,
+      "interleaving_gap": 1,
+      "cost": {
+        "predicate_calls": 13432,
+        "clusterings": 80,
+        "samples_clustered": 3200,
+        "distinct_after_normalisation": 2146
+      }
+    },
+    "reverse": {
+      "selects": false,
+      "arms": {
+        "m2a": "A",
+        "m2b": "A_prime",
+        "m1a": "B"
+      },
+      "flagged": 10,
+      "findings": [
+        {
+          "input_id": "msg-01",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": 0.41943359375
+          }
+        },
+        {
+          "input_id": "msg-13",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": 0.6640625
+          }
+        },
+        {
+          "input_id": "msg-15",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": 0.2666015625
+          }
+        },
+        {
+          "input_id": "msg-22",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": 0.406005859375
+          }
+        },
+        {
+          "input_id": "out-01",
+          "stratum": "prose",
+          "channels": {
+            "nli_directional": -0.2822265625
+          }
+        },
+        {
+          "input_id": "out-02",
+          "stratum": "prose",
+          "channels": {
+            "nli_directional": 0.232421875
+          }
+        },
+        {
+          "input_id": "out-03",
+          "stratum": "prose",
+          "channels": {
+            "nli_directional": 0.328369140625
+          }
+        },
+        {
+          "input_id": "out-06",
+          "stratum": "prose",
+          "channels": {
+            "nli_directional": 0.30517578125
+          }
+        },
+        {
+          "input_id": "out-10",
+          "stratum": "prose",
+          "channels": {
+            "nli_directional": 0.31494140625
+          }
+        },
+        {
+          "input_id": "out-11",
+          "stratum": "prose",
+          "channels": {
+            "nli_directional": 0.252197265625
+          }
+        }
+      ],
+      "channels": {
+        "mode_share": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: partly separated: at the best cut 10 input(s) above against 1 baseline score(s), estimate 0.20 against q=0.1. More samples per input or more inputs would sharpen this"
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: 6 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 4 more would have cleared it"
+        },
+        "novel_mode": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: partly separated: at the best cut 7 input(s) above against 1 baseline score(s), estimate 0.29 against q=0.1. More samples per input or more inputs would sharpen this"
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied",
+          "reading": "skipped: no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: no separation: the new system's scores sit inside the old system's own run-to-run variation. Either nothing changed that this check can see, or it cannot see this kind of change; the report cannot tell those apart"
+        },
+        "nli_directional": {
+          "flagged": 10,
+          "skipped": null,
+          "reading": "all inputs pooled: 10 flagged above 0.232, estimated false-discovery rate 0.10"
+        }
+      },
+      "notes": [
+        "this recording crosses midnight UTC. At least one common chat template interpolates the date into a hidden system prompt, so the arms may differ by a prompt edit nobody made (BCH-009)."
+      ],
+      "short_clouds": 0,
+      "interleaving_gap": 1,
+      "cost": {
+        "predicate_calls": 15097,
+        "clusterings": 80,
+        "samples_clustered": 3200,
+        "distinct_after_normalisation": 2120
+      }
+    },
+    "rep-AB2": {
+      "selects": false,
+      "arms": {
+        "m1a": "A",
+        "m1b": "A_prime",
+        "m2b": "B"
+      },
+      "flagged": 18,
+      "findings": [
+        {
+          "input_id": "msg-13",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 1.0,
+            "novel_mode": 1.0,
+            "nli_directional": -0.63037109375
+          }
+        },
+        {
+          "input_id": "out-01",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8500000000000001,
+            "novel_mode": 0.75,
+            "nli_directional": 0.263427734375
+          }
+        },
+        {
+          "input_id": "out-03",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.85,
+            "novel_mode": 0.85,
+            "nli_directional": -0.38916015625
+          }
+        },
+        {
+          "input_id": "out-06",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.65,
+            "novel_mode": 0.5,
+            "nli_directional": -0.271728515625
+          }
+        },
+        {
+          "input_id": "out-10",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.8,
+            "nli_directional": -0.4326171875
+          }
+        },
+        {
+          "input_id": "out-11",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.65,
+            "novel_mode": 0.6,
+            "nli_directional": -0.2147216796875
+          }
+        },
+        {
+          "input_id": "msg-01",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.7999999999999999,
+            "nli_directional": -0.41162109375
+          }
+        },
+        {
+          "input_id": "msg-22",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.9,
+            "nli_directional": -0.370849609375
+          }
+        },
+        {
+          "input_id": "out-02",
+          "stratum": "prose",
+          "channels": {
+            "novel_mode": 0.45,
+            "nli_directional": -0.17333984375
+          }
+        },
+        {
+          "input_id": "out-04",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6000000000000001,
+            "novel_mode": 0.4
+          }
+        },
+        {
+          "input_id": "out-05",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6,
+            "nli_directional": -0.228271484375
+          }
+        },
+        {
+          "input_id": "out-08",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.7
+          }
+        },
+        {
+          "input_id": "out-09",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6000000000000001,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "out-12",
+          "stratum": "list",
+          "channels": {
+            "mode_share": 0.9500000000000001,
+            "novel_mode": 0.95
+          }
+        },
+        {
+          "input_id": "out-15",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.75,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "out-16",
+          "stratum": "prose",
+          "channels": {
+            "novel_mode": 0.5,
+            "nli_directional": 0.194091796875
+          }
+        },
+        {
+          "input_id": "msg-06",
+          "stratum": "short",
+          "channels": {
+            "novel_mode": 0.45
+          }
+        },
+        {
+          "input_id": "msg-15",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": -0.2333984375
+          }
+        }
+      ],
+      "channels": {
+        "mode_share": {
+          "flagged": 14,
+          "skipped": null,
+          "reading": "all inputs pooled: 14 flagged above 0.600, estimated false-discovery rate 0.07"
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: 5 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 5 more would have cleared it"
+        },
+        "novel_mode": {
+          "flagged": 14,
+          "skipped": null,
+          "reading": "all inputs pooled: 14 flagged above 0.400, estimated false-discovery rate 0.07"
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied",
+          "reading": "skipped: no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: no separation: the new system's scores sit inside the old system's own run-to-run variation. Either nothing changed that this check can see, or it cannot see this kind of change; the report cannot tell those apart"
+        },
+        "nli_directional": {
+          "flagged": 12,
+          "skipped": null,
+          "reading": "all inputs pooled: 12 flagged above 0.173, estimated false-discovery rate 0.08"
+        }
+      },
+      "notes": [
+        "this recording crosses midnight UTC. At least one common chat template interpolates the date into a hidden system prompt, so the arms may differ by a prompt edit nobody made (BCH-009)."
+      ],
+      "short_clouds": 0,
+      "interleaving_gap": 1,
+      "cost": {
+        "predicate_calls": 13437,
+        "clusterings": 80,
+        "samples_clustered": 3200,
+        "distinct_after_normalisation": 2124
+      }
+    },
+    "rep-A2B": {
+      "selects": false,
+      "arms": {
+        "m1b": "A",
+        "m1a": "A_prime",
+        "m2a": "B"
+      },
+      "flagged": 19,
+      "findings": [
+        {
+          "input_id": "msg-13",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 1.0,
+            "novel_mode": 1.0,
+            "nli_directional": -0.71630859375
+          }
+        },
+        {
+          "input_id": "out-03",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.7000000000000001,
+            "novel_mode": 0.65,
+            "nli_directional": -0.26171875
+          }
+        },
+        {
+          "input_id": "out-06",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.9500000000000001,
+            "novel_mode": 0.5,
+            "nli_directional": -0.27294921875
+          }
+        },
+        {
+          "input_id": "out-08",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6000000000000001,
+            "novel_mode": 0.6,
+            "nli_directional": -0.2125244140625
+          }
+        },
+        {
+          "input_id": "out-10",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6,
+            "novel_mode": 0.6,
+            "nli_directional": -0.236328125
+          }
+        },
+        {
+          "input_id": "out-11",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.7000000000000001,
+            "novel_mode": 0.65,
+            "nli_directional": -0.212646484375
+          }
+        },
+        {
+          "input_id": "out-12",
+          "stratum": "list",
+          "channels": {
+            "mode_share": 0.85,
+            "novel_mode": 0.65,
+            "nli_directional": 0.1865234375
+          }
+        },
+        {
+          "input_id": "msg-01",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.85,
+            "nli_directional": -0.41796875
+          }
+        },
+        {
+          "input_id": "msg-22",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.8999999999999999,
+            "nli_directional": -0.343994140625
+          }
+        },
+        {
+          "input_id": "out-01",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6,
+            "nli_directional": 0.256591796875
+          }
+        },
+        {
+          "input_id": "out-02",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.8
+          }
+        },
+        {
+          "input_id": "out-05",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "out-13",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.65,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "out-15",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.5
+          }
+        },
+        {
+          "input_id": "out-16",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "msg-06",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": 0.1776123046875
+          }
+        },
+        {
+          "input_id": "msg-15",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": -0.212646484375
+          }
+        },
+        {
+          "input_id": "out-04",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.7000000000000001
+          }
+        },
+        {
+          "input_id": "out-14",
+          "stratum": "list",
+          "channels": {
+            "novel_mode": 0.5
+          }
+        }
+      ],
+      "channels": {
+        "mode_share": {
+          "flagged": 16,
+          "skipped": null,
+          "reading": "all inputs pooled: 16 flagged above 0.600, estimated false-discovery rate 0.06"
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: 8 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 2 more would have cleared it"
+        },
+        "novel_mode": {
+          "flagged": 13,
+          "skipped": null,
+          "reading": "all inputs pooled: 13 flagged above 0.500, estimated false-discovery rate 0.08"
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied",
+          "reading": "skipped: no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: no separation: the new system's scores sit inside the old system's own run-to-run variation. Either nothing changed that this check can see, or it cannot see this kind of change; the report cannot tell those apart"
+        },
+        "nli_directional": {
+          "flagged": 12,
+          "skipped": null,
+          "reading": "all inputs pooled: 12 flagged above 0.178, estimated false-discovery rate 0.08"
+        }
+      },
+      "notes": [
+        "this recording crosses midnight UTC. At least one common chat template interpolates the date into a hidden system prompt, so the arms may differ by a prompt edit nobody made (BCH-009)."
+      ],
+      "short_clouds": 0,
+      "interleaving_gap": 1,
+      "cost": {
+        "predicate_calls": 13269,
+        "clusterings": 80,
+        "samples_clustered": 3200,
+        "distinct_after_normalisation": 2136
+      }
+    },
+    "rep-A2B2": {
+      "selects": false,
+      "arms": {
+        "m1b": "A",
+        "m1a": "A_prime",
+        "m2b": "B"
+      },
+      "flagged": 16,
+      "findings": [
+        {
+          "input_id": "msg-13",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 1.0,
+            "novel_mode": 1.0,
+            "nli_directional": -0.703125
+          }
+        },
+        {
+          "input_id": "out-01",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6000000000000001,
+            "novel_mode": 0.6,
+            "nli_directional": 0.266357421875
+          }
+        },
+        {
+          "input_id": "out-03",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.8,
+            "nli_directional": -0.323486328125
+          }
+        },
+        {
+          "input_id": "out-06",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.75,
+            "nli_directional": -0.272216796875
+          }
+        },
+        {
+          "input_id": "out-08",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.85,
+            "novel_mode": 0.75,
+            "nli_directional": -0.1978759765625
+          }
+        },
+        {
+          "input_id": "out-10",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8500000000000001,
+            "novel_mode": 0.85,
+            "nli_directional": -0.352294921875
+          }
+        },
+        {
+          "input_id": "out-11",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.8,
+            "novel_mode": 0.7,
+            "nli_directional": -0.267333984375
+          }
+        },
+        {
+          "input_id": "msg-01",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.85,
+            "nli_directional": -0.446044921875
+          }
+        },
+        {
+          "input_id": "msg-22",
+          "stratum": "short",
+          "channels": {
+            "mode_share": 0.8,
+            "nli_directional": -0.393798828125
+          }
+        },
+        {
+          "input_id": "out-12",
+          "stratum": "list",
+          "channels": {
+            "mode_share": 0.9500000000000001,
+            "novel_mode": 0.95
+          }
+        },
+        {
+          "input_id": "out-14",
+          "stratum": "list",
+          "channels": {
+            "mode_share": 0.6,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "out-15",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.7000000000000001,
+            "novel_mode": 0.6
+          }
+        },
+        {
+          "input_id": "msg-15",
+          "stratum": "short",
+          "channels": {
+            "nli_directional": -0.2117919921875
+          }
+        },
+        {
+          "input_id": "out-05",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6000000000000001
+          }
+        },
+        {
+          "input_id": "out-09",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6
+          }
+        },
+        {
+          "input_id": "out-13",
+          "stratum": "prose",
+          "channels": {
+            "mode_share": 0.6000000000000001
+          }
+        }
+      ],
+      "channels": {
+        "mode_share": {
+          "flagged": 15,
+          "skipped": null,
+          "reading": "all inputs pooled: 15 flagged above 0.600, estimated false-discovery rate 0.07"
+        },
+        "dispersion": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: 4 input(s) sit above every baseline-vs-baseline score, under the floor of 10: 6 more would have cleared it"
+        },
+        "novel_mode": {
+          "flagged": 10,
+          "skipped": null,
+          "reading": "all inputs pooled: 10 flagged above 0.600, estimated false-discovery rate 0.10"
+        },
+        "embedding": {
+          "flagged": 0,
+          "skipped": "no embedder supplied",
+          "reading": "skipped: no embedder supplied"
+        },
+        "nli_contradiction": {
+          "flagged": 0,
+          "skipped": null,
+          "reading": "all inputs pooled: no separation: the new system's scores sit inside the old system's own run-to-run variation. Either nothing changed that this check can see, or it cannot see this kind of change; the report cannot tell those apart"
+        },
+        "nli_directional": {
+          "flagged": 10,
+          "skipped": null,
+          "reading": "all inputs pooled: 10 flagged above 0.198, estimated false-discovery rate 0.10"
+        }
+      },
+      "notes": [
+        "this recording crosses midnight UTC. At least one common chat template interpolates the date into a hidden system prompt, so the arms may differ by a prompt edit nobody made (BCH-009)."
+      ],
+      "short_clouds": 0,
+      "interleaving_gap": 1,
+      "cost": {
+        "predicate_calls": 13279,
+        "clusterings": 80,
+        "samples_clustered": 3200,
+        "distinct_after_normalisation": 2114
+      }
+    }
+  },
+  "pending_design_r_quantities": [
+    "reverse selection against s(B,B') — needs detect() to take an explicit pairing (proposal §4); arrays are in the store",
+    "cross-pooled (1+d/2)/t at the selection's cut — needs the r>1 estimator generalisation riding the MTH-027 freeze"
+  ],
+  "next": "flagged inputs go to blind human judgment (measurement plan item 3)"
+}

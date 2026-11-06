@@ -70,19 +70,22 @@ system RAM, and no documented breakage on the serving stack.
    unavailable under tried tags. French gate passed by both nominees via
    `compare/spotcheck_french.py`. A five-year-old office CPU will be
    slower; measured ratios, not absolute times, carry the decision.
-2. **Pairwise difference triage with a-prime.** For the nominated pair on
-   the same task set, k samples per input, the detector flags only inputs
-   where the two models' behaviour certifiably differs; a human judges the
-   flagged cases only. This is the comparator's honest claim: a-prime does
-   not rank quality, it concentrates human judgment where candidates
-   actually disagree. The null design is Design R, ratified and frozen in
-   MTH-027 (2026-11-04); sizing is CMP-001 (n=40, k=20, q=0.10). The
-   recording mirrors the deployment: CPU only, both models resident. No
-   study rail crosses into this campaign and none of its numbers enter the
+2. **Pairwise difference triage with a-prime.** — DONE 2026-11-06
+   (CMP-004, run 20261106T075759Z). 800/800 four-arm tuples, zero errors;
+   primary selection 18 of 40 inputs at q=0.10 (4/24 translation, 14/16
+   drafting); core of 13 stable across all four same-orientation
+   replicates; reverse orientation confirms 10 of the 18 and reads
+   phi4-mini as the noisier model against itself. Design R per MTH-027,
+   sizing per CMP-001, deployment-mirroring record (CPU only, both models
+   resident). No study rail crossed; none of these numbers enter the
    paper.
-3. **Human judgment protocol**: flagged inputs go to the owner (and the
-   real user where French tone matters) blind to which model produced
-   which output.
+3. **Human judgment protocol** — IN PROGRESS 2026-11-06: flagged inputs
+   go to the owner (and the real user where French tone matters) blind to
+   which model produced which output. The queue is emitted
+   (`compare/results/judging-queue.md`, 18 cases, sides shuffled per case,
+   key sealed); verdicts X / Y / egal / aucun per case, then
+   `compare/emit_judging_queue.py --score` unblinds the tally
+   (protocol: compare METHODS).
 
 ## Deliverable
 

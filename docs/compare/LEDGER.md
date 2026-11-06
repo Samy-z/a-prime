@@ -126,3 +126,85 @@ scores the pair at CMP-001's sizing (n=40, k=20, q=0.10, ~2.7 h CPU for
 **Reopen if:** the engine ships the §4 generalisations (then the pending
 quantities get computed from this store and appended here), or the first
 live run contradicts the plan's cost by more than 2x.
+
+**Reopened and closed on the cost clause, 2026-11-06 (see CMP-004):** the
+live store cost ~6.3 h of CPU against the planned 2.7, a 2.3x miss. Cause
+identified, not drift: both pace constants (12 then 19 s/tuple) were
+calibrated on translation-class tuples, the only ones recorded when they
+were set, and recording is input-major with the drafting class last. Live
+medians per call: translation ~4 s, drafting ~11-12 s, so a drafting tuple
+costs ~46 s. Within each class the pace was flat all night, so nothing
+degraded. Consequence for validity: none (arms interleave within tuples,
+1 s apart). Lesson for any future plan line: pace is per task class, never
+one constant.
+
+## CMP-004 — First live pairwise: 18 of 40 flagged; drafting carries the difference (2026-11-06)
+
+The assistante campaign's measurement plan item 2 ran to completion
+overnight: the store resumed at 29/800 and finished at **800/800 four-arm
+tuples, 3,200 samples, zero errors, zero empty outputs**, digests held
+across the resume, interleaving gap 1 s. Scored the same morning on the
+GPU. Run id **20261106T075759Z**, config 52b45df073b51223; store, meta,
+both report files and the night log's tail are the evidence, committed
+with this entry (runtime state is data, BCH-018).
+
+**Primary selection (A = llama3.2:3b per CMP-003, B = phi4-mini): 18 of
+40 inputs flagged at q = 0.10.** Channels, each against its own decoys:
+mode_share 15 (est. FDR 0.07), novel_mode 16 (0.06), nli_directional 11
+(0.09); dispersion floor-limited (6 above every decoy, under the 1/q
+floor of 10, MTH-024); nli_contradiction reported no separation in all
+five pairings, which per ENG-007 is "silent", never "no contradictions".
+
+**The composition is the finding:** 4 of 24 translation inputs flagged
+(17%) against 14 of 16 drafting briefs (88%). Where the source text pins
+the content, the two models are near-interchangeable; where text is
+generated freely, they certifiably diverge on almost everything.
+
+**Replicate stability (Design R's three extra target sets):** counts
+18 / 18 / 19 / 16 across the four same-orientation pairings; 13 inputs
+flagged in all four, 5 more in three of four (all five inside the primary
+selection), 2 at two of four (outside it), none at one. The edge wobbles
+by about the ~2 false alarms a q = 0.10 list of 18 expects; the core does
+not move.
+
+**Reverse orientation (A = phi4-mini, its own second run as the null):
+10 of 40, every one inside the primary 18,** all via nli_directional with
+exactly mirrored signs. The mode channels die under phi's null: best cut
+10 targets over 1 decoy, estimate 0.20 against q = 0.10. Reading:
+**phi4-mini is noisier against itself than llama3.2 is**; llama's tighter
+self-null is what makes the mode-level differences selectable. For a
+desktop assistant, run-to-run steadiness is itself deployable behaviour,
+so this reads in the reference's favour, but the quality call stays with
+the human pass.
+
+**Direction of the difference:** on most flagged inputs the directional
+channel says phi's outputs carry content llama's do not entail (phi "says
+more"); out-01 is the lone input where it runs the other way. Conformance
+agrees at the margins: phi broke llama's word-count envelope on 17/800
+outputs (2%) and llama phi's on 11/800 (1%); phi sometimes runs past 22
+lines and leaves "[Nom...]"-style template placeholders (example stored in
+the report). Median lengths per output class are within 15% of each other,
+so this is tail behaviour, not a length regime change.
+
+**BCH-009 note in all five reports** (recording crosses midnight UTC, a
+chat template may interpolate the date): absorbed by design here. Tuples
+are atomic with arms ~1 s apart, recording is input-major, so at most one
+input straddles the flip and its arms straddle it together.
+
+**The judging queue (measurement plan item 3) is emitted:**
+`compare/emit_judging_queue.py` wrote `compare/results/judging-queue.md`,
+18 cases in seeded-shuffled order, two samples per side (one from each of
+the model's two arms, seed 20261106), side X/Y re-drawn per case, the
+unblinding map sealed in `judging-key-DO-NOT-OPEN.json`, scoring via
+`--score` into `judging-verdict.json`. Blindness is tested
+(`tests/test_compare_judging.py`): the queue carries no model names, no
+channel scores, no stability markers. Structural caveat, recorded: this
+entry itself describes aggregate tendencies, so an owner-judge is not
+fully blind to style; the per-case side shuffle still holds, and the real
+user is a fully blind judge if tone needs one.
+
+**Reopen if:** the human pass judges most flagged cases `egal` (then the
+selection measured decoy resolution, not behaviour difference, and the
+pair needs a calibration look before any verdict), or the §4
+generalisations ship and the two pending Design R quantities get computed
+from this store.

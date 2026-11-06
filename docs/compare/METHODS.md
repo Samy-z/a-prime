@@ -25,3 +25,23 @@ assistante campaign — per-candidate pace and footprint, CPU only
 (`num_gpu: 0`), resumable, pull failures recorded as findings. Results in
 `compare/results/`. It talks to Ollama directly; the detector is not
 involved, and the boundary test holds the whole package to that.
+
+`compare/pairwise_ventes.py` runs measurement plan 2: the Design R
+four-arm recording (compare-side, tuple-atomic, resumable, digest-guarded,
+collision-guarded against main-line recorders) and the five `detect()`
+relabelings through the public API. `scripts/night-pairwise.cmd` chains
+record then analyse unattended. Known data trap: the two pace constants in
+its history were calibrated on translation tuples only; pace is per task
+class (translation ~16 s/tuple, drafting ~46 s/tuple on the dev CPU,
+CMP-004).
+
+**Blind judging protocol** (measurement plan 3, instrument
+`compare/emit_judging_queue.py`): the primary selection's inputs, in
+seeded-shuffled order, two samples per side drawn one from each of the
+model's two arms, side X/Y re-drawn per case; the queue shows task and
+outputs only (no model names, channel scores or stability markers,
+enforced by `tests/test_compare_judging.py`); the unblinding map stays
+sealed in `judging-key-DO-NOT-OPEN.json` until every `verdict:` line is
+filled (X / Y / egal / aucun), then `--score` unblinds and writes the
+tally. The emitter refuses to overwrite filled verdicts without `--force`:
+judging work is runtime state.

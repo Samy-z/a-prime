@@ -1,0 +1,514 @@
+{
+  "created_utc": "20261106T151552Z",
+  "seed": 20261106,
+  "source_report": {
+    "run_id": "20261106T075759Z",
+    "config_hash": "52b45df073b51223"
+  },
+  "cases": [
+    {
+      "position": 1,
+      "input_id": "out-06",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            18
+          ],
+          [
+            "m1b",
+            4
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            10
+          ],
+          [
+            "m2b",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "position": 2,
+      "input_id": "out-12",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            2
+          ],
+          [
+            "m2b",
+            18
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            16
+          ],
+          [
+            "m1b",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "position": 3,
+      "input_id": "out-04",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            6
+          ],
+          [
+            "m2b",
+            2
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            16
+          ],
+          [
+            "m1b",
+            7
+          ]
+        ]
+      }
+    },
+    {
+      "position": 4,
+      "input_id": "out-05",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            13
+          ],
+          [
+            "m1b",
+            17
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            13
+          ],
+          [
+            "m2b",
+            2
+          ]
+        ]
+      }
+    },
+    {
+      "position": 5,
+      "input_id": "out-14",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            13
+          ],
+          [
+            "m1b",
+            2
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            18
+          ],
+          [
+            "m2b",
+            9
+          ]
+        ]
+      }
+    },
+    {
+      "position": 6,
+      "input_id": "out-16",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            12
+          ],
+          [
+            "m1b",
+            13
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            6
+          ],
+          [
+            "m2b",
+            14
+          ]
+        ]
+      }
+    },
+    {
+      "position": 7,
+      "input_id": "out-11",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            6
+          ],
+          [
+            "m2b",
+            1
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            10
+          ],
+          [
+            "m1b",
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "position": 8,
+      "input_id": "msg-01",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            17
+          ],
+          [
+            "m1b",
+            19
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            1
+          ],
+          [
+            "m2b",
+            4
+          ]
+        ]
+      }
+    },
+    {
+      "position": 9,
+      "input_id": "out-09",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            3
+          ],
+          [
+            "m2b",
+            15
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            11
+          ],
+          [
+            "m1b",
+            13
+          ]
+        ]
+      }
+    },
+    {
+      "position": 10,
+      "input_id": "out-15",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            7
+          ],
+          [
+            "m1b",
+            17
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            0
+          ],
+          [
+            "m2b",
+            12
+          ]
+        ]
+      }
+    },
+    {
+      "position": 11,
+      "input_id": "out-10",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            2
+          ],
+          [
+            "m1b",
+            11
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            14
+          ],
+          [
+            "m2b",
+            19
+          ]
+        ]
+      }
+    },
+    {
+      "position": 12,
+      "input_id": "out-08",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            6
+          ],
+          [
+            "m1b",
+            2
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            19
+          ],
+          [
+            "m2b",
+            15
+          ]
+        ]
+      }
+    },
+    {
+      "position": 13,
+      "input_id": "msg-15",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            15
+          ],
+          [
+            "m2b",
+            16
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            9
+          ],
+          [
+            "m1b",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "position": 14,
+      "input_id": "msg-13",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            11
+          ],
+          [
+            "m2b",
+            11
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            11
+          ],
+          [
+            "m1b",
+            18
+          ]
+        ]
+      }
+    },
+    {
+      "position": 15,
+      "input_id": "out-02",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            17
+          ],
+          [
+            "m1b",
+            0
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            12
+          ],
+          [
+            "m2b",
+            14
+          ]
+        ]
+      }
+    },
+    {
+      "position": 16,
+      "input_id": "out-03",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            19
+          ],
+          [
+            "m2b",
+            8
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            3
+          ],
+          [
+            "m1b",
+            16
+          ]
+        ]
+      }
+    },
+    {
+      "position": 17,
+      "input_id": "out-01",
+      "X": "llama3.2:3b",
+      "Y": "phi4-mini:latest",
+      "draws": {
+        "X": [
+          [
+            "m1a",
+            15
+          ],
+          [
+            "m1b",
+            11
+          ]
+        ],
+        "Y": [
+          [
+            "m2a",
+            15
+          ],
+          [
+            "m2b",
+            11
+          ]
+        ]
+      }
+    },
+    {
+      "position": 18,
+      "input_id": "msg-22",
+      "X": "phi4-mini:latest",
+      "Y": "llama3.2:3b",
+      "draws": {
+        "X": [
+          [
+            "m2a",
+            12
+          ],
+          [
+            "m2b",
+            16
+          ]
+        ],
+        "Y": [
+          [
+            "m1a",
+            16
+          ],
+          [
+            "m1b",
+            14
+          ]
+        ]
+      }
+    }
+  ]
+}

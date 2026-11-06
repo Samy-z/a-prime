@@ -1,21 +1,27 @@
 # compare — current state
 
-Seat ratified 2026-10-16 (HANDOFF §24 and its amendment). Nothing is built.
+Seat ratified 2026-10-16 (HANDOFF §24 and its amendment). First campaign
+live: the assistante-ventes comparison (`docs/compare/campaign-assistante.md`).
 
 | Piece | State |
 |---|---|
-| Input generation from a usage description | first real campaign opened 2026-11-04: `docs/compare/campaign-assistante.md`, fixtures in `compare/fixtures_ventes.py` |
-| Output store | not started |
-| Multi-system scheduling | not started |
-| Inference-performance measurement | not started (methodology before code: serving load changes outputs, MTH-015) |
-| Comparison reporting / UI | not started |
+| Input generation from a usage description | live: 40 deterministic language tasks from the campaign's usage description (`compare/fixtures_ventes.py`, CMP-001) |
+| Output store | live: `compare/results/pairwise-ventes.jsonl`, four-arm tuple-atomic resumable store, 800/800 tuples recorded 2026-11-06 (CMP-003/004) |
+| Multi-system scheduling | first form: lead rotation over the four-arm roster inside one Ollama, plus the unattended night chain `scripts/night-pairwise.cmd` (collision-guarded). Many-system scheduling not started. |
+| Inference-performance measurement | pace instrument live (`compare/pace_ventes.py`, CMP-002); perf fields live in comparator records, never in Trace (MTH-015) |
+| Comparison reporting / UI | first form: five-pairing report (`compare/results/pairwise-ventes.report.json` and its readable twin `compare/results/pairwise-ventes.report.txt`) plus the blind judging queue and its scorer (`compare/emit_judging_queue.py`). No UI. |
+
+Campaign state: **awaiting the human pass** on the 18 flagged cases in
+`compare/results/judging-queue.md`; after `--score`, CMP-005 names the
+winner and ChatADV gets pointed at it.
+
+Boundary: `tests/test_compare_boundary.py` whitelist carries six public
+names (net, detect, recorder, clustering, probes.channels, provenance),
+each with its reason in the test file.
 
 Model pool for cross-system work: D10's ratified four (granite4.2:8b,
 ministral-3:8b, qwen3.5:9b, ministral-3:3b as the capability axis), weights
 on disk; a 2026-Q4 agentic-branded refresh candidate is under research
-(HANDOFF §24 amendment).
-
-The boundary test promised by METHODS guardrail 1 exists:
-`tests/test_compare_boundary.py`, whitelist empty. The assistante campaign's
-pairwise stage waits on the cross-system null ratification; pace and
-footprint measurement does not.
+(HANDOFF §24 amendment). The cross-system null proposal
+(`docs/methods/cross-system-null-proposal.md`) still awaits owner
+ratification; the pairwise stage ran under the ratified MTH-027 freeze.
