@@ -835,3 +835,47 @@ banking-extraction pair (config above), `logs/chain.log` timings; all
 committed with this entry.
 **Reopen if:** an agent cell is recorded at k=20, or the k=20 rows are
 re-analysed under a changed instrument.
+
+## STD-014 — The drift negative control runs at 33.6 days: silence in all three comparisons (2026-11-07)
+
+MTH-026's protocol, executed 2026-11-07 (run 20261107T045701Z, config
+4366ced9c36980a3, commit 13ce27e, tree clean). Both guards passed: the
+model digest equals period one's (f586c02fdecd...), so the weights did not
+move between periods, and the corpus rebuilt from the same seeds matched
+the period-1 input ids exactly. One deviation from the frozen entry's
+prose, declared here: the gap is 33.6 days, not the "about 13" the
+protocol text assumed when written — the quiet night came three weeks
+late. The enforced substance (digest equality, corpus equality, gap
+measured and reported) is untouched; 33.6 days is a strictly harder
+version of the question the protocol asks.
+
+**Result: 0 flagged of 40 inputs in each of the three comparisons** at
+q=0.10, k=6 — cross-p1null (the 2026-10-04 pair as the null, today's arm
+as candidate), cross-p2null (today's pair as the null, the 2026-10-04 arm
+as candidate), and within-p2 (same-day sanity). Every live channel is
+silent in every comparison: mode_share, dispersion, novel_mode,
+nli_contradiction and nli_directional all at zero; embedding skipped by
+configuration, as in the whole study. The within-period zero means
+MTH-026's harness-indicting reopen clause does not fire.
+
+**Reading, under the MTH-024 floor.** At q=0.10 and n=40 the selector
+cannot report fewer than ten findings, so zero flagged is consistent with
+up to nine genuinely drifted inputs; the claim this run supports is
+narrower and stated with that floor: 33.6 days of wall-clock time on
+unchanged weights does not manufacture a reportable regression in either
+direction of comparison. That is the no-change case of the stored-baseline
+regime measured for the first time — a month-old baseline of the same
+system can stand in as A without the detector inventing drift, which is
+the load-bearing assumption of both the hosted-model scenario (STD-008)
+and Design R's stored-baseline leg (MTH-027). The positive case, a digest
+change, remains unmeasured; the exit-5 guard exists to catch it when it
+arrives.
+
+**Evidence:** `results/drift/drift-control.4366ced9c36980a3.report.json`
+(gap_days 33.6, nli_revision 6f5cf0a2...), the period-2 checkpoint
+`results/drift/drift-p2.4366ced9c36980a3.jsonl` (240 of 240 triples, 720
+samples), both committed with this entry; MTH-026; STD-008.
+**Reopen if:** a later drift control on a changed digest or a longer gap
+flags cross-period inputs beside a silent within-period comparison — that
+is the drift measurement MTH-026 anticipates, and it gets its own entry —
+or these recordings are re-analysed under a changed instrument.

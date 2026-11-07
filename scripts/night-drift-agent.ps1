@@ -56,11 +56,16 @@ cmd /c "`"$py`" scripts\run_study.py --clear-stop >> `"$log`" 2>&1" | Out-Null
 
 $stages = @(
     @{ name = "drift negative control (MTH-026)"
-       cmd  = "`"$py`" -u scripts\run_drift_control.py --go" },
+       cmd  = "`"$py`" -u scripts\run_drift_control.py --go"
+       done = "results\drift\drift-control.*.report.json" },
     @{ name = "banking-agent at k=20"
        cmd  = "`"$py`" -u scripts\run_study.py --go --yes --only-domain banking --only-format agent --k 20" }
 )
 foreach ($stage in $stages) {
+    if ($stage.done -and (Test-Path (Join-Path $root $stage.done))) {
+        Write-Log "---- stage '$($stage.name)' skipped: its report is already on disk"
+        continue
+    }
     Write-Log "---- stage '$($stage.name)'"
     cmd /c "$($stage.cmd) >> `"$log`" 2>&1"
     $rc = $LASTEXITCODE

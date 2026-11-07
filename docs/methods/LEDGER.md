@@ -860,3 +860,17 @@ point of its existence.
 same day; the owner's ratification message, 2026-11-04.
 **Reopen if:** the owner answers the roster-width question differently, or
 Design R's first live run contradicts the proposal's stub-sweep validation.
+
+## MTH-026 — RESULT (dated append, 2026-11-07): run at 33.6 days, expectation met
+
+The protocol ran 2026-11-07 (run 20261107T045701Z). Both guards held: the
+model digest equals period one's, and the rebuilt corpus matched the
+period-1 input ids exactly. Zero flagged of 40 inputs in all three
+comparisons at q=0.10 — the filed expectation met — and the within-period
+zero means this entry's harness-indicting reopen clause does not fire.
+One prose deviation, declared rather than smoothed over: the gap came out
+33.6 days, not the "about 13" this entry assumed when it was frozen,
+because the quiet night arrived three weeks later than planned. The
+enforced substance (digest equality, corpus equality, gap measured and
+reported) is untouched, and the longer gap is a strictly harder version
+of the same question. Full reading and evidence: STD-014.
