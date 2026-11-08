@@ -83,11 +83,30 @@ name only.
 
 ### The evening-to-night handover is automated from outside this repo
 
-The recurring slowdown has one root cause: granite needs 6.8 GB on an 8 GB
-card, the VRAM split is decided once at model load and never revisited while
-the model stays busy, and the owner's evening use (video in Opera GX) holds
-enough VRAM that a run started or resumed during the evening loads partially
-on CPU and stays 3-4x slow all night — even after the apps close.
+The recurring slowdown has one root cause, refined by a controlled bounce
+on 2026-11-08: granite's 6.8 GB footprint plus CUDA context plus Ollama's
+own reserve does not fit an 8 GB card that also drives the display, and the
+VRAM split is decided once at model load and never revisited while the
+model stays loaded. Two separately measured consequences:
+
+- **A 100% GPU load is out of reach while the desktop session is up.** With
+  everything closed but the shell (888 MiB residue: DWM, the overlays), a
+  fresh load still chose 8%/92% CPU/GPU. Closing Spotify or browser tabs
+  before launching does not change the placement; an ~8% CPU share is this
+  card's normal state, not a fault (2026-11-08, `ollama ps` after a clean
+  pause, `ollama stop`, relaunch).
+- **What costs time is contention, not the floor split itself.** The same
+  8/92 split measured 13.3 s per agent call on an idle machine (2026-11-08,
+  280 s window, 21 samples) — faster than the 16.9 s/call planning pace —
+  against ~35 s/call averaged over 10 h of daytime use (2026-11-07). The
+  old reading still holds for the big spills: a load taken during evening
+  video (Opera GX) puts far more than 8% on CPU and stays slow all night
+  even after the apps close. The floor split does not need fixing.
+
+Operating rules that follow: never bounce a split model on a quiet box
+expecting a speedup, and do not close apps chasing 100%; what matters is
+not loading during heavy VRAM use, and not running heavy use alongside a
+recording.
 
 The owner's fix (2026-10-06) lives in their `Youtube_ad_skipper_fr` project
 (branch `idle-close`), which already watches the screen for ad buttons: when
