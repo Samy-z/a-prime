@@ -208,3 +208,68 @@ selection measured decoy resolution, not behaviour difference, and the
 pair needs a calibration look before any verdict), or the §4
 generalisations ship and the two pending Design R quantities get computed
 from this store.
+
+## CMP-005 — The human pass lands near-even: phi4-mini 8, llama3.2 6, egal 3, aucun 1 (2026-11-10)
+
+The owner judged all 18 flagged cases blind (CMP-004's queue, sides
+re-drawn per case, key sealed 2026-11-06). The key was opened only by the
+scorer, after every verdict line was filled: `judging-verdict.json`,
+scored 20261110T012014Z, source run 20261106T075759Z. The review burden
+the detector bought: the human read 18 of 40 inputs, not 40.
+
+**Vocabulary note, recorded before the tally.** The judge answered eleven
+of eighteen cases in a finer vocabulary than the queue's four words,
+ranking individual samples ("X2/X1", "Y1/Y2", "X2/Y1"). Normalisation
+rule, applied by script with each raw verdict preserved on its remarque
+line: samples named from one side only map to that side; samples named
+from both sides map to `egal`. Three cases normalised to `egal` that way
+(out-04, out-02, out-03); the judge's line order and remarks stay in the
+queue file verbatim, so any case can be re-read against the rule.
+
+**Tally: of 18 cases, phi4-mini 8, llama3.2:3b 6, egal 3, aucun 1.** By
+task class: the four translations go 3-1 to phi4-mini, and the one llama
+win is the German case the judge took "for accuracy" while calling phi's
+wording the better-formed. The fourteen drafting briefs split dead even:
+5 llama, 5 phi, 3 egal, 1 aucun (out-16, where the judge rejected all
+four replies for inverting the house payment rule: payment precedes
+shipment, so a "pay within 48 h after delivery" mail reads wrong to
+them). Position note: the judge preferred side X in 10 of 18 against 4
+for side Y, while the draw put each model at X nine times; whatever
+position lean exists, the per-case shuffle spread it evenly, and n=18 is
+too small to test it.
+
+**CMP-004's reopen clause does not fire:** 3 of 18 `egal` is not "most".
+The selection measured behaviour difference, and the two instruments now
+compose the way the project claims they should: the detector certified
+WHERE the pair differs (18 of 40 inputs, drafting-heavy), the human pass
+says the difference is mostly not a quality gap. Difference without a
+clear winner is MTH-001's unidentifiability made concrete on a live
+pair: the machine names the places, the human names the better side,
+and neither instrument can do the other's job.
+
+**Fidelity notes from the judge's remarks, kept because they are
+deployment-relevant:** llama rendered "next Friday" as "la prochaine
+semaine" on a payment promise (msg-01, the same calque CMP-002's spot
+check caught, now reproduced blind); llama inverted the speaker on the
+Spanish early-payment ask (msg-22, the client's own offer rendered as
+"nous appliquons"); one phi sample inverted who chooses the remedy on
+out-12 ("au choix de notre part"); and the remarks on cas 1 and cas 14
+list the recurring fault classes both sides share (dropped "n'" in
+negations, literal calques from English, "nous faites savoir"-class
+conjugation slips).
+
+**Deliverable consequence, decision the owner's:** CMP-002 filed licence
+as a legitimate near-tie tiebreaker (phi4-mini is MIT; llama requires
+"Built with Llama"), and the human pass is a near-tie with phi slightly
+ahead. Against that, CMP-004's reverse orientation found phi noisier
+against itself, and run-to-run steadiness is itself deployable
+behaviour. The ChatADV default-model call takes both findings and is not
+made here.
+
+**Evidence:** `compare/results/judging-queue.md` (filled by the owner,
+normalised with raw verdicts preserved), `compare/results/judging-verdict.json`,
+the key file (now opened, left in place), all at this commit.
+**Reopen if:** the owner re-judges any case against the normalisation
+rule (the raw verdicts are preserved for exactly that), or a second,
+fully blind judge (the real user) runs the same queue and lands
+materially elsewhere.

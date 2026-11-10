@@ -100,8 +100,8 @@ Cordialement,
 [Adresse e-mail]
 ```
 
-verdict:
-remarque:
+verdict: Y
+remarque: [verdict brut: Y1/Y2] Y2 a une meilleure structure, mais objectivement toutes les options ont un français légèrement incorrect, ou une approche du problème trop conciliante pour une situation d'impayé, dans le cas où le virement n'est pas arrivé, l'envoie de la commande est bloquée, le mail doit le dire gentillement mais explicitement, et aider le client à entammer le processus de payement s'il le faut. Parmis les fautes de français notables dans un email, on retrouve le manque de "n'" avant la négation (exemple: "l'expédition de vos pièces aéronautiques est actuellement pas bloquée"), on peut aussi noter quelques mots trop soutenus pour une simple tâche de contact client (exemple: votre prompte réponse), il y a aussi des fautes qui relèvent de traduction littérale d'anglais à français (exemple: Merci de nous contacter à son plus vite pour nous apporter à jour sur ce sujet.)
 
 
 ## Cas 2 (id: out-12)
@@ -196,8 +196,8 @@ Cordialement,
 [Votre nom]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: [verdict brut: X2/X1] X1 et X2 ont des phrases plus organiques, moins courtes et impersonnelles, tout en proposant des options équivalentes aux réponses plus verbeuses, elles sont donc moins frustrantes que les Y1 et Y2.
 
 
 ## Cas 3 (id: out-04)
@@ -281,8 +281,8 @@ Cordialement,
 [Votre nom]
 ```
 
-verdict:
-remarque:
+verdict: egal
+remarque: [verdict brut: X2/Y1] la structure de Y1 est parfaite et le ton de X2 est parfait, il faudrait garder Y1 en priorité, mais si possible prendre la note sympathique de X2 "Nous vous remercions pour votre intérêt continu pour nos pièces aéronautiques. En réponse à votre message,"
 
 
 ## Cas 4 (id: out-05)
@@ -365,8 +365,8 @@ Cordialement,
 [Informations de contact]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: [verdict brut: X2] X2 témoigne plus d'attention au client que ses alternatives, ce qui est un argument important quand on cherche a sécuriser une vente, Y1 est décente mais impersonnelle, un client pourrait penser à une offre baclée, une note de manque d'intérêt, là où X2 est plus explicite, bien qu'un peu extravagant (ce n'est pas un point négatif).
 
 
 ## Cas 5 (id: out-14)
@@ -469,8 +469,8 @@ Cordialement,
 [Adresse e-mail]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: [verdict brut: X2] je ne connais pas la réponse à ces questions moi-même, donc je ne peux que débattre du ton, qui est préférable chez X2
 
 
 ## Cas 6 (id: out-16)
@@ -556,8 +556,8 @@ Cordialement,
 [Adresse e-mail]
 ```
 
-verdict:
-remarque:
+verdict: aucun
+remarque: les règlements doivent précéder l'envoie des pièces, sinon elles sont retenues par l'usine, en attente du paiement, sinon X2 avais le bon ton pour un ADV
 
 
 ## Cas 7 (id: out-11)
@@ -639,8 +639,8 @@ Cordialement,
 [Votre nom]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: [verdict brut: X1] X1 structure + ton parfait, dans les autres options le procéssus de renvoie est trop floue.
 
 
 ## Cas 8 (id: msg-01)
@@ -673,8 +673,8 @@ Bonjour, concernant l'invitation de paiement CMD-2026-1004, notre équipe des co
 Bonjour, concernant l'invoice CMD-2026-1004, notre équipe des comptes confirme que le paiement sera exécuté le vendredi prochain. Nous nous excusons pour le retard, nous avons eu un retard interne d'approbation.
 ```
 
-verdict:
-remarque:
+verdict: Y
+remarque: traduction moins littérale
 
 
 ## Cas 9 (id: out-09)
@@ -776,8 +776,8 @@ Cordialement,
 [Votre nom]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: [verdict brut: X2]
 
 
 ## Cas 10 (id: out-15)
@@ -867,7 +867,7 @@ Cordialement,
 [Adresse e-mail]
 ```
 
-verdict:
+verdict: X
 remarque:
 
 
@@ -955,8 +955,8 @@ Cordialement,
 [Coordonnées de l'entreprise]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: the Y side takes replies to issues too lightly, when facing troubles, client want a clear, possibly complete picture of what to do, which the X side provides
 
 
 ## Cas 12 (id: out-08)
@@ -1042,8 +1042,8 @@ Cordialement,
 [Coordonnées de contact]
 ```
 
-verdict:
-remarque:
+verdict: Y
+remarque: [verdict brut: Y2]
 
 
 ## Cas 13 (id: msg-15)
@@ -1076,8 +1076,8 @@ Bonjour, nous prévoyons la maintenance de trois machines au cours du hiver. Pui
 Bonjour, nous prévoyons la maintenance de trois machines au cours du hiver. Puisque nous avons concentré tous les pièces d'origine auprès de vous, est-ce que vous considérez une réduction de 10% du coût du projet réalisable ?
 ```
 
-verdict:
-remarque:
+verdict: Y
+remarque: i can't judge properly because i do not speak german, but i tend to think translation is more accurate on the Y side, even tho it reads better on the X side because it sounds less forced like "i did this for you so now do this for me", i'd argue let's keep Y for accuracy; BUT TECHNICALLY X2 is the best formulated answer summarizing the client ask, just not loyal to the original formulation
 
 
 ## Cas 14 (id: msg-13)
@@ -1110,8 +1110,8 @@ Bonjour, nous avons reçu l'ordre CMD-2026-1037 avec des dommages visibles sur l
 Bonjour, nous avons reçu l'ordre CMD-2026-1037 avec des dommages visibles sur la boîte de l'actuateur, nous avons donc refusé la livraison de cet article. Veuillez nous organiser une remplacement et nous informez qui porte la demande de réclamation auprès du transporteur.
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: X est un peu mieux traduit que Y qui est plus littéral, mais il y a toujours des fautes de conjugaison dans les deux cotés: "Veuillez arranger un remplacement et nous faites..." devrait être " et nous faire..."; "Veuillez nous organiser une remplacement et nous informez qui porte" devrait être "un remplacement et nous informer"
 
 
 ## Cas 15 (id: out-02)
@@ -1197,8 +1197,8 @@ Cordialement,
 [Coordonnées de contact]
 ```
 
-verdict:
-remarque:
+verdict: egal
+remarque: [verdict brut: X1/Y2]
 
 
 ## Cas 16 (id: out-03)
@@ -1281,8 +1281,8 @@ Cordialement,
 [Votre nom]
 ```
 
-verdict:
-remarque:
+verdict: egal
+remarque: [verdict brut: X1/Y1]
 
 
 ## Cas 17 (id: out-01)
@@ -1372,8 +1372,8 @@ Assistant des ventes
 [Coordonnées de l'entreprise]
 ```
 
-verdict:
-remarque:
+verdict: X
+remarque: [verdict brut: X1]
 
 
 ## Cas 18 (id: msg-22)
@@ -1406,5 +1406,5 @@ Bonjour, nous appliquons un pourcentage de réduction pour le paiement anticipé
 Bonjour, nous appliquons un pourcentage de réduction pour les paiements anticipés. Nous acceptons le paiement de la pièce CMD-2026-1052 à 5 jours avant la date d'expédition, en échange d'un pourcentage de réduction de 2%.
 ```
 
-verdict:
+verdict: X
 remarque:

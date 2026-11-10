@@ -1,0 +1,141 @@
+{
+  "scored_utc": "20261110T012014Z",
+  "source_report": {
+    "run_id": "20261106T075759Z",
+    "config_hash": "52b45df073b51223"
+  },
+  "totals": {
+    "phi4-mini:latest": 8,
+    "egal": 3,
+    "llama3.2:3b": 6,
+    "aucun": 1
+  },
+  "cases": [
+    {
+      "input_id": "out-06",
+      "verdict": "y",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "out-12",
+      "verdict": "x",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "out-04",
+      "verdict": "egal",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": null
+    },
+    {
+      "input_id": "out-05",
+      "verdict": "x",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "llama3.2:3b"
+    },
+    {
+      "input_id": "out-14",
+      "verdict": "x",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "llama3.2:3b"
+    },
+    {
+      "input_id": "out-16",
+      "verdict": "aucun",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": null
+    },
+    {
+      "input_id": "out-11",
+      "verdict": "x",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "msg-01",
+      "verdict": "y",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "out-09",
+      "verdict": "x",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "out-15",
+      "verdict": "x",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "llama3.2:3b"
+    },
+    {
+      "input_id": "out-10",
+      "verdict": "x",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "llama3.2:3b"
+    },
+    {
+      "input_id": "out-08",
+      "verdict": "y",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "msg-15",
+      "verdict": "y",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": "llama3.2:3b"
+    },
+    {
+      "input_id": "msg-13",
+      "verdict": "x",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": "phi4-mini:latest"
+    },
+    {
+      "input_id": "out-02",
+      "verdict": "egal",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": null
+    },
+    {
+      "input_id": "out-03",
+      "verdict": "egal",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": null
+    },
+    {
+      "input_id": "out-01",
+      "verdict": "x",
+      "side_X": "llama3.2:3b",
+      "side_Y": "phi4-mini:latest",
+      "judged_model": "llama3.2:3b"
+    },
+    {
+      "input_id": "msg-22",
+      "verdict": "x",
+      "side_X": "phi4-mini:latest",
+      "side_Y": "llama3.2:3b",
+      "judged_model": "phi4-mini:latest"
+    }
+  ]
+}

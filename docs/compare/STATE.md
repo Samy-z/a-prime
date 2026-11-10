@@ -11,9 +11,13 @@ live: the assistante-ventes comparison (`docs/compare/campaign-assistante.md`).
 | Inference-performance measurement | pace instrument live (`compare/pace_ventes.py`, CMP-002); perf fields live in comparator records, never in Trace (MTH-015) |
 | Comparison reporting / UI | first form: five-pairing report (`compare/results/pairwise-ventes.report.json` and its readable twin `compare/results/pairwise-ventes.report.txt`) plus the blind judging queue and its scorer (`compare/emit_judging_queue.py`). No UI. |
 
-Campaign state: **awaiting the human pass** on the 18 flagged cases in
-`compare/results/judging-queue.md`; after `--score`, CMP-005 names the
-winner and ChatADV gets pointed at it.
+Campaign state: **measurement plan complete.** The human pass landed
+2026-11-10 (CMP-005): of 18 blind cases, phi4-mini 8, llama3.2 6, egal 3,
+aucun 1 — near-even, translations 3-1 phi, drafting dead even. The one
+open move is the owner's: point ChatADV's default at llama (steadier
+against itself, CMP-004) or phi (slight judge edge and MIT licence,
+CMP-002/005). Pending engine work unchanged: the §4 pairing-aware
+quantities ride the MTH-027 freeze.
 
 Boundary: `tests/test_compare_boundary.py` whitelist carries six public
 names (net, detect, recorder, clustering, probes.channels, provenance),
