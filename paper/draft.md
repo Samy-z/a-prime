@@ -1023,8 +1023,9 @@ percent interval. On the other two formats the question is unresolved at six sam
 per cloud: not answered no, because the silent cells were diagnosed and in
 every one the detector saw the change and could not certify it at the
 budget, as the paragraphs on those rows show. At twenty samples per cloud
-the one JSON cell recorded again detected fully, in one domain; the other
-two JSON cells and the agent format at twenty remain unmeasured.
+the one JSON cell recorded again detected fully, in one domain, and the
+agent cell recorded again stayed silent, as the agent row's paragraphs
+measure; the other two JSON cells remain unmeasured.
 
 The second finding is what that pattern says about the method, and it was
 not a hypothesis before the matrix was read, so it is labelled post hoc here
@@ -1294,14 +1295,19 @@ none in hospitality; whether those are inputs whose decision held is not
 something the stored diagnosis can say, because it keeps scores and not
 which input each score belongs to. Before the diagnosis ran, the expectation written down from these
 two readings was that the decoys would be as wide as the touched inputs, and
-that is what it found for most inputs. [At twenty samples per cloud the
-statistic takes 21 values rather than 7, which should pull the decoys at
-0.83 off the top and improve the estimates; whether ten or more touched
-inputs then separate cleanly is open, because what binds here is the number
-of inputs that separate, and not the fineness of the grid. If an agent cell
-at twenty samples still cannot reach the budget, that is a statement about
-how much information one agent output carries about this fault, and not
-about the sample count. No agent cell is recorded at twenty.]
+that is what it found for most inputs. At twenty samples per cloud the
+statistic takes 21 values rather than 7, and the banking cell was recorded
+again at that size to ask. The finer grid did improve the estimate: the
+best cut of the share-of-answers check moved from 0.25 to 0.22, nine
+inputs above it and one decoy. It did not buy separation: the decoys' top
+score rose from 0.83 to 0.85 while the highest touched input sits at 0.95,
+and the touched inputs standing above every decoy fell from four to one.
+Nothing was flagged: 0 of 40 inputs, the fault touching 25. The decision
+itself agrees: the fault changed the majority decision on 1 of the 25
+touched inputs, while the two identical baseline runs changed it on 4 of
+40 between themselves. Per the sentence written down before the run, that
+is a statement about how much information one agent output carries about
+this fault, and not about the sample count.
 
 The agent row is also where the recording was least clean. Besides the
 seventeen errored calls, the model reached its step limit on 79, 157 and 282
@@ -1352,8 +1358,13 @@ subsection reports what happened.
 | logistics summary | 14 of 15 | 15, 1 |
 | hospitality summary | 21 of 22 | 23, 2 |
 | banking extraction | 21 of 21 | 21, 0 |
+| banking agent | 0 of 25 | 0, 0 |
 
-Every input in these four cells is labelled and no call errored. Pooled over
+Every input in these five cells is labelled; no call errored in the first
+four, while 19 of the agent cell's 2,400 calls did and are in no cloud. The
+agent row sits in the table for completeness: it was recorded on 8
+November, after and outside the prediction above, and the agent paragraphs
+earlier in this section read it. Pooled over
 the summary row, 51 of 56 touched inputs were caught, 91 percent, with a 95
 percent interval from 81 to 96. The six-sample row's figure was 85 percent
 with an interval from 72 to 92, and 91 lies inside it, so by the rule
@@ -1902,15 +1913,17 @@ example is printed" and "the program prints it".
 | logistics-summary, twenty samples | `fbcbd6de938d8366` | 800 | 1 | 40 of 40 | 67.8 s | |
 | hospitality-summary, twenty samples | `ba6eaed55818324c` | 800 | 2 | 40 of 40 | 76.0 s | |
 | banking-extraction, twenty samples | `1a37665b4308bcf4` | 800 | 2 | 40 of 40 | 47.1 s | |
+| banking-agent, twenty samples | `808db78857a32149` | 800 | 3 | 40 of 40 | 367.9 s | `banking-agent.808db78857a32149.diagnosis.json`, `banking-agent.808db78857a32149.decisions.json` |
 
 Model `granite4.2:8b`, digest `f586c02fdecdf151`. The nine six-sample cells
 have been analysed three times: on the night of 15 to 16 October 2026, again
 on 16 October after the estimator's handling of tied scores was corrected,
 and again on 17 October after the twenty-sample chain had overwritten the
 matrix file; every pass flagged the same inputs in every cell, and the table
-and the per-cell files carry the last. The four twenty-sample cells were
-analysed once, on the evening of 16 October, by the corrected estimator.
-Every input in the four is labelled; in the three that were paused and
+and the per-cell files carry the last. The first four twenty-sample cells
+were analysed once, on the evening of 16 October, by the corrected
+estimator; the fifth, the banking agent cell, once on 8 November 2026 by
+the same estimator. Every input in those four is labelled; in the three that were paused and
 resumed, the input in flight at the pause carries labels for 14, 11 and 15
 of its twenty samples, which changes nothing reported here because an input
 counts as touched when any sample was. Recording time, summed over the calls
@@ -1918,11 +1931,12 @@ that returned, was 0.8 to 0.9 hours per summary cell at six samples and 2.5
 to 2.8 at twenty, 1.2 to 7.6 per extraction cell at six and 3.3 for banking
 at twenty, and 3.1 to 12.8 per agent cell, with pauses on top. A cell with more than one session was
 paused and resumed, and the recorder resumes from its checkpoint. Seventeen
-samples in the agent row were errored calls and are in no cloud (12, 3 and 2
-in the banking, logistics and hospitality cells); the banking agent
-checkpoint also holds three triples twice, a first attempt that failed on all
-three arms and the attempt that replaced it when the cell resumed. No sample
-in any other cell was an errored call. The two cells resumed before the label
+samples in the six-sample agent row were errored calls and are in no cloud
+(12, 3 and 2 in the banking, logistics and hospitality cells), and 19 of
+the 2,400 in the twenty-sample banking agent cell; the six-sample banking
+agent checkpoint also holds three triples twice, a first attempt that
+failed on all three arms and the attempt that replaced it when the cell
+resumed. No sample in any other cell was an errored call. The two cells resumed before the label
 fix lost the fired-or-not labels of their earlier sessions to the bug described
 in section 8; the fix is in the code that recorded every cell after them, and
 the banking extraction row has since been superseded by the twenty-sample

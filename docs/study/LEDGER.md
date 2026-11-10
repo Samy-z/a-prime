@@ -879,3 +879,75 @@ samples), both committed with this entry; MTH-026; STD-008.
 flags cross-period inputs beside a silent within-period comparison — that
 is the drift measurement MTH-026 anticipates, and it gets its own entry —
 or these recordings are re-analysed under a changed instrument.
+
+## STD-015 — The agent format at k=20: still silent, the classification k-robust; the best estimate moved 0.250 to 0.222 and clean separation fell 4 to 1 (2026-11-10)
+
+The last unmeasured point of the format-and-k structure ran overnight
+2026-11-08 (run 20261108T051631Z, config 808db78857a32149, three recording
+sessions across the 2026-11-07/08 nights, 2,400 samples). **banking-agent
+at k=20: 0 of 40 inputs flagged at q = 0.10, the stale-knowledge fault
+touching 25 of 40, every live channel at zero.** This fires and satisfies
+two reopen clauses at once — STD-011 second append's ("an agent cell is
+recorded at k=20") and STD-013's — and both close here. The k=20 format
+gradient completes: summary 51/56, extraction 21/21, agent 0/25.
+
+**MTH-025, applied as frozen with the amendment's estimator** (instrument:
+`scripts/diagnose_channels.py` on the checkpoint; artifact
+`banking-agent.808db78857a32149.diagnosis.json`, committed with this
+entry): (1) blindness fails — four channels order touched inputs above the
+decoys on average (mode_share +0.2225, novel_mode +0.1597, dispersion
++0.0815, nli_contradiction +0.0581); (2) resolution-limited applies — the
+best channel, mode_share, reaches best achievable estimate **0.222 at cut
+0.70 (9 targets over 1 decoy)** against q = 0.10; (3) no selection
+defect — 0.222 > q and the report flagged nothing, as it must.
+**Classification: resolution-limited at k=20, the same class as k=6; the
+zero is k-robust.** Decoy width, quoted as MTH-025 requires: mode_share
+decoys span 0.05–0.85 against fired targets at 0.05–0.95.
+
+**The filed expectation (STD-011 second append) held at its stated width,
+and its open question resolves against selectability.** The finer grid
+improved the estimate, 0.250 to 0.222, real and useless against a budget
+of 0.100. Whether ten or more fired inputs separate cleanly was the open
+question: **one does** on the best channel (three on dispersion and on
+nli_contradiction; computed from the committed diagnosis arrays with the
+third append's instrument and tolerance). At k=6, four fired inputs stood
+above every decoy on mode_share; at k=20, on the same channel, the decoys
+climbed to 0.85, no fired input holds the top value any more (max 0.95),
+and clean separation fell to one. More than tripling the samples per input
+moved the self-variance up with the fault signal. The append's consequence
+clause activates verbatim: this is a statement about information per agent
+output at this fault, not about k.
+
+**The decision-level reading sharpens in the same direction**
+(`scripts/agent_decision_variation.py`; artifact
+`banking-agent.808db78857a32149.decisions.json`; 19 of 2,400 samples
+dropped as errored): the majority decision flips between the two baseline
+arms on 4 of 40 inputs and between baseline and faulted on **1 of 25
+fired** (2 of 15 quiet) — the fault moves the agent's final decisions less
+than the system moves its own between two clean runs, and untouched inputs
+flip more than touched ones. The decision-only statistic resolves better
+at k=20 (0.2 at cut 0.3655, 5 over 0, against 0.667 at k=6) and still sits
+at twice the budget.
+
+Activation note: this recording touched 25 of 40 where the k=6 recording
+touched 26; activation is measured per run and each row uses its own —
+stated explicitly here for the first time, the convention every report has
+carried. Provenance note: the report carries git_dirty true, the flag
+every k=6 headline report also carries; a tree holding the night's own
+untracked result files at analysis time is the night-run norm, and the
+code state is the recorded commit d6d6462.
+
+Readout produced 2026-11-10 by an analyst/skeptic fork pair under the
+cloud-session guidelines: the skeptic's independent rerun of both
+instruments reproduced every field byte-identically (the duplicate
+artifacts were deleted rather than committed — both instruments are
+deterministic and rerunnable from the checkpoint), and every number above
+passed its re-derivation.
+
+**Evidence:** the report, activation and checkpoint at 9cb8133;
+`results/study/banking-agent.808db78857a32149.{diagnosis,decisions}.json`
+committed with this entry; the clean-separation computation in this entry;
+MTH-025 and its amendment; STD-011 second and third appends; STD-013.
+**Reopen if:** an agent cell at k=20 in a second domain classifies
+differently, a second model drives the agent format (STD-011's standing
+clause), or the titration's m > 1 arms change the decoy picture at this k.

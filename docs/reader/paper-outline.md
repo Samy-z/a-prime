@@ -275,7 +275,7 @@ partition (format 88 percent, domain 3 percent of the spread in recall), the
 registered question answered at its width, the format-and-k finding labelled
 post hoc, the k=6 sizing slip disclosed in bold above the table; all five
 silent cells classified under MTH-025 (resolution-limited); the k=20 rows
-bracketed.** The LOSO/LOFO comparison and the
+measured, the agent point landing last (STD-015).** The LOSO/LOFO comparison and the
 severity titration per fault type remain downstream of the full factorial. The section is written now as a table of what each
 result will be backed by, so that the draft cannot quietly promote a
 constructed mechanism to a measured result when the numbers arrive.
