@@ -47,10 +47,16 @@ detail. Report it as prominently as any other choice.
 |---|---|---|---|
 | Real-regression holdout | not yet collected | — | — |
 
-## Queued question — the cross-system null (opened 2026-10-16, gates paper two)
+## The cross-system null — Design R frozen (MTH-027, 2026-11-04; audit append 2026-11-11)
 
-**Proposal drafted 2026-10-20 and revised twice the same day, awaiting
-owner ratification:** `docs/methods/cross-system-null-proposal.md`. Its
+**Ratified 2026-11-04 and amended by the audit append of 2026-11-11** (the
+five decisions: eight-arm pool roster permitted under three conditions
+with four-arm pairs as the first-wave default; H0 clarified at cloud
+level with a candidate-side dependence warning and the orientation
+diagnostic; the k>=20 partition-channel gate; four simulator blocks
+commissioned plus the `best_achievable` tie settlement; C' parked pending
+the multi-decoy literature read). Proposal text:
+`docs/methods/cross-system-null-proposal.md`. Its
 first recommendation (a pooled within-system null with the ratio-adjusted
 estimate `(1 + d/r)/t`, "adding resolution at the margin") was refuted by
 an adversarial pass and withdrawn: the committed instrument
@@ -82,14 +88,14 @@ recorded; the recorder's triple-atomicity generalises with it. The stored-
 baseline regime (version bump: baseline recorded weeks before the candidate,
 interleaving impossible) is part of the same question, and the STD-008
 negative control - score a system against itself across a time gap, expect
-nothing - is its first instrument: period-one arms already exist in the k=6
-and k=20 recordings; the period-two re-record runs under
-`scripts/run_drift_control.py` and sits at 212 of 240 triples on main.
+nothing - is its first instrument: it ran to completion 2026-11-07 and
+stayed silent in all three comparisons at a 33.6-day gap (STD-014), which
+is the no-change case the regime needed.
 
-## Queued question — agent self-variance, titrated with clear numbers (owner-directed 2026-10-17)
+## Agent self-variance, titrated with clear numbers (owner-directed 2026-10-17; protocol ratified 2026-11-04)
 
-**Protocol drafted 2026-10-20 and revised twice the same day, awaiting
-owner ratification:** `docs/methods/agent-self-variance-titration-proposal.md`.
+**Ratified 2026-11-04 (MTH-027):**
+`docs/methods/agent-self-variance-titration-proposal.md`.
 Point 1 (banking-agent at k=20) is owner-directed and records without
 further ratification; every other point waits. Dials k, b (baseline runs;
 `r = b - 1` star decoy pairs), temperature and the decision-versus-text
@@ -122,4 +128,9 @@ proposals' terms, `b` baseline clouds with the first counted and
 proposal §0);
 temperature and serving policy as the entropy dial; and the decision-token
 versus rationale-text channel split the decision-level instrument opened.
-First data point: the banking-agent k=20 cell (scheduled 2026-10-17 night).
+First data point recorded 2026-11-08 and ledgered: banking-agent at k=20
+flagged 0 of 40, resolution-limited again under MTH-025, the zero
+k-robust, clean separation fell 4 to 1 (STD-015). The b > 1 points wait on
+the 2026-11-11 audit decisions 4 and 5 (the all-null row and the
+multi-decoy literature read); the temperature and decision-channel points
+wait only on their own named prerequisites.

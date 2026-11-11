@@ -874,3 +874,79 @@ because the quiet night arrived three weeks later than planned. The
 enforced substance (digest equality, corpus equality, gap measured and
 reported) is untouched, and the longer gap is a strictly harder version
 of the same question. Full reading and evidence: STD-014.
+
+## MTH-027 — FIRST APPEND (dated, 2026-11-11): the arithmetic audit, and its five decisions ratified
+
+**The audit (2026-11-06/07).** An adversarial pair — a proposition seat
+and a scepticism seat, run as forks with full project context under the
+cloud-session guidelines — audited Design R's arithmetic as frozen in this
+entry. Both seats reproduced every committed figure byte-identically
+(instrument reruns, not re-readings). Findings, in decreasing order of
+consequence:
+
+- **(a') Candidate-side within-cloud dependence false-certifies, with no
+  warning.** The decoys s(A,A') model cloud-level exchangeability with
+  independent samples within arms. If the CANDIDATE's samples are
+  correlated within a cloud (pinned seed, response caching, sticky
+  routing), the null never sees it: on simulated all-null k=20 cells,
+  9.0 / 65.2 / 98.3 percent false-certified at within-cloud rho of
+  0.3 / 0.5 / 0.7. The recorder's guard covers only the A/A' shared-seed
+  case (recorder.py:300-313 at the audit commit).
+- **The symmetric escape is refuted.** The proposition seat's claim that
+  selecting on s(B,B') is robust to the same hole fell to a symmetry
+  argument from the scepticism seat: in the stored-baseline regime the
+  blind side moves to the stored A, which cannot be re-recorded. The
+  design's highest-risk assumption, named: per-arm sample independence on
+  the side the selecting decoy cannot see.
+- **C' = (1+d)/(rt) is blocked.** No all-null row demonstrates its
+  control, and the proteomics/knockoff literature handles multiple decoys
+  by competition counting, not division; the naive form risks
+  anti-conservatism, the disqualifying failure mode.
+- **A reporting contradiction in `best_achievable`** (fdr.py:141 against
+  149/153 at the audit commit): the docstring resolves estimate-ties
+  toward more targets, the code keeps the first cut (fewer). The estimate
+  value is unaffected; the reported targets-over-decoys at the best
+  estimate is. Settled under decision 4.
+
+**The five decisions, owner-ratified 2026-11-11:**
+
+1. **This entry's roster-width reopen clause FIRED and closes here.** The
+   eight-arm pool roster is PERMITTED under three conditions: this dated
+   append as the minuted answer; a cross-pair disclosure rule written
+   before any pooled recording (shared clouds correlate comparisons
+   across pairs — per-pair FDR holds, pooled claims must disclose); and
+   one timed tuple measured before the bulk, because eight back-to-back
+   calls stretch the within-tuple window MTH-015 bounds. The first
+   paper-two recording defaults to a four-arm pair with the timed tuple
+   measured alongside; the bulk roster choice follows that timing.
+2. **H0 is clarified at cloud level, and the blind side gets a
+   tripwire.** The null is exchangeability of clouds with independent
+   sampling within arms, now stated; the recorder and report gain a
+   candidate-side warning when a sampling policy can induce within-cloud
+   dependence; primary-versus-reverse orientation disagreement is adopted
+   as a REPORTED in-run diagnostic, never an auto-gate (benign asymmetry
+   exists: the comparator's first campaign showed 18 against 10 with
+   mirrored signs on a healthy pair).
+3. **Partition channels at k >= 20 in this design are gated** behind a
+   one-time dated verification that rounding and tie behaviour stay safe
+   on the denser grid (the ENG-010 class scales with grid density;
+   Option C's recorded trigger stands).
+4. **Four instrument blocks are commissioned into
+   `scripts/simulate_null_designs.py`** — the (a') construction, its
+   stored-baseline A-side mirror, an all-null row for C', and the shock
+   construction for power — and the `best_achievable` tie rule is settled
+   (direction justified in the engine note landing with the code) before
+   any r > 1 code exists. No probe figure from this design reaches a memo
+   before these blocks back it.
+5. **C' stays parked pending a literature read** of the multi-decoy
+   estimators (the Keich/Emery competition-counting line and the current
+   state of the art), commissioned as CPU-side work; un-parking needs the
+   read plus decision 4's all-null row, in a dated append.
+
+**Evidence:** the two seats' reports and the owner's ratification message
+(2026-11-06/07 and 2026-11-11, this session); the figures named above,
+whose durable backing is decision 4's committed blocks — the audit's own
+simulations were seat scratch and die with it by design.
+**Reopen if:** the timed tuple contradicts the eight-arm window
+assumption, the literature read overturns competition counting, or
+decision 4's blocks fail to reproduce the audit's rho table.
