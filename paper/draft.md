@@ -1589,15 +1589,31 @@ is a more useful answer than a finding it cannot stand behind.
 
 ## 11. Extensions, in one sentence each
 
-Each of these is constructed or derived and not measured, and is stated in
-that register.
+Each of these is constructed or derived rather than measured, and is stated
+in that register; the one measured piece, the first extension's negative
+control, is quoted with its numbers.
 
 The same statistic pointed at time rather than at a candidate detects whether
 a hosted model has changed under you: record a baseline now, record it again
-later, and score the two periods against the first period's own
-baseline-versus-baseline spread; the negative control, a locally served model
-whose weights provably did not change, is about an hour of compute and has not
-been run, so this is an extension and not a result.
+later, and score each period's run against the other period's own
+baseline-versus-baseline spread. The negative control for that regime has now
+run: a locally served model whose weights provably did not change (the
+serving digest is checked against the first recording's, and the run aborts
+on a mismatch) was recorded twice, 33.6 days apart, over the same forty
+banking inputs at six samples per cloud, and scored three ways at the 10
+percent budget — the old pair as the null for the new run, the new pair as
+the null for the old run, and the three same-day arms against each other as
+the harness check. All three comparisons flagged zero of forty inputs. The
+selector cannot report fewer than ten findings at this budget, so a zero is
+consistent with up to nine genuinely drifted inputs; the measured claim is
+the narrow one: a month of wall-clock time on unchanged weights did not
+manufacture a reportable change in either direction, which is the no-change
+case a stored, weeks-old baseline has to pass before it can serve as the
+reference. The report file under `results/drift` carries the run identifier
+and configuration hash. Detection of an actual hosted-model change remains
+unmeasured — the digest guard turns the day the weights move into a positive
+observation rather than this control — so the extension itself stays an
+extension; only its negative control is a result.
 
 A hosted model as a system under test is one adapter behind the existing
 boundary, and it was deferred on cost rather than on principle; the one real
