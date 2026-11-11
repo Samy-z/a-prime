@@ -1393,3 +1393,26 @@ four task families on a GPU-less office PC, a 1-4B candidate pool, synthetic
 fixtures, the seat's boundary test landed with its first code. The end-user
 app exists as its own repository (working skeleton, French UI, local-only),
 named ChatADV by the owner.
+
+## §28 — The ChatADV boundary stated: a-prime's research does not include the app's tests (2026-11-11)
+
+Owner directive, 2026-11-11: a-prime and ChatADV remain fully distinct.
+A-prime is the research around the target-decoy FDR approach applied to LLM
+systems; ChatADV is a POC application for the owner's mother that happens
+to be a good fit for testing the comparator in a near-real context. Work on
+both is delegated through the same sessions and forks under the a-prime
+umbrella, which is exactly why the boundary gets stated rather than
+assumed: the overlap is in who does the work, never in what counts as
+evidence for what.
+
+What this adds to the 2026-10-16 guardrails is an evidential clause.
+Campaign results (CMP-004's pairwise selection, CMP-005's blind human pass)
+are product evidence that the tool works and live in the compare ledgers
+only; nothing from `compare/` enters the paper or backs a study or methods
+claim. The allowed direction stays consumption — campaigns consume frozen
+designs and the public API, and a methods entry may name a campaign as a
+consumer, which is a pointer, not evidence. Checked the day of the
+declaration: `paper/` and `docs/reader/` grep clean of the campaign's
+names, models and ids, the paper's only judge vocabulary being its own NLI
+instrument. Stated the same day in CLAUDE.md's compare row and
+docs/compare/METHODS.md.

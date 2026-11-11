@@ -15,6 +15,20 @@ negotiable per commit:
    comparator code, and comparator conventions never harden into library
    constraints (the HANDOFF §10 lesson, both directions).
 
+**Evidential boundary, owner-declared 2026-11-11 (HANDOFF §28).** The two
+projects are fully distinct and stay that way: a-prime is the research on
+the target-decoy FDR approach applied to LLM-emitting systems; ChatADV is a
+proof-of-concept application for a real user that happens to be a good
+near-real test bed for the tool. Campaign results — the assistante-ventes
+pairwise run and its blind human pass included — are product evidence that
+the comparator works, never study evidence: nothing from `compare/` enters
+the paper, the README's research claims, or the backing of a study or
+methods finding. The allowed direction is consumption: campaigns consume
+frozen designs (Design R under MTH-027) and the public API, and a methods
+entry may name a campaign as a consumer, which is a pointer, not evidence.
+Verified at declaration time: a grep of `paper/` and `docs/reader/` for the
+campaign's names, models and ids returns nothing.
+
 Known design questions parked here until work starts: per-pair FDR does not
 give a many-way ranking (multiple-comparison design needed before any
 leaderboard view); perf measurement interacts with behaviour recording
