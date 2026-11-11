@@ -72,7 +72,6 @@ def main() -> int:
     # {input_id: bool}. The study cells store a sibling .activation.json keyed
     # "input_id#sample_idx", one flag per sample; an input counts as touched
     # when any sample was.
-    sib = cp.with_suffix("").with_suffix(".activation.json")         if cp.name.endswith(".jsonl") else None
     sib = Path(str(cp)[: -len(".jsonl")] + ".activation.json")
     if sib.exists():
         raw = json.loads(sib.read_text(encoding="utf-8"))
