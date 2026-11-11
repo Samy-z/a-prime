@@ -58,6 +58,29 @@ caused it (about 1e-16); no channel resolves a difference below 1e-6.
   not move. Regression test: `tests/test_fdr_ties.py`, built from real clouds
   through the real statistic.
 
+## Two tie rules, settled 2026-11-11 (MTH-027 first append, decision 4)
+
+- **`best_achievable` keeps the first cut on an estimate tie — the highest
+  score.** Of two cuts estimating alike, the higher one describes the top of
+  the ranking, and when the higher is separated while the lower tied cut is
+  not, reporting the lower would erase the one fact MTH-025 reads the
+  diagnosis for. `select` still breaks its ties toward more discoveries: its
+  job is power under a budget, the diagnostic's is description, and the two
+  are deliberately different. This is what the code always did — the
+  docstring claimed the opposite and is corrected, so no committed artifact
+  moves; checked beyond construction against the k=20 agent diagnosis, where
+  no channel's best estimate is achieved at more than one cut. Pinned by
+  `tests/test_fdr_ties.py::test_best_achievable_estimate_ties_keep_the_higher_separated_cut`.
+- **Within-input rank ties go to the decoy** in the competition selector the
+  decision-5 read recommends (`select_maxmethod`, measurement-only in
+  `scripts/simulate_null_designs.py`; nothing in the library imports it): a
+  target tying its own top decoy as a value is a decoy win. Emery et al.'s
+  exact construction breaks ties at random; this pipeline is deterministic
+  given recordings, and on our coarse grids the conservative direction only
+  raises the estimate, so control survives while the power cost is priced by
+  the top-tie share the simulator's block 8 prints beside each row. Pinned by
+  `tests/test_simulate_null_designs.py::test_maxmethod_rank_ties_go_to_the_decoy_as_values`.
+
 ## Statistics currently implemented
 
 Clouds are distributions over modes, never a point with a radius (MTH-005).

@@ -63,6 +63,54 @@ These silently invalidate a result rather than failing loudly.
   split is one-directional, so a pre-fix number overstates separation and
   never understates it.
 
+## The null-design simulator's decision-4 blocks (MTH-027 first append)
+
+`scripts/simulate_null_designs.py` blocks 6 to 9, commissioned 2026-11-11.
+Each runs on its own `[seed, block]` rng stream, so its figures are stable
+whichever blocks run (`--only 6 7 8 9`); blocks 1 to 5 keep sharing one
+stream, so the proposals' committed figures are unchanged. On an all-null
+cell the realised FDR equals P(any flag), which is what the rate columns
+report. Acceptance figures below: 2000 cells per entry, n=40, 4 modes,
+q=0.10, seed 20261020 (`--only 6 7 8 9 --null-cells 2000`, run 2026-11-11).
+
+- **Block 6 — the (a') hole.** All-null cells whose CANDIDATE cloud is
+  within-cloud dependent; primary selection s(A,B) against s(A,A'). Two
+  constructions carry the rho dial: "chain" (each sample copies the
+  previous with probability rho) and "anchor" (each copies the first — a
+  cached session answer that recurs). **The anchor form is the audit's
+  construction:** at k=20 it reads 0.068 / 0.681 / 0.983 at rho
+  0.3 / 0.5 / 0.7 against the audit's 0.090 / 0.652 / 0.983 — exact at the
+  top point, within about two combined standard errors elsewhere with the
+  audit's cell count unknown — while the chain form reads
+  0.004 / 0.050 / 0.377 and cannot be it. k=6 contrast, anchor:
+  0.002 / 0.022 / 0.101. The run-time guard for this configuration is the
+  recorder's per-arm sampling-seed warning (decision 2,
+  `docs/knowledge/recorder.md`).
+- **Block 7 — the stored-baseline mirror.** The same dependence planted on
+  the stored, un-re-recordable A, selection on s(B,B'): anchor at k=20
+  reads 0.076 / 0.672 / 0.985. The audit's symmetry refutation is now
+  measured rather than argued: the blind side moves, the failure does not.
+- **Block 8 — the r-decoy all-null row** (the decision-5 read, item 2).
+  The within-input competition max-method (`select_maxmethod`: factor 1/r
+  over decoy WINS, rank ties to the decoy) against the parked naive
+  C' = (1+d)/(rt), at r in {1,2,3} by k in {6,20} by the rho sweep. **At
+  rho 0 both control everywhere** (P(any) at most 0.002 against the 0.10
+  budget): the read's expectation holds for the max-method, and naive C'
+  happening to control in this exact geometry is the case the read
+  pre-empted — a finding about our geometry, not a licence; the un-parking
+  append still adopts the form with the theorem. At rho above 0 every form
+  fails together, as the read predicted: sub-cloud dependence breaks cloud
+  exchangeability one level down, and no counting rule repairs it. Top-tie
+  share 3 percent at k=20 and 6 to 7 at k=6 — the price of the
+  deterministic tie rule. The r=1 rows are classical TDC, labelled so, and
+  are NOT the frozen paper-one estimator.
+- **Block 9 — the shock alternative.** eps of mass moves to one novel
+  mode, so the dial IS the population mode-share distance (the mixture
+  alternative's per-input realised effect only bounds it). Realised FDR
+  stays at or under 0.030 across the grid; power on the single-decoy
+  design: 0.55 at eps 0.8 for k=6; 0.42 at eps 0.4 and 0.96 by eps 0.6
+  for k=20. Use it wherever a power curve needs an exact x-axis.
+
 ## Recommended statistics (as of 2026-09-24)
 
 Per input, four channels, all calibrated against the A-prime decoy arm:

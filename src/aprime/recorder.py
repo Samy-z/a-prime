@@ -267,8 +267,8 @@ def checkpoint_health(path: str | Path) -> dict:
 _SEED_PATHS = (("seed",), ("chat", "seed"), ("sampling", "seed"))
 
 
-def _visible_seed(system: object) -> object | None:
-    for path in _SEED_PATHS:
+def _visible_seed(system: object, paths=_SEED_PATHS) -> object | None:
+    for path in paths:
         cur: object | None = system
         for step in path:
             cur = getattr(cur, step, None) if not isinstance(cur, dict)                 else cur.get(step)
@@ -279,26 +279,47 @@ def _visible_seed(system: object) -> object | None:
     return None
 
 
+# A seed on a sampling transport is a per-request pin for the systems built
+# here (OllamaChat sends it with every call), so one pinned arm has k
+# near-identical samples. A bare `seed` attribute on the system itself can
+# instead be an identity key — the stub hashes it WITH the sample index, so
+# its clouds vary — and stays on the shared-pair rule below, which an
+# identity scheme that differs per arm never trips.
+_SAMPLING_SEED_PATHS = (("chat", "seed"), ("sampling", "seed"))
+
+
 def decoy_independence_warnings(arms: dict[str, SystemUnderTest]) -> list[str]:
-    """Reasons to doubt that A_prime can act as a null, where they are visible.
+    """Reasons to doubt the null calibration, where they are visible.
 
-    A_prime is the second baseline run and it IS the null distribution that
-    target-decoy FDR calibrates against. If both baseline arms are configured
-    with the same pinned seed they land on the same handful of outputs: eight
-    repeats of one request under a pinned seed produced 2 distinct outputs,
-    against 8 with the seed unset (MTH-023). A null supported on two points
-    calibrates a tail quantile no better than one supported on a single point,
-    and nothing about that failure is loud. Every arm records cleanly and the
-    FDR column fills with confident meaningless numbers.
+    Two failure shapes, both silent (every arm records cleanly and the FDR
+    column fills with confident meaningless numbers):
 
-    The rule is to mirror the deployment being audited rather than to force a
-    difference. A deployment that really does pin its seed really does have
-    near-zero self-variance, and for that one an exact diff answers the question
-    and this tool is the wrong instrument.
+    - A and A_prime sharing one pinned seed collapses the null's width: eight
+      repeats of one request under a pinned seed produced 2 distinct outputs,
+      against 8 with the seed unset (MTH-023).
+    - ANY arm whose sampling transport carries a pinned seed (`chat.seed`,
+      `sampling["seed"]` — per-request pins for the systems built here) has
+      within-cloud dependence: its k samples repeat instead of vary. On a
+      candidate arm the decoys never see that dependence, and all-null inputs
+      can be certified as changed with no warning from the estimator itself
+      (MTH-027 first append, finding (a') and decision 2). On a baseline arm
+      it narrows the null. A bare `seed` attribute on the system itself is
+      excluded from this per-arm rule: the stub's is an identity key hashed
+      with the sample index, so its clouds vary, and only the shared-pair
+      rule above reads it.
+
+    The rule stays mirror-the-deployment: warn, never refuse. A deployment
+    that really does pin its seed really does have near-zero self-variance,
+    and for that one an exact diff answers the question and this tool is the
+    wrong instrument.
     """
     out: list[str] = []
-    a, ap = _visible_seed(arms.get("A")), _visible_seed(arms.get("A_prime"))
-    if a is not None and ap is not None and a == ap:
+    a = _visible_seed(arms.get("A"))
+    ap = _visible_seed(arms.get("A_prime"))
+    shared = a is not None and ap is not None and a == ap
+    seeds = {name: _visible_seed(sys_, _SAMPLING_SEED_PATHS)
+             for name, sys_ in arms.items()}
+    if shared:
         out.append(
             f"A and A_prime are both configured with seed {a!r}. The decoy arm "
             f"is the null distribution, and two arms sharing a pinned seed "
@@ -309,6 +330,29 @@ def decoy_independence_warnings(arms: dict[str, SystemUnderTest]) -> list[str]:
             f"really does pin its seed, its self-variance is genuinely near "
             f"zero and an exact diff answers the question better than this "
             f"tool does. See MTH-023."
+        )
+    for name in sorted(n for n, s in seeds.items() if s is not None):
+        if shared and name in ("A", "A_prime"):
+            continue  # already covered by the shared-seed message above
+        if name in ("A", "A_prime"):
+            consequence = (
+                "on a baseline arm that narrows the null itself, so the "
+                "false-alarm rate is calibrated against less variation than "
+                "the target side carries (MTH-023)"
+            )
+        else:
+            consequence = (
+                "on a candidate arm the decoys never see that dependence, so "
+                "inputs where nothing changed can be certified as changed "
+                "(MTH-027 first append, finding (a'))"
+            )
+        out.append(
+            f"{name} is configured with pinned seed {seeds[name]!r}. A pinned "
+            f"seed makes the k samples of one cloud repeat instead of vary — "
+            f"within-cloud dependence — and {consequence}. Mirror the "
+            f"deployment: if it leaves the seed unset, leave it unset here; "
+            f"if it really pins it, an exact diff answers the question better "
+            f"than this tool does."
         )
     return out
 

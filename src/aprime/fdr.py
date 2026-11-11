@@ -137,9 +137,18 @@ class BestCut:
 def best_achievable(targets: np.ndarray, decoys: np.ndarray) -> BestCut | None:
     """The cut with the lowest estimated FDR, or None with no targets.
 
-    Ties in the estimate go to the cut admitting more targets, matching
-    `select`. Ties in score are compared as values (`SCORE_DECIMALS`): one cut
-    per distinct value, with every target and decoy at that value counted.
+    Ties in the estimate keep the first cut found, which is the highest score
+    (the scan descends). Of two cuts estimating alike, the higher one
+    describes the top of the ranking, and when the higher cut is separated
+    (no decoy at or above it) while the lower tied cut is not, reporting the
+    lower would erase the one fact MTH-025 reads this number for. `select`
+    breaks its ties the other way, toward more discoveries, because its job
+    is power under a budget; this function's job is diagnosis, and the two
+    are deliberately different. Settled 2026-11-11 (MTH-027 first append,
+    decision 4); every committed diagnosis artifact was produced under this
+    rule, so the settlement changes no number. Ties in score are compared as
+    values (`SCORE_DECIMALS`): one cut per distinct value, with every target
+    and decoy at that value counted.
     """
     targets = _scores(targets)
     decoys = _scores(decoys)

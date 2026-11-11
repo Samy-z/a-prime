@@ -122,6 +122,24 @@ def test_stratified_flags_agree_with_each_stratum_selection_on_mixed_floats():
     assert s.per_stratum["json"].n_discoveries == 10
 
 
+def test_best_achievable_estimate_ties_keep_the_higher_separated_cut():
+    """The tie rule settled 2026-11-11 (MTH-027 first append, decision 4): on
+    an estimate tie the FIRST cut found — the highest score — is kept. Here
+    the cut at 1.0 reads 4 targets over 0 decoys and the cut at 0.5 reads 8
+    over 1, both estimating 0.25; keeping the lower would report the channel
+    as unseparated when a separated cut achieves the same estimate, which is
+    exactly the distinction MTH-025 reads this number for. `select` prefers
+    more discoveries on its ties; the two are deliberately different."""
+    targets = np.array([1.0] * 4 + [0.5] * 4 + [0.1] * 2)
+    decoys = np.array([0.5] + [0.1] * 9)
+    best = fdr.best_achievable(targets, decoys)
+    assert best is not None
+    assert best.estimate == pytest.approx(0.25)
+    assert best.cut == 1.0
+    assert (best.targets_above, best.decoys_above) == (4, 0)
+    assert best.separated
+
+
 def test_rounding_keeps_scores_that_differ_at_the_instrument_resolution():
     """Nine decimals merges float noise and nothing the channels can resolve:
     the NLI scores in the artifacts are stored at six."""

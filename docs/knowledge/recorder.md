@@ -144,6 +144,20 @@ The rule is **mirror the deployment**, not force a difference. A deployment that
 genuinely pins its seed genuinely has near-zero self-variance, and for that one
 an exact diff answers the question better than this tool does.
 
+**Extended 2026-11-11 (MTH-027 first append, decision 2):** the guard now also
+warns PER ARM when a sampling transport carries a pinned seed (`chat.seed`,
+`sampling["seed"]` — per-request pins for the systems built here). A pinned
+arm's k samples repeat instead of vary: within-cloud dependence. On a
+candidate arm the decoys never see it, and the measured consequence is
+all-null k=20 cells false-certifying at 6.8 / 68.1 / 98.3 percent under
+dependence rho 0.3 / 0.5 / 0.7 with nothing loud anywhere
+(`scripts/simulate_null_designs.py --only 6`, block 6, anchor form,
+2026-11-11, reproducing the audit); on a baseline arm it narrows the null
+itself. A bare `seed` attribute on the system stays on the shared-pair rule
+above: the stub's is an identity key hashed with the sample index, so its
+clouds vary and a per-arm warning there would be false. Still a warning,
+never a refusal (ENG-006 unchanged).
+
 Two deliberate limits:
 
 - **It warns, it does not refuse.** The check cannot see every system's

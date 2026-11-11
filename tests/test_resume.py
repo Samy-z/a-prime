@@ -262,21 +262,41 @@ def test_two_baseline_arms_sharing_a_pinned_seed_are_flagged():
     """A_prime IS the null. Eight repeats under a pinned seed gave 2 distinct
     outputs against 8 with it unset, and a null on two points calibrates a tail
     quantile no better than one on a single point (MTH-023). Nothing about that
-    failure is loud on its own: every arm records cleanly."""
+    failure is loud on its own: every arm records cleanly. The trio's bare
+    `seed` attributes stay on this shared-pair rule only — the stub hashes its
+    bare seed with the sample index, so a bare seed is not a per-call pin."""
     warns = decoy_independence_warnings(_trio(_Seeded, 7, 7))
     assert len(warns) == 1
     assert "seed" in warns[0] and "MTH-023" in warns[0]
 
 
-def test_differing_or_unset_seeds_are_not_flagged():
+def test_differing_or_unset_bare_seeds_are_not_flagged():
     assert decoy_independence_warnings(_trio(_Seeded, 7, 8)) == []
     assert decoy_independence_warnings(_trio(_Seeded, None, None)) == []
 
 
+def test_a_pinned_sampling_seed_is_flagged_per_arm():
+    """Decision 2 of the MTH-027 first append: a seed pinned on a SAMPLING
+    transport (chat.seed here, a per-request pin for the systems built in this
+    repo) means within-cloud dependence on that arm. Differing baseline pins
+    no longer pass silently — each collapses its own cloud — and a
+    candidate-only pin gets the (a') warning the audit showed the estimator
+    cannot give itself."""
+    warns = decoy_independence_warnings(_trio(_NestedSeed, 7, 8, b=None))
+    assert len(warns) == 2
+    assert warns[0].startswith("A is") and "MTH-023" in warns[0]
+    assert warns[1].startswith("A_prime is") and "MTH-023" in warns[1]
+    warns = decoy_independence_warnings(_trio(_NestedSeed, None, None, b=42))
+    assert len(warns) == 1
+    assert warns[0].startswith("B is") and "(a')" in warns[0] and "MTH-027" in warns[0]
+
+
 def test_a_seed_held_one_level_down_is_still_found():
-    """Cell keeps its sampling on the chat transport it holds, not on itself."""
-    assert len(decoy_independence_warnings(_trio(_NestedSeed, 7, 7))) == 1
-    assert decoy_independence_warnings(_trio(_NestedSeed, 7, 8)) == []
+    """Cell keeps its sampling on the chat transport it holds, not on itself.
+    Shared pins keep the pair message; the pinned candidate adds its own."""
+    warns = decoy_independence_warnings(_trio(_NestedSeed, 7, 7))
+    assert len(warns) == 2 and "MTH-023" in warns[0] and warns[1].startswith("B is")
+    assert len(decoy_independence_warnings(_trio(_NestedSeed, 7, 7, b=None))) == 1
 
 
 def test_a_system_that_exposes_nothing_is_not_flagged():
