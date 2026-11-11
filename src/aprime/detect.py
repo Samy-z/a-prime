@@ -185,6 +185,10 @@ class Report:
     # Set by the caller from provenance.row_provenance(). The report prints
     # it when present, because a report without a run id cannot be traced.
     provenance: dict | None = None
+    # The usable input ids, in the order every channel's target and decoy
+    # arrays run. Without it two reports cannot be aligned input by input,
+    # which the pairing layer (Design R's cross-pooled estimate) needs.
+    input_order: list[str] = field(default_factory=list)
 
     @property
     def n_flagged(self) -> int:
@@ -346,6 +350,7 @@ class Report:
             "k": self.k, "q": self.q, "floor": _floor(self.q),
             "short_clouds": self.short_clouds,
             "provenance": self.provenance,
+            "input_order": list(self.input_order),
             "findings": [{"input_id": f.input_id, "stratum": f.stratum,
                           "channels": dict(f.channels)} for f in self.findings],
             "channels": channels,
@@ -543,6 +548,7 @@ def detect(
         cost=cost,
         k=recording.k,
         short_clouds=short_clouds,
+        input_order=list(ids),
     )
 
 

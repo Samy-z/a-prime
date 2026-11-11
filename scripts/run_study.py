@@ -114,6 +114,34 @@ STALE_SHAPES = frozenset({"lookup", "search", "history", "verify"})
 N, K, Q = 40, 6, 0.10
 N_ENTITIES = 18
 
+# Frozen 2026-11-11: the sampling configuration every recording committed
+# before this date used. A CURRENT value equal to its entry stays out of the
+# config hash, so every committed hash recomputes unchanged
+# (tests/test_config_hash_stability.py); a value moved off its entry enters
+# the hash as "sampling.<name>" and is a new configuration with its own
+# checkpoints — the titration's temperature dial. The dated handling is in
+# docs/knowledge/provenance.md.
+HISTORICAL_SAMPLING = {
+    "temperature": 0.2, "top_p": 0.9, "top_k": 40, "num_ctx": 8192,
+    "num_predict": 512, "seed": None, "think": False,
+}
+SAMPLING = dict(HISTORICAL_SAMPLING)
+
+
+def configure_sampling(temperature: float | None = None) -> None:
+    """Study configuration, never code (HANDOFF §10), like `configure`."""
+    if temperature is not None:
+        if not (0.0 <= temperature <= 2.0):
+            raise ValueError(f"temperature must be in [0, 2], got {temperature}")
+        SAMPLING["temperature"] = float(temperature)
+
+
+def sampling_hash_params() -> dict:
+    """The sampling values that differ from the frozen historical defaults,
+    named for the hash. Empty at the defaults, by construction."""
+    return {f"sampling.{k}": v for k, v in sorted(SAMPLING.items())
+            if HISTORICAL_SAMPLING[k] != v}
+
 
 def configure(n: int | None = None, k: int | None = None) -> None:
     """Set the corpus size and samples per cloud for this invocation.
@@ -161,6 +189,26 @@ def ollama_digest() -> str:
     except Exception:  # noqa: BLE001
         pass
     return "unresolved"
+
+
+_SERVER_VERSION: str | None = None
+
+
+def server_version() -> str:
+    """The Ollama build serving the run — recorded in notes, never hashed:
+    the digest pins the weights, and the server build explains a discrepancy
+    after the fact (the same split the host already follows)."""
+    global _SERVER_VERSION
+    if _SERVER_VERSION is None:
+        import urllib.request
+
+        try:
+            with urllib.request.urlopen(HOST + "/api/version", timeout=10) as r:
+                _SERVER_VERSION = str(
+                    json.loads(r.read().decode()).get("version") or "unknown")
+        except Exception:  # noqa: BLE001
+            _SERVER_VERSION = "unreachable"
+    return _SERVER_VERSION
 
 
 @dataclass
@@ -215,12 +263,73 @@ def make_job(domain: str, output_format: str, digest: str, nli_rev: str) -> Cell
         params={"k": K, "q": Q, "n_inputs": N, "domain": domain,
                 "output_format": output_format,
                 "fault": "F5:stale_view/" + ",".join(sorted(STALE_SHAPES)),
-                "seed_policy": "unset on every arm (MTH-023)"},
+                "seed_policy": "unset on every arm (MTH-023)",
+                # Empty at the frozen defaults, so no committed hash moves;
+                # a titration point's off-default values land here.
+                **sampling_hash_params()},
         corpus=corpus_fingerprint([i.input_id for i in job.inputs]),
-        notes={"purpose": "cell factorial", "model_host": HOST},
+        notes={"purpose": "cell factorial", "model_host": HOST,
+               "server_version": server_version()},
         warn_if_dirty=False,
     )
     return job
+
+
+def write_meta(job: CellJob) -> None:
+    """The digest and params beside the checkpoint, before recording starts.
+
+    Additive and unhashed. The digest sits inside the config hash, so a
+    weight change can never corrupt a checkpoint — it silently ORPHANS it:
+    the next run computes a new hash, finds no checkpoint, and spends the
+    night re-recording from zero while the old file sits one filename away.
+    This sidecar is what lets `digest_guard` name that case before any call
+    is made. Recordings older than 2026-11-11 have no meta and the guard
+    treats them as unjudgeable.
+    """
+    p = RUNS / f"{job.name}.{job.prov.config_hash}.meta.json"
+    if p.exists():
+        return
+    p.write_text(json.dumps({
+        "config_hash": job.prov.config_hash, "digest": job.digest,
+        "params": job.prov.params, "model": MODEL,
+        "server_version": server_version(),
+        "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }, indent=2), encoding="utf-8")
+
+
+def digest_guard(jobs: list[CellJob], digest: str) -> list[str]:
+    """In-flight recordings of this same configuration under other weights.
+
+    A sibling meta with equal params, a different digest and an unfinished
+    checkpoint (no report file) is a recording the weights moved under. The
+    run refuses (exit 5, the drift control's pattern, MTH-026) rather than
+    silently starting a parallel recording: the weights moving mid-study is
+    a version-change observation to record, not a night to burn twice.
+    """
+    complaints: list[str] = []
+    for job in jobs:
+        for meta_path in sorted(RUNS.glob(f"{job.name}.*.meta.json")):
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            except ValueError:
+                continue
+            h = str(meta.get("config_hash") or "")
+            if not h or h == job.prov.config_hash:
+                continue
+            if meta.get("params") != job.prov.params:
+                continue  # a different configuration on purpose (k, n, q, sampling)
+            if str(meta.get("digest")) == digest:
+                continue
+            cp = RUNS / f"{job.name}.{h}.jsonl"
+            rep = RUNS / f"{job.name}.{h}.report.json"
+            if cp.exists() and not rep.exists():
+                complaints.append(
+                    f"{job.name}: {cp.name} is unfinished and was recorded "
+                    f"under digest {str(meta.get('digest'))[:12]}; the server "
+                    f"now serves {digest[:12]} with the same configuration. "
+                    f"Finish it on the old weights, or move it aside and "
+                    f"record the version change as its own observation.")
+    return complaints
 
 
 def select(args, digest: str, nli_rev: str) -> list[CellJob]:
@@ -251,9 +360,14 @@ def select(args, digest: str, nli_rev: str) -> list[CellJob]:
 
 def chat() -> OllamaChat:
     # seed unset on every arm: MTH-023. Two baseline arms sharing a pinned seed
-    # collapse the decoy arm, and the decoy arm is the null.
-    return OllamaChat(model=MODEL, host=HOST, keep_alive="10m", num_ctx=8192,
-                      temperature=0.2, num_predict=512, seed=None)
+    # collapse the decoy arm, and the decoy arm is the null. Values come from
+    # SAMPLING so that what runs and what is hashed cannot drift apart.
+    s = SAMPLING
+    return OllamaChat(model=MODEL, host=HOST, keep_alive="10m",
+                      num_ctx=s["num_ctx"], temperature=s["temperature"],
+                      top_p=s["top_p"], top_k=s["top_k"],
+                      num_predict=s["num_predict"], seed=s["seed"],
+                      think=s["think"])
 
 
 def arms_for(job: CellJob):
@@ -314,8 +428,16 @@ def main() -> int:
                           "checkpoint files, nothing shared with the k=6 matrix")
     ap_.add_argument("--n", type=int, default=None,
                      help=f"inputs per cell (default {N}). Hashed, like --k")
+    ap_.add_argument("--temperature", type=float, default=None,
+                     help="sampling temperature (default "
+                          f"{HISTORICAL_SAMPLING['temperature']}). A "
+                          "non-default value is hashed as its own "
+                          "configuration (sampling.temperature): new "
+                          "checkpoints, nothing shared — the titration's "
+                          "entropy dial")
     args = ap_.parse_args()
     configure(n=args.n, k=args.k)
+    configure_sampling(temperature=args.temperature)
 
     RUNS.mkdir(parents=True, exist_ok=True)
     if args.stop:
@@ -361,6 +483,18 @@ def main() -> int:
         cum += left
         done = " (already done)" if p_["remaining"] == 0 else ""
         print(f"  {cum:>5.1f} h  {job.name}{done}")
+    # The weights moving under an unfinished recording of this same
+    # configuration is named before any call is made, dry run included.
+    complaints = digest_guard(jobs, digest)
+    if complaints:
+        print()
+        print("WEIGHTS MOVED under an in-flight recording:")
+        for c in complaints:
+            print(f"  {c}")
+        if args.go:
+            print("REFUSING to record (exit 5): starting a parallel recording "
+                  "under the new weights would silently orphan the old one.")
+            return 5
     # Dry run by default. An earlier version only gated on --max-hours, and a
     # scope whose estimate fell just under the default started recording on a
     # machine that was already busy. Hours of someone else's GPU is not a
@@ -401,6 +535,7 @@ def main() -> int:
             print(f"{job.name}: already complete, {p['done']} triples")
             recorded[job.name] = job
             continue
+        write_meta(job)
         arms, fault = arms_for(job)
         faults[job.name] = fault
         print(f"{job.name}: recording {p['remaining']} of {p['planned']} triples "

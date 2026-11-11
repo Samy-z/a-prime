@@ -71,15 +71,45 @@ caused it (about 1e-16); no channel resolves a difference below 1e-6.
   moves; checked beyond construction against the k=20 agent diagnosis, where
   no channel's best estimate is achieved at more than one cut. Pinned by
   `tests/test_fdr_ties.py::test_best_achievable_estimate_ties_keep_the_higher_separated_cut`.
-- **Within-input rank ties go to the decoy** in the competition selector the
-  decision-5 read recommends (`select_maxmethod`, measurement-only in
-  `scripts/simulate_null_designs.py`; nothing in the library imports it): a
-  target tying its own top decoy as a value is a decoy win. Emery et al.'s
-  exact construction breaks ties at random; this pipeline is deterministic
-  given recordings, and on our coarse grids the conservative direction only
-  raises the estimate, so control survives while the power cost is priced by
-  the top-tie share the simulator's block 8 prints beside each row. Pinned by
-  `tests/test_simulate_null_designs.py::test_maxmethod_rank_ties_go_to_the_decoy_as_values`.
+- **Within-input rank ties go to the decoy** in the competition selector
+  (`fdr.select_competition` since the third append's engine package; the
+  simulator's `select_maxmethod` is the instrument it mirrors): a target
+  tying its own top decoy as a value is a decoy win. Emery et al.'s exact
+  construction breaks ties at random; this pipeline is deterministic given
+  recordings, and on our coarse grids the conservative direction only raises
+  the estimate, so control survives while the power cost is priced by the
+  top-tie share the simulator's block 8 prints beside each row. Pinned by
+  `tests/test_simulate_null_designs.py::test_maxmethod_rank_ties_go_to_the_decoy_as_values`
+  and, for the library selector, `tests/test_fdr_competition.py`.
+
+## The r > 1 selector (MTH-027 third append, 2026-11-11)
+
+`fdr.select_competition(targets, decoy_matrix, q)` is the adopted multi-decoy
+estimator: Emery et al.'s within-input competition family at the max-method
+instantiation, c = lambda = 1/(r+1). `decoy_matrix` has shape (r, n): row j
+holds every input's j-th decoy score — the titration's star pairs s(A, A'_j).
+Per input the target wins only by strictly beating all r of its own decoys as
+values; the estimate is (1 + decoy wins) / (r * original wins) among inputs
+whose competition score sits at or above the cut, and the floor is
+ceil(1/(q*r)) — 4 findings at r = 3, q = 0.10, the resolution the parked
+naive C' was meant to buy. The 1/r divides a count of within-input
+competition OUTCOMES, never a pooled above-threshold count (the read's one
+legitimate division). `select_competition_stratified` applies it per output
+shape exactly as `select_stratified` does for the pooled rule.
+
+Three facts that keep it honest:
+
+- **It mirrors the simulator's block 8 exactly**, pinned by equivalence tests
+  over null, dependent and signal cells (`tests/test_fdr_competition.py`), so
+  the all-null row's measured figures — control at rho 0 everywhere in the
+  r x k grid — apply to the library selector verbatim.
+- **r = 1 is classical TDC and is NOT the frozen pooled rule.** Classical
+  competition never counts a decoy against another input's target; `select`
+  does. A committed test pins a case where the two disagree. Nothing in
+  paper one's path calls the competition selector.
+- **Naive C' = (1+d)/(rt) is retired** (third append): its measured control
+  at rho 0 in this geometry is geometry, not a guarantee, and it exists only
+  inside the simulator's all-null row for measurement.
 
 ## Statistics currently implemented
 

@@ -5,10 +5,27 @@
 - The adapter is `input -> output + trace` and nothing more. Every request to
   widen it is a design smell; record the pressure in the LEDGER rather than
   widening quietly.
-- Three arms always: A, A-prime, B. A-prime is not optional, and it is
-  interleaved in time with B rather than batched before it — the point is to
-  capture drift and ordering effects, which a batched decoy arm would miss.
+- A and A-prime always; the roster beyond them is the caller's (generalised
+  2026-11-11, MTH-027 third append's engine package — before that, exactly
+  three arms). A-prime is not optional, and every arm of a tuple is
+  interleaved in time rather than batched — the point is to capture drift
+  and ordering effects, which a batched decoy arm would miss. The classic
+  trio behaves exactly as before; `docs/knowledge/recorder.md` has the
+  roster rules.
 - Nothing is compared before dedup.
+- **Design R's pairings live in `src/aprime/pairings.py`**: one roster
+  recording, relabelled into three-arm views and run through the unchanged
+  detector — primary selection, reverse orientation, the three replicate
+  sets, the stored-baseline regime, the cross-pooled estimate under its own
+  name, and the orientation-disagreement diagnostic (decision 2's deferred
+  report field, now in the suite). Only the suite's primary selects. The
+  r > 1 star-pair selection is `fdr.select_competition`
+  (`docs/knowledge/decoy-fdr.md`); the titration runner composes the two.
+- `scripts/check_temp0_repeat.py` measures whether THIS serving stack is
+  repeatable at temperature 0 (eight identical banking-agent calls,
+  deliberately same-arm and back-to-back: a determinism probe, not a study
+  arm). The titration's temperature point reads its artifact before the
+  dial turns.
 
 ## Induced conformance — the three-tier band
 

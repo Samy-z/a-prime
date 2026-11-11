@@ -89,6 +89,35 @@ So a hashed param added later silently orphans every checkpoint on disk, and a
 param wrongly left out of the hash lets two different configurations append to
 one file. Both are quiet. When adding a param, decide its side first.
 
+**Sampling parameters, dated handling 2026-11-11 (the titration
+prerequisite).** The sampling configuration is hashed by DIFFERENCE from a
+frozen historical default: `run_study.HISTORICAL_SAMPLING` records the values
+every recording committed before this date used (temperature 0.2, top_p 0.9,
+top_k 40, num_ctx 8192, num_predict 512, seed None, think False), and
+`sampling_hash_params()` contributes `sampling.<name>` entries to `params`
+only for values moved off that default. At the defaults it contributes
+nothing, so every committed config hash recomputes unchanged — proven by
+`tests/test_config_hash_stability.py`, which recomputes the banking-agent
+k=20 and banking-summary k=6 hashes through `make_job` itself. An off-default
+value (the titration's `--temperature`) is a new configuration with its own
+checkpoints, which is the intended side of the trade. The frozen-defaults
+dict is load-bearing the same way `instruments` is: editing an entry is a
+schema migration, not a tidy-up.
+
+**The digest guard and the meta sidecar (2026-11-11).** The digest sits
+inside the config hash, so a weight change never corrupts a checkpoint — it
+silently orphans it: the next run computes a new hash, finds no checkpoint,
+and re-records from zero while the old file sits one filename away. Since
+2026-11-11 `run_study` writes `<cell>.<hash>.meta.json` (digest, params,
+server version; unhashed, additive) when a recording starts, and
+`digest_guard` refuses with exit 5 — the drift control's pattern — when an
+UNFINISHED sibling checkpoint exists whose meta carries the same params under
+a different digest. A finished sibling is history; different params are a
+different configuration on purpose; recordings older than the sidecar have no
+meta and are not judged. The server build is also recorded per run in
+`notes.server_version` — notes, never the hash, because the digest pins the
+weights and the build only explains discrepancies.
+
 ## Dirty trees are recorded, not blocked
 
 `git_dirty: true` means the recorded commit does not describe the code that

@@ -1,14 +1,41 @@
 # Recorder — current state
 
-Three-arm replay and input deduplication. `src/aprime/recorder.py`,
-`src/aprime/dedup.py`.
+Three-arm replay, generalised to rosters, and input deduplication.
+`src/aprime/recorder.py`, `src/aprime/dedup.py`.
 
 ## Collection protocol
 
-`record(invocations, {A, A_prime, B}, k)` collects k samples per input per arm.
-All three arms are required; the call raises without A_prime, because without a
+`record(invocations, arms, k)` collects k samples per input per arm. "A" and
+"A_prime" are mandatory — the call raises without A_prime, because without a
 decoy there is no calibrated false-alarm rate and every threshold is a guess
-(MTH-007).
+(MTH-007) — and any further arms join the same atomic tuple. The classic trio
+{A, A_prime, B} behaves exactly as it always has.
+
+## Rosters beyond three arms (2026-11-11, MTH-027 third append's engine package)
+
+Design R's four-arm pairs and the titration's extra baseline clouds record
+through the same `record()`:
+
+- **The tuple is the roster.** Every arm of one (input, sample index) is
+  called back to back and written atomically; a kill mid-tuple discards the
+  partial tuple on resume, whatever the width. The lead rotates across the
+  whole roster, so no arm owns the cold-cache position (MTH-015).
+- **Canonical arm order** is the classic trio first, in `ARMS` order, then
+  the rest sorted — deterministic across resumes whatever dict order a caller
+  builds, and exactly the old order for the trio, so the rotation pattern of
+  every committed recording is unchanged.
+- **Completeness is judged against the roster.** `load_checkpoint`,
+  `checkpoint_health` and `recording_progress` take `arms=`; left out they
+  judge against the classic trio, which keeps every pre-2026-11-11
+  checkpoint loading byte-identically. A roster recording MUST pass its own
+  arms: a four-arm tuple judged against the trio would count as finished
+  with its fourth arm missing (`tests/test_roster.py` pins this).
+- **A two-arm null pair records.** {A, A_prime} alone is a legitimate
+  recording — the pre-registration's hard stop runs on exactly that shape.
+- The per-arm seed-pin warnings generalise: every roster arm is checked.
+  The candidate-side message assumes any arm beyond A/A_prime is
+  candidate-like, which is the conservative direction for extra baseline
+  clouds (it names the scarier failure).
 
 **Interleaved, never batched.** Temperature-0 decoding is not deterministic on
 batched serving infrastructure — 1000 completions of one prompt gave 80 unique

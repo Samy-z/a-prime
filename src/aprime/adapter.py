@@ -76,7 +76,7 @@ class SystemUnderTest(Protocol):
     """
 
     name: str
-    arm: str  # "A", "A_prime", or "B"
+    arm: str  # "A", "A_prime", "B", or a roster label such as "B_prime"
 
     def invoke(self, inv: Invocation) -> Response: ...
 
@@ -85,6 +85,16 @@ ARMS = ("A", "A_prime", "B")
 
 
 def check_arm(arm: str) -> str:
-    if arm not in ARMS:
-        raise ValueError(f"arm must be one of {ARMS}, got {arm!r}")
+    """Any non-empty, whitespace-free label is a valid arm name.
+
+    "A", "A_prime" and "B" (`ARMS`) are the classic trio every three-arm
+    recording uses; rosters beyond three arms (MTH-027 third append's engine
+    package, 2026-11-11) add labels such as "B_prime" or "A_prime2". The
+    recorder enforces the invariants that matter — the dict key must equal
+    the system's own label, and "A"/"A_prime" must both be present — so this
+    check guards label hygiene only.
+    """
+    if not isinstance(arm, str) or not arm or any(c.isspace() for c in arm):
+        raise ValueError(
+            f"arm must be a non-empty label without whitespace, got {arm!r}")
     return arm

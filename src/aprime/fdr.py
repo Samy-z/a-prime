@@ -235,3 +235,155 @@ def select_stratified(
         flagged[m] = discoveries(targets[m], sel)
     return StratifiedSelection(per_stratum=per, flagged=flagged,
                                strata=tuple(effective))
+
+
+# ---------------------------------------------------------------------------
+# within-input competition at r > 1  (MTH-027 third append, 2026-11-11)
+# ---------------------------------------------------------------------------
+#
+# The adopted multi-decoy estimator: Emery, Hasam, Noble, Keich
+# (arXiv:1907.01458), the within-input competition family at its max-method
+# instantiation, c = lambda = 1/(r+1). Per input, the target score competes
+# against that input's OWN r decoy scores and wins only by strictly beating
+# every one of them as a value; the estimate divides a count of competition
+# OUTCOMES by r, never a pooled above-threshold count — the one legitimate
+# division the decision-5 literature read found. Floor: ceil(1/(q*r))
+# discoveries, which is the resolution the parked naive C' was meant to buy.
+#
+# r = 1 is classical target-decoy competition and is NOT byte-identical to
+# the frozen pooled rule above (`select`): classical competition never counts
+# a decoy against another input's target, the pooled rule does. Nothing here
+# replaces `select`; paper one's path is untouched, and a committed test pins
+# a case where the two disagree so they are never silently conflated. This
+# selector exists for the cross-system r > 1 measurements: the titration's
+# b > 1 points (r = b - 1 star pairs) and pooled rosters.
+
+
+@dataclass(frozen=True, eq=False)
+class CompetitionSelection:
+    """What the max-method competition selected, with its evidence.
+
+    `flagged` marks the admitted inputs; `wins` the original-win indicator
+    (target strictly above every one of its own decoys, as values); `w` the
+    competition score per input, the maximum of its r + 1 scores. On an
+    estimate tie between cuts the most permissive qualifying cut wins, as in
+    `select`, because this object's job is power under a budget.
+    """
+
+    threshold: float
+    n_discoveries: int
+    fdr_hat: float
+    q: float
+    r: int
+    flagged: np.ndarray
+    wins: np.ndarray
+    w: np.ndarray
+
+    @property
+    def empty(self) -> bool:
+        return self.n_discoveries == 0
+
+    @property
+    def floor(self) -> int:
+        """The fewest discoveries this estimator can report: ceil(1/(q*r))."""
+        return int(np.ceil(1.0 / (self.q * self.r) - 1e-9))
+
+
+def competition_wins(targets, decoy_matrix) -> tuple[np.ndarray, np.ndarray]:
+    """Per-input competition scores and original-win indicators.
+
+    `decoy_matrix` has shape (r, n): row j holds the j-th decoy score of
+    every input — s(A, A'_j) for the titration's star pairs. A rank tie at
+    the top counts as a decoy win: the target must STRICTLY exceed its top
+    decoy as a value (`SCORE_DECIMALS`). Emery et al. break ties at random;
+    this pipeline is deterministic given recordings, and on our coarse
+    grids the conservative direction only raises the estimate, with the
+    power price measured by the simulator's top-tie share (block 8).
+    Declared with the `best_achievable` tie settlement (MTH-027 first
+    append, decision 4).
+    """
+    t = _scores(targets)
+    d = _scores(np.asarray(decoy_matrix, dtype=float))
+    if d.ndim != 2 or d.shape[0] < 1:
+        raise ValueError(
+            f"decoy_matrix must be 2-D with shape (r, n_inputs); got "
+            f"{d.shape if hasattr(d, 'shape') else type(decoy_matrix)}")
+    if d.shape[1] != t.shape[0]:
+        hint = (" (it looks transposed: rows must be decoy sets, columns "
+                "inputs)" if d.shape[0] == t.shape[0] else "")
+        raise ValueError(
+            f"decoy_matrix has {d.shape[1]} inputs per row against "
+            f"{t.shape[0]} targets{hint}")
+    dmax = d.max(axis=0)
+    return np.maximum(t, dmax), t > dmax
+
+
+def select_competition(targets, decoy_matrix, q: float = 0.10) -> CompetitionSelection:
+    """The adopted r > 1 selection: most permissive cut over the competition
+    scores whose estimate (1 + decoy wins) / (r * original wins) stays
+    within `q`, flagging the original wins at or above it.
+
+    Mirrors `select_maxmethod` in `scripts/simulate_null_designs.py` (block
+    8) exactly — the equivalence is pinned by test — so every figure the
+    all-null row measured applies to this selector verbatim.
+    """
+    W, orig = competition_wins(targets, decoy_matrix)
+    r = int(np.asarray(decoy_matrix).shape[0])
+    best: tuple[int, float, float] | None = None
+    for cut in np.unique(W)[::-1]:
+        at = W >= cut
+        n_t = int((at & orig).sum())
+        n_d = int((at & ~orig).sum())
+        fdr = (1 + n_d) / (r * max(n_t, 1))
+        if fdr <= q and (best is None or n_t > best[0]):
+            best = (n_t, float(cut), float(fdr))
+    if best is None:
+        return CompetitionSelection(float("inf"), 0, float("nan"), q, r,
+                                    np.zeros(len(W), dtype=bool), orig, W)
+    n, cut, fdr = best
+    return CompetitionSelection(cut, n, fdr, q, r,
+                                orig & (W >= cut), orig, W)
+
+
+@dataclass(frozen=True, eq=False)
+class StratifiedCompetition:
+    per_stratum: dict[str, CompetitionSelection]
+    flagged: np.ndarray
+    strata: tuple[str, ...]
+
+    @property
+    def n_discoveries(self) -> int:
+        return int(self.flagged.sum())
+
+
+def select_competition_stratified(
+    targets,
+    decoy_matrix,
+    strata: Sequence[str],
+    q: float = 0.10,
+    min_stratum: int = 30,
+) -> StratifiedCompetition:
+    """`select_competition` within each stratum, as `select_stratified` does
+    for the pooled rule and for the same reason: the measured 5%-FPR
+    threshold spans a factor of eighty across output shapes, and each
+    stratum carries its own decoys. Strata smaller than `min_stratum` pool
+    into one remainder group.
+    """
+    t = np.asarray(targets, dtype=float)
+    d = np.asarray(decoy_matrix, dtype=float)
+    strata = list(strata)
+    if d.ndim != 2 or len(t) != d.shape[1] or len(t) != len(strata):
+        raise ValueError(
+            "targets, decoy_matrix columns and strata must be the same length")
+
+    counts = Counter(strata)
+    effective = [s if counts[s] >= min_stratum else "__pooled__" for s in strata]
+    flagged = np.zeros(len(t), dtype=bool)
+    per: dict[str, CompetitionSelection] = {}
+    for name in sorted(set(effective)):
+        m = np.array([e == name for e in effective])
+        sel = select_competition(t[m], d[:, m], q)
+        per[name] = sel
+        flagged[m] = sel.flagged
+    return StratifiedCompetition(per_stratum=per, flagged=flagged,
+                                 strata=tuple(effective))

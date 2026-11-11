@@ -1,7 +1,15 @@
-"""Three-arm replay.
+"""Three-arm replay, generalised to rosters.
 
 Runs the baseline (A), the decoy (A_prime) and the candidate (B) over the same
 inputs and records what came back.
+
+Generalised 2026-11-11 (MTH-027 third append's engine package): `record` takes
+any roster of arms — extra baseline clouds, a candidate's own second run —
+not only the classic trio. "A" and "A_prime" stay mandatory, every property
+below (interleaving, lead rotation, atomic checkpointing, resume) holds per
+tuple over the whole roster, and a three-arm checkpoint written before the
+change loads and resumes unchanged: completeness defaults to the classic trio
+unless the caller names its roster (`load_checkpoint(..., arms=...)`).
 
 The ordering is the part that matters. A_prime is not "a second run of A" — it
 is a run of A collected under the same conditions as B, and the two constraints
@@ -70,6 +78,17 @@ from typing import Callable, Iterable, Sequence
 import warnings
 
 from .adapter import ARMS, Invocation, SystemUnderTest
+
+
+def _roster(arms: Iterable[str]) -> tuple[str, ...]:
+    """Canonical arm order: the classic trio first, in `ARMS` order, then the
+    rest sorted. Deterministic across resumes whatever dict order a caller
+    builds, and exactly `ARMS` for the classic trio, so the rotation pattern
+    of every committed recording is unchanged."""
+    names = list(arms)
+    lead = [a for a in ARMS if a in names]
+    rest = sorted(n for n in names if n not in ARMS)
+    return tuple(lead + rest)
 
 
 @dataclass(frozen=True)
@@ -170,6 +189,7 @@ class Recording:
 def load_checkpoint(
     path: str | Path,
     retry_dead_triples: bool = True,
+    arms: Sequence[str] | None = None,
 ) -> tuple[list[Sample], set[tuple[str, int]], int]:
     """Read a checkpoint, keeping only complete triples.
 
@@ -177,6 +197,12 @@ def load_checkpoint(
     and the next session number. A triple missing any arm is dropped entirely
     and will be redone, because a partial triple is exactly the split-load-regime
     case MTH-015 forbids.
+
+    `arms` names the roster completeness is judged against. Left out, it is
+    the classic trio, which keeps every checkpoint recorded before the roster
+    generalisation (2026-11-11) loading byte-identically; a roster recording
+    MUST pass its own arms, because a wider tuple judged against the trio
+    would count a tuple missing its extra arms as finished.
 
     **A triple where every arm errored is not finished either.** It holds three
     error strings and no outputs, so counting it as done means a resume skips it
@@ -211,23 +237,24 @@ def load_checkpoint(
         latest[(s.triple, s.arm)] = s
     live = list(latest.values())
 
+    roster = _roster(arms) if arms is not None else ARMS
     seen: dict[tuple[str, int], set[str]] = {}
     for s in live:
         seen.setdefault(s.triple, set()).add(s.arm)
-    complete = {t for t, got in seen.items() if set(ARMS) <= got}
+    complete = {t for t, got in seen.items() if set(roster) <= got}
     if retry_dead_triples:
         errored: dict[tuple[str, int], int] = {}
         for s in live:
             if s.triple in complete and s.error:
                 errored[s.triple] = errored.get(s.triple, 0) + 1
-        complete -= {t for t, n in errored.items() if n >= len(ARMS)}
+        complete -= {t for t, n in errored.items() if n >= len(roster)}
     kept = [s for s in live if s.triple in complete]
     kept.sort(key=lambda x: x.order)
     next_session = max((s.session for s in kept), default=-1) + 1
     return kept, complete, next_session
 
 
-def checkpoint_health(path: str | Path) -> dict:
+def checkpoint_health(path: str | Path, arms: Sequence[str] | None = None) -> dict:
     """What is actually in a checkpoint, errors included.
 
     `load_checkpoint` hides dead triples so that a resume redoes them, which is
@@ -240,7 +267,7 @@ def checkpoint_health(path: str | Path) -> dict:
         return {"exists": False, "samples": 0, "errored": 0, "empty": 0,
                 "triples": 0, "dead_triples": 0, "error_rate": 0.0,
                 "messages": []}
-    rows, _, _ = load_checkpoint(p, retry_dead_triples=False)
+    rows, _, _ = load_checkpoint(p, retry_dead_triples=False, arms=arms)
     by_triple: dict[tuple[str, int], list[Sample]] = {}
     for s in rows:
         by_triple.setdefault(s.triple, []).append(s)
@@ -425,12 +452,14 @@ class PreflightFailed(Exception):
 def preflight(
     arms: dict[str, SystemUnderTest],
     invocation: Invocation,
+    order: Sequence[str] | None = None,
 ) -> PreflightResult:
     """Ask every arm one question, and report which ones answered.
 
-    Three invocations against the 720 a real run makes, bought in exchange for
-    finding out in seconds rather than in half an hour that nothing is
-    listening.
+    One invocation per arm against the hundreds a real run makes, bought in
+    exchange for finding out in seconds rather than in half an hour that
+    nothing is listening. `order` fixes the probe order; left out, it is the
+    roster's canonical order.
 
     **An empty output is reported but is not a failure.** A cell that exhausts
     its step budget legitimately returns nothing, so refusing on that would
@@ -459,7 +488,7 @@ def preflight(
     check claims to detect.
     """
     probes = []
-    for name in ARMS:
+    for name in (tuple(order) if order is not None else _roster(arms)):
         system = arms[name]
         t0 = time.perf_counter()
         try:
@@ -553,19 +582,21 @@ def recording_progress(
     checkpoint: str | Path,
     invocations: Sequence[Invocation],
     k: int,
+    arms: Sequence[str] | None = None,
 ) -> dict:
     """How much of a planned recording is already on disk.
 
     Reads the checkpoint without touching a model, so progress can be reported
-    while a run is stopped, or checked before deciding to start one.
+    while a run is stopped, or checked before deciding to start one. For a
+    roster recording, pass the same `arms` the recording uses.
     """
     want = {(inv.input_id, idx) for inv in invocations for idx in range(k)}
     if not Path(checkpoint).exists():
         return {"planned": len(want), "done": 0, "remaining": len(want),
                 "fraction": 0.0, "sessions": 0}
-    samples, done, next_session = load_checkpoint(checkpoint)
+    samples, done, next_session = load_checkpoint(checkpoint, arms=arms)
     have = done & want
-    health = checkpoint_health(checkpoint)
+    health = checkpoint_health(checkpoint, arms=arms)
     return {"planned": len(want), "done": len(have),
             "remaining": len(want - have),
             "fraction": len(have) / max(1, len(want)),
@@ -592,9 +623,14 @@ def record(
 ) -> Recording:
     """Collect k samples per input per arm, interleaved across arms.
 
-    `arms` maps arm name to system. All three of A, A_prime and B are required:
-    the decoy arm is not optional, because without it there is no calibrated
-    false-alarm rate and the thresholds are guesses (MTH-007).
+    `arms` maps arm name to system. "A" and "A_prime" are mandatory — the
+    decoy arm is not optional, because without it there is no calibrated
+    false-alarm rate and the thresholds are guesses (MTH-007) — and any
+    further arms (a candidate "B", its own second run "B_prime", extra
+    baseline clouds) join the same tuple: every arm of one
+    (input, sample index) is called back to back, written atomically, and
+    the lead rotates across the whole roster (MTH-015). The classic trio
+    behaves exactly as it always has.
 
     With `checkpoint`, each completed triple is appended to that file and a
     rerun skips what is already there. Safe to kill at any point.
@@ -622,15 +658,19 @@ def record(
     whole run, which makes the noise floor span the run's full conditions at
     large cost in prefill. See the module docstring.
     """
-    missing = set(ARMS) - set(arms)
+    missing = {"A", "A_prime"} - set(arms)
     if missing:
         raise ValueError(
             f"missing arms {sorted(missing)}. The decoy arm A_prime is mandatory; "
             "without it nothing downstream has a null to calibrate against."
         )
+    roster = _roster(arms)
     for name, sys_ in arms.items():
         if sys_.arm != name:
             raise ValueError(f"arm {name!r} holds a system labelled {sys_.arm!r}")
+    if set(roster) != set(ARMS):
+        print(f"recording roster: {', '.join(roster)} "
+              f"({len(roster)} arms per tuple)")
     # A warning rather than an error: the check is best-effort and cannot see
     # every system's configuration, so refusing on it would refuse runs it
     # cannot actually judge. Loud, because the failure it describes is silent.
@@ -642,14 +682,14 @@ def record(
     if check_arms_first:
         if not invocations:
             raise ValueError("no invocations to record")
-        result = preflight(arms, invocations[0])
+        result = preflight(arms, invocations[0], roster)
         print(f"preflight: {result.summary()}")
         if not result.ok:
             raise PreflightFailed(result)
 
     samples, done, session = [], set(), 0
     if checkpoint is not None:
-        samples, done, session = load_checkpoint(checkpoint)
+        samples, done, session = load_checkpoint(checkpoint, arms=roster)
         if done:
             print(
                 f"resuming: {len(done)} complete triples already recorded "
@@ -674,7 +714,7 @@ def record(
     try:
         for pos, (inv, idx) in enumerate(schedule):
             # Rotate which arm leads, so no arm owns the cold position.
-            rotated = ARMS[idx % len(ARMS) :] + ARMS[: idx % len(ARMS)]
+            rotated = roster[idx % len(roster):] + roster[: idx % len(roster)]
             if (inv.input_id, idx) in done:
                 continue
             # Checked here, between triples, so a stop never splits a triple.
@@ -717,8 +757,8 @@ def record(
                         )
                     )
                 order += 1
-            # All three arms or none. A kill between arms leaves a partial
-            # set that load_checkpoint discards, so the triple is redone.
+            # Every arm of the tuple or none. A kill between arms leaves a
+            # partial set that load_checkpoint discards, so it is redone.
             samples.extend(triple)
             if fh is not None:
                 for s in triple:
