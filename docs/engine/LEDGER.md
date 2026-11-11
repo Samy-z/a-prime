@@ -452,3 +452,78 @@ the five `.diagnosis.json` files and the nine `report.json` files plus
 are meant to tie, or two genuinely different scores within 1e-9 are meant to
 be told apart; or a selection is found to differ between `select` and
 `discoveries` on the same arrays.
+
+## ENG-011 — The recorder takes rosters, the max-method selects at r>1, and the engine is titration-ready
+**Date:** 2026-11-11
+Commissioned by the MTH-027 third append, landed at 7ec1d9d (16 files,
++1,594/-46; suite 419 passed, 28 new tests), built by the engine-seat fork
+and reviewed in the main session.
+
+**What the engine can now do.** `record()` takes any arm dict (A and
+A_prime stay mandatory; a two-arm null pair is legal — the prereg's
+hard-stop shape), every arm of one (input, sample_idx) called back to back
+and written atomically, the lead rotating across the whole roster,
+canonical order trio-first so the classic trio's rotation is
+byte-identical. `fdr.select_competition` / `select_competition_stratified`
+implement the adopted Emery max-method exactly as frozen (strict
+beat-all-r on values, ties to the decoy, (1 + decoy_wins)/(r *
+orig_wins), floor ceil(1/(q*r)) on the returned selection); **acceptance:
+equivalence with simulator block 8 pinned over 96 null and dependent
+cells (r in {1,2,3} x k in {6,20} x rho in {0, 0.5}) plus 10 signal
+cells, zero disagreements**, with the tie case, the floor-at-4 case and
+the r=1-differs-from-the-frozen-pooled-rule case each pinned at library
+level. `pairings.design_r()` builds the whole Design R suite from one
+roster recording — primary selection, reverse orientation, three
+replicate sets, the stored-baseline regime with s(A,A') reported
+alongside, the cross-pooled estimate under its own name and never
+selecting, and the orientation-disagreement diagnostic — so CMP-003's two
+pending quantities now exist at the API level; `compare/` untouched, the
+consumer wires in on its own clock. run_study gained the digest guard
+(exit 5 when an unfinished sibling checkpoint of the same params was
+recorded under other weights, judged via the new `<cell>.<hash>.meta.json`
+sidecar) and an unhashed `notes.server_version`. Sampling parameters hash
+by difference from `HISTORICAL_SAMPLING` (frozen this day): committed
+hashes recompute unchanged through `make_job` itself — proven for
+808db78857a32149 and 60ac20518858cf53 — while an off-default temperature
+changes the hash and restoring the default restores the hash.
+
+**Non-orphaning, and its sharp edge.** Checkpoint readers default to the
+classic trio, so every committed three-arm checkpoint loads, resumes and
+reports exactly as before. The edge is pinned by test: a four-arm file
+judged with the default looks complete at three arms — which is why
+`record()` always passes its own roster to the readers, and any new
+reader must too.
+
+**Temp-0 repeat check (titration prerequisite, verdict):** 8 identical
+calls on one banking-agent input at temperature 0
+(`results/study/temp0-repeat.3ff5c7c5b3b6d80e.json`): **7 of 8
+byte-identical; only the first, cold call diverged** (one character at
+position 83; 29.8 s against 27.x warm). Warm, the serving stack is
+repeatable at temperature 0 — the titration's low end is near a point
+mass, and the cold-call effect is exactly what the recorder's discarded
+preflight and interleaving already absorb.
+
+**Five design choices, flagged by the builder, reviewed and accepted:**
+(a) `check_arm` accepts any non-empty whitespace-free label — the trio
+vocabulary cannot survive rosters; the key-equals-label check is the real
+mismatch guard, a typo'd arm surfaces at pairing construction, and the
+study runners build their arm dicts as code constants, so no live
+exposure. (b) A missing "B" no longer errors at record time —
+deliberate, the two-arm null pair needs it; a forgotten candidate
+surfaces at analysis. (c) The cross-pooled estimate is computed
+strata-pooled and loudly labelled; it never selects, so the stratified
+selecting path is unaffected. (d) The per-arm seed warning treats every
+non-A/A_prime arm as candidate-like — conservative for extra baseline
+clouds; the wording is slightly off for an A_second, the warning itself
+is right. (e) `digest_guard` judges only recordings carrying the new
+sidecar — acceptable because no unfinished pre-sidecar checkpoint exists
+on main; every study, drift and k=20 cell is complete.
+
+**Evidence:** 7ec1d9d; `tests/test_roster.py`,
+`tests/test_fdr_competition.py`, `tests/test_pairings.py`,
+`tests/test_config_hash_stability.py`; the temp-0 artifact above; the
+MTH-027 third append (the commissioning and the frozen estimator).
+**Reopen if:** a committed checkpoint fails to load or resume under the
+roster reader defaults, the selector and block 8 ever disagree on a cell,
+the digest guard misses an orphaning its sidecar should have caught, or a
+roster reader is found consuming the trio default on a wider file.

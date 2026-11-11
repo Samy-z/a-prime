@@ -133,9 +133,12 @@ flagged 0 of 40, resolution-limited again under MTH-025, the zero
 k-robust, clean separation fell 4 to 1 (STD-015). Decisions 4 and 5
 delivered 2026-11-11 (blocks 4049b0b, read aae5937) and the estimator
 adopted the same day (MTH-027 third append: Emery max-method selects at
-r > 1, naive C' retired, r = 1 untouched). The b > 1 points now wait on
-the engine roster generalisation (commissioned 2026-11-11) and point 2's
-MTH-025 amendment; the temperature point on the repeat check and the
-parameter-hash handling riding that same package; the decision-channel
-point on a dated reading-rule note, then it is CPU-only analysis over
-the committed k=6 and k=20 agent recordings.
+r > 1, naive C' retired, r = 1 untouched). The engine package landed the
+same day (7ec1d9d, ENG-011): roster recorder, the frozen selector with
+block-8 equivalence pinned, Design R pairings, the digest guard,
+non-orphaning parameter hashes, and the temp-0 verdict (warm-repeatable
+at temperature 0; only the cold call diverges). Point 2 now waits only
+on the dated MTH-025 amendment; the temperature point only on
+scheduling; the decision-channel point on a dated reading-rule note,
+then it is CPU-only analysis over the committed k=6 and k=20 agent
+recordings.
