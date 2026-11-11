@@ -116,7 +116,10 @@ it closes the browser tab and runs a machine-local hook,
 `on_idle_close.local.cmd` (gitignored there, not in any repo). The hook
 unloads granite (`ollama stop`), so the next load re-plans its split against
 the freed card, and fires the `aprime-factorial` scheduled task, whose
-collision guard makes a double-start impossible.
+collision guard makes a double-start impossible. **Retired 2026-11-11:**
+the factorial completed and the owner retired `aprime-factorial`, so the
+hook's `schtasks /Run` now returns task-not-found, which is harmless; the
+log-reading consequence below is historical for logs after that date.
 
 Consequence for reading run logs: a recording may legitimately START in the
 middle of the night, minutes after a browser tab closed, rather than at the

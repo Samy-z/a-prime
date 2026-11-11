@@ -951,3 +951,12 @@ MTH-025 and its amendment; STD-011 second and third appends; STD-013.
 **Reopen if:** an agent cell at k=20 in a second domain classifies
 differently, a second model drives the agent format (STD-011's standing
 clause), or the titration's m > 1 arms change the decoy picture at this k.
+
+## STD-015 — OWNER ACK (dated append, 2026-11-11)
+
+The owner acknowledged the entry as landed; no amendment requested. The
+same message retired the daily analysis task (`aprime-factorial`), whose
+purpose ended with the matrix: its final act was the fourth identical
+clean-tree pass over the nine k=6 cells (run 20261110T030004Z, committed
+9003776). From here on, re-verification of the matrix is on demand from
+the committed checkpoints, not scheduled.

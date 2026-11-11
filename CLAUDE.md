@@ -218,10 +218,13 @@ passed its pre-registered test: pooled recall 51/56 = 0.91 inside
 banking-extraction k=20 re-record (1a37665b4308bcf4) caught 21/21 at FDR 0,
 superseding the partial-label k=6 row. No full re-record. Paper §8 reports
 both against the prediction and the abstract's result is filled
-(2026-10-17); one bracket left, the agent format at k=20. **Data trap:**
+(2026-10-17); the last bracket filled 2026-11-10 — banking-agent at k=20
+flagged 0 of 40 with 25 touched, resolution-limited again, the zero
+k-robust (STD-015, acked 2026-11-11) — and the drift negative control
+stayed silent at 33.6 days (STD-014). **Data trap:**
 `matrix.json` is a view of the last `run_study.py` run; cite the per-cell
-`.report.json` files (STD-013, study METHODS). The 05:00 daily task runs only
-the k=6 stage.
+`.report.json` files (STD-013, study METHODS). The daily analysis task was
+retired 2026-11-11 after its fourth identical clean-tree pass.
 
 Not built: the severity titration rerun (needs k>=20 and a fault with a
 severity knob, bench METHODS), LOSO, the embedding style-stability gate, the
@@ -229,9 +232,9 @@ Palworld adapter. F2 and F11 are built and unit-tested, never run live. The
 paper is drafted in every section; section 8 and Appendix F describe the
 nine-cell k=6 matrix in the two-question shape and the four k=20 cells
 against the D25 prediction (2026-10-17), silent cells diagnosed; the abstract
-carries its result; subtitle per RDR-010. Three proposals await owner
-ratification (2026-10-20, HANDOFF §26): the cross-system null
-(`docs/methods/cross-system-null-proposal.md`), the agent self-variance
-titration (`docs/methods/agent-self-variance-titration-proposal.md`) and
-paper two's pre-registration skeleton
-(`docs/study/preregistration-2-draft.md`, DRAFT, not registered).
+carries its result; subtitle per RDR-010. The three 2026-10-20 proposals were
+ratified 2026-11-04 (MTH-027, HANDOFF §27). Five decisions from the
+Design-R arithmetic audit (2026-11-07, Fable/Opus pair) await the owner;
+the audit's MTH-027 append lands with them. The comparator campaign is
+complete through its blind human pass (CMP-005), its evidential boundary
+stated (HANDOFF §28).
