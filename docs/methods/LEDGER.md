@@ -1023,3 +1023,50 @@ the acceptance command above with its seed.
 **Reopen if:** the un-parking append lands differently, a live
 dependence shape neither anchor nor chain explains shows up, or the §4
 pairing-aware report work contradicts the deferred-field decision.
+
+## MTH-027 — THIRD APPEND (dated, 2026-11-11): C' un-parked into the Emery max-method; naive division retired
+
+Owner ratification, same day as the second append, both gates in hand
+(the read, aae5937; the all-null row, 4049b0b).
+
+**Adopted: the within-input competition estimator, max-method
+instantiation** (Emery, Hasam, Noble, Keich, arXiv:1907.01458), exactly
+as block 8 implements it: c = lambda = 1/(r+1); per input, the target
+score s(A,B) competes against its own r decoy scores s(A,A'_j) and wins
+only by beating all r; rank ties resolve to the decoy (conservative,
+declared with the 4049b0b tie settlement); the estimate carries the
++1-class offset with the 1/r factor over decoy WINS, never over pooled
+above-threshold counts. Floor: ceil(1/(q*r)) findings — 4 at r = 3,
+q = 0.10 — which is the resolution C' was parked to buy. This is THE
+selecting estimator for r > 1: the titration's b > 1 points (r = b - 1
+star pairs) and any pooled-roster selection.
+
+**Retired: naive C' = (1+d)/(rt).** It never selects. Its measured
+control at rho = 0 in this project's geometry (second append) is
+recorded as a fact about the geometry and carries no guarantee; the
+read's three anti-conservatism grounds stand.
+
+**Unchanged: r = 1.** The frozen pooled rule in fdr.py remains the only
+r = 1 selector; Emery at one decoy is classical TDC and is NOT
+byte-identical to it — a committed test pins a disagreement case so the
+two are never silently conflated. Paper one is untouched.
+
+**What this unblocks, and what still gates it.** The titration's b > 1
+points and paper two's rosters now have their estimator. They still wait
+on the engine's roster generalisation (the recorder speaks exactly three
+arms by design; pairing-aware detect and readers do not exist) and, for
+titration point 2, the dated MTH-025 amendment the protocol names. The
+engine package is commissioned this day: roster-aware recorder,
+the max-method selection path (acceptance: reproduces block 8 on
+simulated data), the reverse-selection and orientation-disagreement
+report fields (decision 2's deferred piece), run_study's digest guard
+and server-version field, the sampling-parameter hashing that does not
+orphan committed checkpoints, and the eight-call temperature-0 repeat
+check the temperature point requires.
+
+**Evidence:** aae5937, 4049b0b, the owner's ratification message
+(2026-11-11).
+**Reopen if:** a live b > 1 recording contradicts the all-null row's
+decoy behaviour, the (a') warning fires on a selecting run, or an
+e-value construction (the Ren-Barber line) is adopted for
+derandomisation and changes the selection path.

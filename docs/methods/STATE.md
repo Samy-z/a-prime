@@ -131,8 +131,11 @@ versus rationale-text channel split the decision-level instrument opened.
 First data point recorded 2026-11-08 and ledgered: banking-agent at k=20
 flagged 0 of 40, resolution-limited again under MTH-025, the zero
 k-robust, clean separation fell 4 to 1 (STD-015). Decisions 4 and 5
-delivered 2026-11-11 (blocks 4049b0b, read aae5937), both pointing at the
-Emery max-method: the b > 1 points now wait only on the owner's
-un-parking append (MTH-027 second append carries the recommendation);
-the temperature and decision-channel points wait only on their own named
-prerequisites.
+delivered 2026-11-11 (blocks 4049b0b, read aae5937) and the estimator
+adopted the same day (MTH-027 third append: Emery max-method selects at
+r > 1, naive C' retired, r = 1 untouched). The b > 1 points now wait on
+the engine roster generalisation (commissioned 2026-11-11) and point 2's
+MTH-025 amendment; the temperature point on the repeat check and the
+parameter-hash handling riding that same package; the decision-channel
+point on a dated reading-rule note, then it is CPU-only analysis over
+the committed k=6 and k=20 agent recordings.
