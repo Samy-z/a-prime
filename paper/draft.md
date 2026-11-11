@@ -1932,11 +1932,12 @@ example is printed" and "the program prints it".
 | banking-agent, twenty samples | `808db78857a32149` | 800 | 3 | 40 of 40 | 367.9 s | `banking-agent.808db78857a32149.diagnosis.json`, `banking-agent.808db78857a32149.decisions.json` |
 
 Model `granite4.2:8b`, digest `f586c02fdecdf151`. The nine six-sample cells
-have been analysed three times: on the night of 15 to 16 October 2026, again
+have been analysed four times: on the night of 15 to 16 October 2026, again
 on 16 October after the estimator's handling of tied scores was corrected,
-and again on 17 October after the twenty-sample chain had overwritten the
-matrix file; every pass flagged the same inputs in every cell, and the table
-and the per-cell files carry the last. The first four twenty-sample cells
+again on 17 October after the twenty-sample chain had overwritten the
+matrix file, and once more by a scheduled pass on 10 November, the first on
+a tree with nothing uncommitted; every pass flagged the same inputs in
+every cell, and the table and the per-cell files carry the last. The first four twenty-sample cells
 were analysed once, on the evening of 16 October, by the corrected
 estimator; the fifth, the banking agent cell, once on 8 November 2026 by
 the same estimator. Every input in those four is labelled; in the three that were paused and
