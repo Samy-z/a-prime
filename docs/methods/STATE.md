@@ -130,7 +130,9 @@ temperature and serving policy as the entropy dial; and the decision-token
 versus rationale-text channel split the decision-level instrument opened.
 First data point recorded 2026-11-08 and ledgered: banking-agent at k=20
 flagged 0 of 40, resolution-limited again under MTH-025, the zero
-k-robust, clean separation fell 4 to 1 (STD-015). The b > 1 points wait on
-the 2026-11-11 audit decisions 4 and 5 (the all-null row and the
-multi-decoy literature read); the temperature and decision-channel points
-wait only on their own named prerequisites.
+k-robust, clean separation fell 4 to 1 (STD-015). Decisions 4 and 5
+delivered 2026-11-11 (blocks 4049b0b, read aae5937), both pointing at the
+Emery max-method: the b > 1 points now wait only on the owner's
+un-parking append (MTH-027 second append carries the recommendation);
+the temperature and decision-channel points wait only on their own named
+prerequisites.
