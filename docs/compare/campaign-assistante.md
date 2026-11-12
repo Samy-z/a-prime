@@ -92,3 +92,10 @@ system RAM, and no documented breakage on the serving stack.
 A CMP ledger entry naming the winning candidate with its numbers, and the
 app (its own repository; consumes the conclusion, not the machinery)
 pointed at that model.
+
+**Delivered 2026-11-12 (CMP-006): phi4-mini**, ratified by the owner on
+CMP-005's blind tally (8 to 6 of 18, translations 3 to 1) with the MIT
+licence as the pre-filed near-tie tiebreaker; ChatADV points at it since
+its commit 388d8de and serves the campaign's measured regime. The
+campaign is closed; item 3's standing offer (a second, fully blind pass
+by the real user) remains open under CMP-005's reopen clause.

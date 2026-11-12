@@ -273,3 +273,40 @@ the key file (now opened, left in place), all at this commit.
 rule (the raw verdicts are preserved for exactly that), or a second,
 fully blind judge (the real user) runs the same queue and lands
 materially elsewhere.
+
+## CMP-006 — Winner ratified: phi4-mini ships as ChatADV's default; the campaign closes (2026-11-12)
+
+The owner took CMP-005's reserved call: **phi4-mini is ChatADV's default
+model**, over llama3.2:3b. Grounds, in the order they weighed: CMP-005's
+tally (8 to 6 of 18 blind cases, the four translations 3 to 1), with
+CMP-002's pre-filed near-tie tiebreaker, the MIT licence, deciding the
+margin; CMP-004's steadiness finding (phi noisier against itself, reverse
+orientation) weighed against it and accepted as the cost. The deciding
+frame, recorded: llama's two blind-confirmed slips change what an e-mail
+commits to (a date on a payment promise, msg-01; the speaker inverted on
+an early-payment offer, msg-22), and silent wrongness outranks visible
+variance for this deployment.
+
+App pointed at the winner at ChatADV commit 388d8de: default model and
+README pull line moved to phi4-mini, the Llama attribution footer retired
+with the old default, and the app now pins num_predict 400, so it serves
+the exact regime the campaign measured (temperature 0.2, 400-token
+budget, CPU only; the missing pin was found during the wiring).
+llama3.2:3b stays one ASSISTANTE_MODELE away.
+
+The campaign doc's deliverable is thereby delivered: a ledger entry
+naming the winner with its numbers, and the app pointed at that model.
+**The campaign is closed.** Per the evidential boundary (HANDOFF §28),
+none of it enters the paper; it validated the tool on a live pair, and
+the composition claim it demonstrated is CMP-005's.
+
+**Follow-up, open but not blocking:** the engine's roster and r>1
+generalisations shipped 2026-11-11 (ENG-011), so CMP-003's two pending
+Design R quantities (the reverse selection against s(B,B') and the
+cross-pooled estimate) are now computable from the stored arrays.
+CMP-003's reopen clause is live until they are appended.
+
+**Reopen if:** the real user's fully blind pass over the same queue
+(CMP-005's standing offer) lands materially elsewhere, or the office PC
+contradicts the dev-box pace ratios badly enough that phi4-mini's 2.5 GB
+does not hold inside 8 GB RAM beside a browser.

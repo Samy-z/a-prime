@@ -236,5 +236,5 @@ carries its result; subtitle per RDR-010. The three 2026-10-20 proposals were
 ratified 2026-11-04 (MTH-027, HANDOFF §27). Five decisions from the
 Design-R arithmetic audit (2026-11-07, Fable/Opus pair) await the owner;
 the audit's MTH-027 append lands with them. The comparator campaign is
-complete through its blind human pass (CMP-005), its evidential boundary
-stated (HANDOFF §28).
+closed: phi4-mini ratified and wired as ChatADV's default (CMP-006,
+2026-11-12); evidential boundary stated (HANDOFF §28).
